@@ -7,12 +7,11 @@ class WinnerState(IntEnum):
     NONE = 0
 
     # Black Jack eredmények
-    BLACKJACK_PLAYER_WON = 1
-    BLACKJACK_PUSH = 2
-    BLACKJACK_DEALER_WON = 3
+    NATURAL_PLAYER_WON = 1
+    NATURAL_PUSH = 2
+    NATURAL_DEALER_WON = 3
 
     # Általános kimenetelek
-    PUSH = 4
-    PLAYER_LOST = 5
-    PLAYER_WON = 6
-    DEALER_WON = 7
+    TIE = 4
+    PLAYER_WON = 5
+    DEALER_WON = 6

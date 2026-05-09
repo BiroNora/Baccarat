@@ -41,7 +41,7 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 # DATABASE SETUP (NEON POSTGRES)
 # =========================================================================
 DATABASE_URL = os.environ.get(
-    "DATABASE_URL_SIMPLE", "postgresql://player:pass@localhost:5433/blackjack_game"
+    "DATABASE_URL_SIMPLE", "postgresql://player:pass@localhost:5433/baccarat_game"
 )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
@@ -58,7 +58,7 @@ log.setLevel(logging.ERROR)
 # MODEL
 # =========================================================================
 class User(db.Model):
-    __tablename__ = "my_users"
+    __tablename__ = "my_baccarat"
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     client_id = db.Column(
         db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
