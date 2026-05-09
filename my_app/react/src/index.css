@@ -4,7 +4,7 @@
   line-height: clamp(1.4, 1.8vw, 2);
   font-weight: 400;
 
-  background-color: rgb(104, 211, 142);
+  background-color: #d82753;
   opacity: 1;
   box-sizing: border-box;
   color: #171515;
@@ -115,7 +115,7 @@ body {
   line-height: 1;
   margin: 0;
   text-align: left;
-  color: #d41515;
+  color: #118634;
 }
 .title2 {
   font-size: clamp(2.2rem, 8vw, 3.45rem);
@@ -156,10 +156,10 @@ button:not(:disabled) {
 
 button:not(:disabled):hover,
 button:not(:disabled):focus {
-  background-color: rgb(53, 154, 74) !important;
+  background-color: #a00d0d !important;
   color: white;
   border-color: rgb(206, 212, 220) !important;
-  border: 2px solid #d41515 !important;
+  border: 2px solid rgb(53, 154, 74) !important;
   outline: none;
 }
 
@@ -325,7 +325,6 @@ button:disabled {
   font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
-  color: #ba1616ff;
 }
 
 .merriweather5grey {
