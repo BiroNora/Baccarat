@@ -1,4 +1,4 @@
-import type { GameStateData } from "../types/game-types";
+import { BetTypes, type GameStateData } from "../types/game-types";
 import "../styles/betting.css";
 import { formatNumber } from "../utilities/utils";
 import { useEffect, useRef, useState } from "react";
@@ -23,6 +23,7 @@ const Betting: React.FC<BettingProps> = ({
 
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
+  const [selectedBetType, setSelectedBetType] = useState<number>(BetTypes.NONE);
 
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
@@ -33,6 +34,12 @@ const Betting: React.FC<BettingProps> = ({
       if (timeoutIdRef.current !== null) {
         window.clearTimeout(timeoutIdRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      setSelectedBetType(BetTypes.NONE);
     };
   }, []);
 
@@ -96,9 +103,9 @@ const Betting: React.FC<BettingProps> = ({
       <motion.button
         id="start-button"
         onClick={onStartGame}
-        disabled={isDisabled || isWFSR}
+        disabled={isDisabled || isWFSR || selectedBetType === BetTypes.NONE}
         variants={variants}
-        animate={isDisabled || isWFSR ? "disabled" : "enabled"}
+        animate={isDisabled || isWFSR || selectedBetType === BetTypes.NONE ? "disabled" : "enabled"}
         transition={isWFSR ? { duration: 0.3 } : undefined}
       >
         <motion.span variants={textVariants}>Start Game</motion.span>
@@ -116,6 +123,42 @@ const Betting: React.FC<BettingProps> = ({
           <motion.span variants={textVariants}>
             Bet: {"  " + formatNumber(bet)}
           </motion.span>
+        </motion.button>
+      </div>
+
+      <div className="bettype-button-group">
+        <motion.button
+          id="player-button"
+          onClick={() => setSelectedBetType(BetTypes.PLAYER)}
+          className={`target-selector-btn ${selectedBetType === BetTypes.PLAYER ? 'active' : ''}`}
+          disabled={isWFSR}
+          variants={variants}
+          animate={isWFSR ? "disabled" : "enabled"}
+          transition={isWFSR ? { duration: 0.3 } : undefined}
+        >
+          <motion.span variants={textVariants}>PLAYER</motion.span>
+        </motion.button>
+        <motion.button
+          id="tie-button"
+          onClick={() => setSelectedBetType(BetTypes.TIE)}
+          className={`target-selector-btn ${selectedBetType === BetTypes.TIE ? 'active' : ''}`}
+          disabled={isWFSR}
+          variants={variants}
+          animate={isWFSR ? "disabled" : "enabled"}
+          transition={isWFSR ? { duration: 0.3 } : undefined}
+        >
+          <motion.span variants={textVariants}>TIE</motion.span>
+        </motion.button>
+        <motion.button
+          id="banker-button"
+          onClick={() => setSelectedBetType(BetTypes.BANKER)}
+          className={`target-selector-btn ${selectedBetType === BetTypes.BANKER ? 'active' : ''}`}
+          disabled={isWFSR}
+          variants={variants}
+          animate={isWFSR ? "disabled" : "enabled"}
+          transition={isWFSR ? { duration: 0.3 } : undefined}
+        >
+          <motion.span variants={textVariants}>BANKER</motion.span>
         </motion.button>
       </div>
 
@@ -139,7 +182,9 @@ const Betting: React.FC<BettingProps> = ({
                 whiteSpace: "nowrap",
                 display: "inline-block", // Biztosítja, hogy legyen kiterjedése
               }}
-            > {"\u00A0"}
+            >
+              {" "}
+              {"\u00A0"}
               {formatNumber(tokens)}
             </motion.span>
           </AnimatePresence>
@@ -160,8 +205,8 @@ const Betting: React.FC<BettingProps> = ({
             tokens === 0
               ? "disabledByUser"
               : isWFSR
-              ? "disabledByServer"
-              : "enabled"
+                ? "disabledByServer"
+                : "enabled"
           }
           transition={isWFSR ? { duration: 0.3 } : undefined}
         >
@@ -181,8 +226,8 @@ const Betting: React.FC<BettingProps> = ({
               tokens < amount
                 ? "disabledByUser"
                 : isWFSR
-                ? "disabledByServer"
-                : "enabled"
+                  ? "disabledByServer"
+                  : "enabled"
             }
             transition={isWFSR ? { duration: 0.3 } : undefined}
           >
