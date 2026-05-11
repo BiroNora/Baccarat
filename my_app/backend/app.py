@@ -420,6 +420,38 @@ def create_deck(user, game):
 
 
 # 4
+@app.route("/api/shoe_cut", methods=["POST"])
+@api_error_handler
+@login_required
+@with_game_state
+def shoe_cut(user, game):
+    data = request.get_json() or {}
+    cut_index = data.get("cut")
+    print("CUT: ", cut_index)
+    initial_cards = Game.TOTAL_INITIAL_CARDS
+
+    if not isinstance(cut_index, int):
+        raise ValueError("Cut index must be an integer.")
+
+    if not (2 <= cut_index <= initial_cards - 2):
+        raise ValueError(f"Cut must be between 2 and {initial_cards - 2}.")
+
+    game.shoe_cut(cut_index)
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "current_tokens": user.tokens,
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "game_state_hint": "DECK_SHIFTED",
+            }
+        ),
+        200,
+    )
+
+
+# 4
 @app.route("/api/start_game", methods=["POST"])
 @api_error_handler
 @login_required

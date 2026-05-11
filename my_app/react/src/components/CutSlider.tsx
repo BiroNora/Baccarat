@@ -2,16 +2,16 @@ import { useState } from "react";
 import "../styles/cutslider.css";
 
 interface CutSliderProps {
+  initDeckLen: number | null;
   onConfirm: (amount: number) => void;
 }
 
-const CutSlider: React.FC<CutSliderProps> = ({
-  onConfirm,
+const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm,
   }) => {
-  const deckLen = 416;
-  const [cutValue, setCutValue] = useState(Math.floor(deckLen / 2));
 
-  const percentage = (cutValue / deckLen) * 100;
+  const [cutValue, setCutValue] = useState(Math.floor(initDeckLen! / 2));
+
+  const percentage = (cutValue / initDeckLen!) * 100;
 
   return (
     <div className="cut-container">
@@ -34,7 +34,7 @@ const CutSlider: React.FC<CutSliderProps> = ({
       <input
         type="range"
         min="2"
-        max={deckLen - 2}
+        max={initDeckLen! - 2}
         value={cutValue}
         onChange={(e) => setCutValue(parseInt(e.target.value))}
         className="cut-slider"
@@ -45,7 +45,7 @@ const CutSlider: React.FC<CutSliderProps> = ({
         <span className="highlight">
           <i>{cutValue}</i>
         </span>{" "}
-        / <i>{deckLen}</i>
+        / <i>{initDeckLen}</i>
       </div>
 
       <button className="cut-button" onClick={() => onConfirm(cutValue)}>

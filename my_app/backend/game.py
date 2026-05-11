@@ -59,6 +59,24 @@ class Game:
         self.target_phase = PhaseState.INIT_GAME
         return self.deck
 
+    def shoe_cut(self, cut_index: int):
+        if 0 < cut_index < len(self.deck):
+            self.deck = self.deck[cut_index:] + self.deck[:cut_index]
+
+            self.shoe_cut_limit = self.deck_penetration()
+            print("67 shoe_cut_limit: ", self.shoe_cut_limit)
+
+            self.target_phase = PhaseState.SHIFTING_THE_STACKS
+
+        return self.deck
+
+    def deck_penetration(self):
+        lower_limit = int(Game.TOTAL_INITIAL_CARDS * 0.10)
+        upper_limit = int(Game.TOTAL_INITIAL_CARDS * 0.25)
+
+        return random.randint(lower_limit, upper_limit)
+
+
     def initialize_new_round(self, bet_type):
         self.clear_up()
 

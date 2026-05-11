@@ -16,6 +16,7 @@ import { Reloading } from "./components/Reloading";
 import RecoveryDec from "./components/RecoveryDec";
 import UniqueBetBank from "./components/UniqueBetBank";
 import CutSlider from "./components/CutSlider";
+import { Shifting } from "./components/Shifting";
 
 function App() {
   const {
@@ -84,7 +85,10 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <CutSlider onConfirm={handleShoeCut}/>
+                    <CutSlider
+                      onConfirm={handleShoeCut}
+                      initDeckLen={initDeckLen}
+                    />
                   </PageWrapper>
                 </div>
               );
@@ -92,7 +96,7 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <CutSlider onConfirm={handleShoeCut}/>
+                    <Shifting />
                   </PageWrapper>
                 </div>
               );
@@ -120,15 +124,10 @@ function App() {
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked
-                      gameState={gameState}
-                    />
+                    <PlayerDealerMasked gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
-                    <PlayButtons
-                      gameState={gameState}
-                      isWFSR={isWFSR}
-                    />
+                    <PlayButtons gameState={gameState} isWFSR={isWFSR} />
                   </div>
                   <UniqueBetBank
                     gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
@@ -161,9 +160,7 @@ function App() {
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked
-                      gameState={gameState}
-                    />
+                    <PlayerDealerMasked gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
                     {/* <Winner gameState={gameState} /> */}
