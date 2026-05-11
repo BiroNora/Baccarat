@@ -9,6 +9,7 @@
   box-sizing: border-box;
   color: #171515;
 
+  font-family: "Merriweather", serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -290,14 +291,12 @@ button:disabled {
 }
 
 .merriweather {
-  font-family: "Merriweather", serif;
   font-weight: 600;
   font-style: italic;
   font-variation-settings: "wdth" 100;
 }
 
 .merriweatherblack {
-  font-family: "Merriweather", serif;
   font-weight: 600;
   font-style: italic;
   font-variation-settings: "wdth" 100;
@@ -305,7 +304,6 @@ button:disabled {
 }
 
 .merriweather9red {
-  font-family: "Merriweather", serif;
   font-weight: 800;
   font-style: italic;
   font-variation-settings: "wdth" 100;
@@ -313,21 +311,18 @@ button:disabled {
 }
 
 .merriweather9black {
-  font-family: "Merriweather", serif;
   font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
 }
 
 .merriweather9 {
-  font-family: "Merriweather", serif;
   font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
 }
 
 .merriweather5grey {
-  font-family: "Merriweather", serif;
   font-weight: 400;
   font-style: italic;
   font-variation-settings: "wdth" 100;
@@ -335,7 +330,6 @@ button:disabled {
 }
 
 .merriweather5grey2 {
-  font-family: "Merriweather", serif;
   font-weight: 200;
   font-style: italic;
   font-variation-settings: "wdth" 100;
@@ -356,7 +350,6 @@ button:disabled {
 }
 
 .error-merriweather {
-  font-family: "Merriweather", serif;
   font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   font-weight: 600;
   font-style: italic;

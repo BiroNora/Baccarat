@@ -19,7 +19,6 @@
   margin-bottom: 1.5rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-family: "Merriweather", serif;
 }
 
 /* Virtuális Pakli */
@@ -98,7 +97,6 @@
   font-family: monospace;
   margin-bottom: 1.5rem;
   font-size: 1.125rem;
-  font-family: "Merriweather", serif;
 }
 
 .highlight {
@@ -118,7 +116,6 @@
   cursor: pointer;
   transition: transform 0.1s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  font-family: "Merriweather", serif;
 }
 
 .cut-button:hover {

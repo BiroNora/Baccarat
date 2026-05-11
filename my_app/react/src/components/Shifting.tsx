@@ -24,16 +24,9 @@ export function Shifting() {
       ) : (
         <div className="fade-in" style={{ textAlign: "center" }}>
           <h1>S H O E &nbsp; C U T T E D</h1>
-          <p
-            style={{
-              marginTop: "20px",
-              fontSize: "1.2rem",
-              color: "#aaa",
-              letterSpacing: "1px",
-            }}
-          >
-            Cut card placed about the last fifth of the shoe.
-          </p>
+            <p>
+              Cut card placed about the last fifth of the shoe.
+            </p>
         </div>
       )}
     </div>
