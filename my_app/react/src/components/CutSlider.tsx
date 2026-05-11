@@ -6,18 +6,14 @@ interface CutSliderProps {
   onConfirm: (amount: number) => void;
 }
 
-const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm,
-  }) => {
-
+const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm }) => {
   const [cutValue, setCutValue] = useState(Math.floor(initDeckLen! / 2));
 
   const percentage = (cutValue / initDeckLen!) * 100;
 
   return (
     <div className="cut-container">
-      <h2 className="cut-title">
-        Cut the Shoe
-      </h2>
+      <h2 className="cut-title">Cut the Shoe</h2>
 
       <div className="deck-visual">
         <div className="deck-texture">
@@ -42,10 +38,20 @@ const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm,
 
       <div className="cut-info">
         <i>Selected Card: </i>
-        <span className="highlight">
-          <i>{cutValue}</i>
-        </span>{" "}
-        / <i>{initDeckLen}</i>
+        <div>
+          <span className="highlight">
+            <i
+              style={{
+                display: "inline-block",
+                width: "40px",
+                textAlign: "center",
+              }}
+            >
+              {cutValue}
+            </i>
+          </span>{" "}
+          / <i>{initDeckLen}</i>
+        </div>
       </div>
 
       <button className="cut-button" onClick={() => onConfirm(cutValue)}>

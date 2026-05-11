@@ -1,3 +1,5 @@
+import "../styles/headerTitle.css";
+
 function HeaderTitles() {
   return (
     <div className="titles">

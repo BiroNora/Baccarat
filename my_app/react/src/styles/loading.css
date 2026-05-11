@@ -1,17 +1,14 @@
-/* src/styles/loading.css */
-
 /* Ez a konténer felelős a LOADING... felirat középre igazításáért a képernyőn */
 .loading-container-centered {
-  margin: 0 auto; /* Középre igazítás és nincs felesleges margó */
+  margin: auto; /* Középre igazítás és nincs felesleges margó */
   position: relative;
   display: flex;
   flex-direction: column; /* Egymás alá rendeződnek a gyermekek */
-  align-items: flex-start;
-  justify-content: flex-start;
-  min-height: 100vh; /* Teljes képernyő magasság */
-  width: 100%; /* Teljes képernyő szélesség */
+  align-items: center;
+  text-align: center;
+  justify-content: center;
   position: fixed; /* Fixen a képernyőn, hogy ne befolyásolja más tartalom */
-  top: clamp(10rem, 1.375vw, 20rem);
+
   background-color: transparent; /* Teljesen átlátszó háttér */
   z-index: 9999; /* Legyen felül, ha van más tartalom */
   box-sizing: border-box;
@@ -19,9 +16,8 @@
 
 /* A LOADING... felirat stílusa */
 .loading-container-centered h1 {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* A betűtípusod */
-  font-size: clamp(1.5rem, 2.3vw, 3rem);
-  font-weight: 500;
+  font-size: clamp(1.8rem, 2.3vw, 5.5rem);
+  font-weight: 600;
   color: #504343ff; /* A szöveg színe */
   display: inline-flex; /* <-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
   align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */
@@ -29,13 +25,49 @@
   white-space: pre; /* Fontos! Megakadályozza, hogy a böngésző törje a sort a pontok előtt */
   margin: 0; /* Ne legyen alapértelmezett margó a h1-en */
   padding: 0; /* Ne legyen alapértelmezett padding a h1-en */
+  /* --- HULLÁMZÁS (GRADIENS) BEÁLLÍTÁSA --- */
+  background: linear-gradient(
+    to right,
+    #504343 0%,   /* Alap sötétbarna szín */
+    #d4af37 50%,  /* Arany csillanás középen */
+    #504343 100%  /* Alap sötétbarna szín */
+  );
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  /* Az animáció: egyszer fut le (1.5s), majd megáll */
+  animation: waveOnce 1.5s ease-out infinite;
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  white-space: pre;
+  margin: 0;
+  padding: 0;
+}
+
+@keyframes waveOnce {
+  0% {
+    background-position: -100% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
 }
 
 /* A pontok általános stílusa */
 .dot {
+  background: linear-gradient(to bottom, #e2b934, #b49920, #98821f);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   opacity: 0; /* Kezdetben láthatatlanok */
   animation: dot-fade 1.4s infinite ease-in-out; /* Animáció */
-  font-size: clamp(1.8rem, 2.3vw, 3rem); /* Ugyanakkora méret, mint a "LOADING" szó */
+  font-size: clamp(1.8rem, 2.3vw, 5rem); /* Ugyanakkora méret, mint a "LOADING" szó */
+  padding-left: 0.2rem;
   line-height: 1; /* Nincs extra sorköz */
   vertical-align: baseline; /* <-- Hozzáadva: biztosítja az alapvonalhoz igazítást */
   display: inline-block; /* <-- Hozzáadva: hogy a vertical-align működjön */
@@ -67,6 +99,15 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes waveOnce {
+  0% {
+    background-position: -100% center;
+  }
+  100% {
+    background-position: 100% center;
   }
 }
 

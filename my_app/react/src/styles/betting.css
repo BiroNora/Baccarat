@@ -5,24 +5,28 @@
   display: flex;
 }
 
-.cards {
-  min-height: 1.2rem;
-  display: flex;
-  font-weight: 600;
-  width: 1.2rem;
-  justify-content: space-between; /* A két szélre tolja őket */
-  align-items: center;
+#cards {
+  padding-bottom: 0.2rem;
 }
 
-.deck-count {
-  display: inline-block;
-  min-width: 1.2rem; /* Elég hely 3 karakternek (100) */
-  text-align: right; /* A szám a saját blokkján belül jobbra igazodik */
-  margin-left: 0.5rem; /* Ez a "kis távolság" a szöveg és a szám között */
+.main-container {
+  padding: 1rem 0.2rem;
+  margin: 0;
+  max-width: 100rem;
 }
 
 .betting-screen-container {
   padding-top: var(--extra-vertical-padding1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #9f2438; /* gray-900 */
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #ca8a04; /* yellow-600 */
+  max-width: 60rem;
+  margin: 0 auto;
 }
 
 .deal-bank {
@@ -31,65 +35,20 @@
 
 .bank {
   display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
-  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
+  align-items: center; /* Függőlegesen az elem tetejére igazítja a tartalmat */
+  text-align: center;
   font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   font-weight: 500;
   padding-top: var(--extra-vertical-padding2);
 }
 
-.bank1 {
-  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
-  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
-  font-size: clamp(1.2rem, 1.2vw, 1.8rem);
-  font-weight: 500;
-}
-
-.bank2 {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 0.5vw; /* A jelek közötti távolság is a szélességtől függ */
-  width: 100%;
-  justify-content: center; /* Mobilon jobb a középre igazítás */
-  white-space: nowrap; /* Tilos a sortörés! */
-
-  /* A titkos szósz: a szélesség 4%-a legyen a betűméret,
-     de minimum 0.8rem és maximum 1.8rem */
-  font-size: clamp(1rem, 4vw, 1.8rem);
-
-  width: 100%;
-  overflow: hidden; /* Biztonsági háló */
-  padding-top: var(--extra-vertical-padding1);
-}
-
-.bank3 {
-  padding-top: var(--extra-vertical-padding1);
-  padding-bottom: var(--extra-vertical-padding02);
-  font-size: clamp(1.2rem, 1.2vw, 1.8rem);
-}
-
-.bet-bank {
-  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
-  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
-  font-size: clamp(1rem, 1.2vw, 1.5rem);
-  font-weight: 500;
-}
-
-.bettype-button-group {
+.bettype-button-group, .chips {
   display: flex;
   flex-wrap: wrap; /* Ez a kulcs: engedi az egymás alá ugrást */
-  justify-content: flex-start;
+  justify-content: center;
   gap: 12px;
   width: 100%;
   padding: 1rem 0; /* Rövidítve: top/bottom 1rem, left/right 0 */
-  font-family:
-    "Merriweather", serif; /* Figyelj a pontos névre és a fallbackre */
 }
 
 .target-selector-btn {
@@ -100,16 +59,6 @@
   filter: brightness(0.85) !important; /* Kicsit sötétebb lesz, mintha be lenne nyomva */
   border-style: inset !important; /* "Belső" keret, amitől benyomottnak tűnik */
   background-color: #a00d0d !important;
-  outline: 2px solid #000 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
+  outline: 1px solid #2a2720 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
   color: white !important;
 }
-/* Példa: Ha láthatóvá akarod tenni a Deal Bank szekciót egy bizonyos állapotban */
-/* Ezt egy React komponenssel vagy JavaScripttel adnád hozzá az elemhez */
-/* .deal-bank.active {
-  display: flex;
-} */
-
-/* Példa: Láthatóvá tesszük a chips szekciót */
-/* .chips.active {
-  display: flex;
-} */

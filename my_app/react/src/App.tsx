@@ -51,7 +51,9 @@ function App() {
       <HeaderTitles />
       <AnimatePresence mode="wait">
         {(() => {
-          switch (gameState.currentGameState) {
+          const phase = gameState.currentGameState;
+
+          switch (phase) {
             case "LOADING":
               return (
                 <div>

@@ -24,7 +24,7 @@ const Betting: React.FC<BettingProps> = ({
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
   const [selectedBetType, setSelectedBetType] = useState<number>(BetTypes.NONE);
-  console.log("selectedBetType: ", selectedBetType)
+  console.log("selectedBetType: ", selectedBetType);
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
@@ -197,35 +197,16 @@ const Betting: React.FC<BettingProps> = ({
             <motion.span>TIE</motion.span>
           </motion.button>
         </div>
-        <motion.button
-          id="all-in"
-          type="button"
-          onClick={handleAllIn}
-          variants={variants}
-          disabled={tokens === 0 || isWFSR}
-          animate={
-            tokens === 0
-              ? "disabledByUser"
-              : isWFSR
-                ? "disabledByServer"
-                : "enabled"
-          }
-          transition={isWFSR ? { duration: 0.3 } : undefined}
-        >
-          All In
-        </motion.button>
 
-        {betAmounts.map((amount) => (
+        <div className="chips">
           <motion.button
-            key={amount}
-            id={String(amount)}
+            id="all-in"
             type="button"
-            data-bet={amount}
-            onClick={() => onPlaceBet(amount)}
+            onClick={handleAllIn}
             variants={variants}
-            disabled={tokens < amount || isWFSR}
+            disabled={tokens === 0 || isWFSR}
             animate={
-              tokens < amount
+              tokens === 0
                 ? "disabledByUser"
                 : isWFSR
                   ? "disabledByServer"
@@ -233,9 +214,31 @@ const Betting: React.FC<BettingProps> = ({
             }
             transition={isWFSR ? { duration: 0.3 } : undefined}
           >
-            {formatNumber(amount)}
+            All In
           </motion.button>
-        ))}
+
+          {betAmounts.map((amount) => (
+            <motion.button
+              key={amount}
+              id={String(amount)}
+              type="button"
+              data-bet={amount}
+              onClick={() => onPlaceBet(amount)}
+              variants={variants}
+              disabled={tokens < amount || isWFSR}
+              animate={
+                tokens < amount
+                  ? "disabledByUser"
+                  : isWFSR
+                    ? "disabledByServer"
+                    : "enabled"
+              }
+              transition={isWFSR ? { duration: 0.3 } : undefined}
+            >
+              {formatNumber(amount)}
+            </motion.button>
+          ))}
+        </div>
       </div>
     </div>
   );

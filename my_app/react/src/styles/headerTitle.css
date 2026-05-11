@@ -1,0 +1,47 @@
+.title2 {
+  font-size: clamp(2.2rem, 8vw, 3.5rem);
+  line-height: 1;
+  font-weight: 600;
+  padding-bottom: 0.5em;
+  margin: 0;
+  text-align: left;
+
+  /* Gradiens beállítása */
+  background: linear-gradient(
+    to right,
+    rgb(95, 83, 13) 0%,
+    rgb(194, 170, 31) 25%,
+    rgb(95, 83, 13) 50%,
+    rgb(194, 170, 31) 75%,
+    rgb(95, 83, 13) 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  /* Az animáció meghívása */
+  animation: flagWave 3s ease-in-out forwards;
+}
+
+@keyframes flagWave {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+/* Az új fázis bejöveteléhez egy külön animáció */
+.phase-enter {
+  animation: slideInAndWave 0.8s ease-out, flagWave 3s ease-in-out forwards;
+}
+
+@keyframes slideInAndWave {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
