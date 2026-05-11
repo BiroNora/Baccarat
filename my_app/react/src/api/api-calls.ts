@@ -57,29 +57,20 @@ export async function getShuffling() {
   return data;
 }
 
-export async function startGame() {
-  const data = await callApiEndpoint("/api/start_game", "POST");
+export async function setShoeCut(amount: number) {
+  const data = await callApiEndpoint("/api/shoe_cut", "POST", { cut: amount });
 
   return data;
 }
 
-export async function handleHit() {
-  const data = await callApiEndpoint("/api/hit", "POST");
+export async function startGame(betType: number) {
+  const data = await callApiEndpoint("/api/start_game", "POST", { type: betType });
 
   return data;
 }
 
-export async function handleInsurance() {
-  const data = await callApiEndpoint("/api/ins_request", "POST");
 
-  return data;
-}
 
-export async function handleDouble() {
-  const data = await callApiEndpoint("/api/double_request", "POST");
-
-  return data;
-}
 
 export async function handleStandAndRewards() {
   const data = await callApiEndpoint("/api/stand_and_rewards", "POST");
@@ -87,53 +78,7 @@ export async function handleStandAndRewards() {
   return data;
 }
 
-export async function handleSplitHand() {
-  const data = await callApiEndpoint("/api/split_request", "POST");
 
-  return data;
-}
-
-export async function handleSplitHit() {
-  const data = await callApiEndpoint("/api/split_hit", "POST");
-
-  return data;
-}
-
-export async function addSplitPlayerToGame() {
-  const data = await callApiEndpoint("/api/add_split_player_to_game", "POST");
-
-  return data;
-}
-
-export async function addToPlayersListByStand() {
-  const data = await callApiEndpoint(
-    "/api/add_to_players_list_by_stand",
-    "POST"
-  );
-
-  return data;
-}
-
-export async function addPlayerFromPlayers() {
-  const data = await callApiEndpoint("/api/add_player_from_players", "POST");
-
-  return data;
-}
-
-export async function handleSplitDouble() {
-  const data = await callApiEndpoint("/api/split_double_request", "POST");
-
-  return data;
-}
-
-export async function handleSplitStandAndRewards() {
-  const data = await callApiEndpoint(
-    "/api/split_stand_and_rewards",
-    "POST"
-  );
-
-  return data;
-}
 
 export async function setRestart() {
   const data = await callApiEndpoint("/api/set_restart", "POST");
@@ -206,12 +151,6 @@ export async function callApiEndpoint<T>(
           console.error("Az automata újra-inicializálás sikertelen.");
           throw retryError;
         }
-      }
-
-      // Speciális logolás szűrése
-      const isSplitHandError = status === 400 && (errorData.error === "No more split hands." || errorData.message === "No more split hands.");
-      if (!isSplitHandError && status !== 401) {
-        console.error(`API hiba (${status}):`, errorData);
       }
 
       // Hiba objektum összeállítása

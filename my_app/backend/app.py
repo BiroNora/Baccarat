@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
+from my_app.backend.bet_type import BetType
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -119,6 +120,7 @@ def login_required(f):
 def with_game_state(f):
     @wraps(f)
     def decorated_function(user, *args, **kwargs):
+        print("DEBUG: with_game_state elindult")
         # 1. Alapvető ellenőrzés
         if not user.current_game_state:
             return (
@@ -136,9 +138,11 @@ def with_game_state(f):
         data = request.get_json(silent=True) or {}
         ikey = data.get("idempotency_key")
 
+        print(">>>>>>> IKEY: ", ikey)
+
         # Deszerializálunk (szükség van rá az idempotens válaszhoz is)
         game = Game.deserialize(user.current_game_state)
-
+        print(f"DEBUG: Path keresése: {request.path}")
         if ikey and user.idempotency_key == ikey:
             # Ha a kulcs egyezik, nem futtatjuk le a függvényt (f),
             # csak visszaadjuk az aktuális állapotot.
@@ -343,7 +347,7 @@ def initialize_session():
 def bet(user, game):
     data = request.get_json() or {}
     bet_amount = data.get("bet", 0)
-
+    print("BET: ", bet_amount)
     if not isinstance(bet_amount, (int, float)) or bet_amount < MINIMUM_BET:
         raise ValueError(f"Bet must be at least {MINIMUM_BET}.")
 
@@ -399,7 +403,8 @@ def retake_bet(user, game):
 @login_required
 @with_game_state
 def create_deck(user, game):
-    game.create_deck()
+    deck = game.create_deck()
+    print("deck: ", deck)
 
     return (
         jsonify(
@@ -420,7 +425,10 @@ def create_deck(user, game):
 @login_required
 @with_game_state
 def start_game(user, game):
-    game.initialize_new_round()
+    data = request.get_json() or {}
+    bet_type = data.get("type", 0)
+    print("bet_type: ", bet_type)
+    game.initialize_new_round(bet_type)
 
     return (
         jsonify(

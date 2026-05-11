@@ -1,18 +1,15 @@
 import React, { type JSX } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import type { GameStateData } from "../types/game-types";
 import "../styles/playerDealer.css";
 
 interface TableProps {
   gameState: GameStateData;
-  showInsLost: boolean;
 }
 
 const PlayerDealerMasked: React.FC<TableProps> = ({
   gameState,
-  showInsLost,
 }) => {
-  const { player, dealer_masked } = gameState;
+  const { player } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
     if (card.trim() === "✪") {
@@ -70,34 +67,21 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
   };
 
   const playerHand = loop(player.hand);
-  const dealerHand = loop(dealer_masked.hand);
 
   const formattedPlayerHand = formatHand(playerHand);
-  const formattedDealerHand = formatHand(dealerHand);
 
 
-  const fadeProps = {
-    initial: { opacity: 0 },
-    animate: {
-      // 0: láthatatlan, 1: látható, 1: még mindig látható (várakozás), 0: eltűnik
-      opacity: [0, 1, 1, 0],
-    },
-    transition: {
-      duration: 3.5, // A teljes folyamat hossza (megjelenés + várakozás + eltűnés)
-      times: [0, 0.3, 0.8, 1], // Mikor történjenek a fenti állapotok (0-tól 1-ig skálázva)
-    },
-  };
 
   return (
     <div>
       <div id="dealer-hand" className="play">
-        <div className="hand hand-area-wrapper">{formattedDealerHand}</div>
+        <div className="hand hand-area-wrapper">{}</div>
         <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey2">{}</span>
         </div>
         <div className="band-area-wrapper">
           <span className="label-text">Dealer: </span>
-          <span className="label-text1">{dealer_masked.sum}</span>
+          <span className="label-text1">{}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
@@ -106,27 +90,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
           <span className="label-text1"> {player.sum}</span>
         </div>
         <div className="score-area-wrapper">
-          <AnimatePresence mode="wait">
-            {" "}
-            {/* Ajánlott a sima váltáshoz */}
-            {showInsLost ? (
-              <motion.span
-                key="ins-lost" // Fix kulcs a feliratnak
-                {...fadeProps}
-                className="score-mood merriweather9red"
-              >
-                Insurance lost
-              </motion.span>
-            ) : (
-              <motion.span
-                key="ins-empty" // Fix kulcs az üres állapotnak
-                {...fadeProps}
-                className="score-mood merriweather5grey2"
-              >
-                {"\u00A0"} {/* Üres karakter, hogy a magasság megmaradjon */}
-              </motion.span>
-            )}
-          </AnimatePresence>
+
         </div>
         <div className="hand hand-area-wrapper">{formattedPlayerHand}</div>
       </div>

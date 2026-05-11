@@ -5,6 +5,7 @@ import random
 from collections import Counter
 from typing import Any, Dict
 
+from my_app.backend.bet_type import BetType
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
@@ -38,7 +39,8 @@ class Game:
         self.target_phase = PhaseState.LOADING
         self.pre_phase = PhaseState.NONE
         self.is_session_init = False
-        self.shoe_cut_limit = self.get_cut_card_position()
+        self.shoe_cut_limit = 0
+        self.bet_type = BetType.NONE
 
     def get_cut_card_position(self):
         total_cards = Game.TOTAL_INITIAL_CARDS
@@ -47,9 +49,21 @@ class Game:
         cut_offset = random.randint(60, 90)
         return total_cards - cut_offset
 
-    def initialize_new_round(self):
+    def set_bet_type(self, type_value):
+        self.bet_type = BetType(type_value)
+
+    def create_deck(self):
+        single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
+        self.deck = single_deck * Game.NUM_DECKS
+        random.shuffle(self.deck)
+        self.target_phase = PhaseState.INIT_GAME
+        return self.deck
+
+    def initialize_new_round(self, bet_type):
         self.clear_up()
 
+        self.bet_type = bet_type
+        print("59 bettype: ", self.bet_type)
         card1 = self.deck.pop(0)
         card2 = self.deck.pop(0)
         card3 = self.deck.pop(0)
@@ -168,7 +182,7 @@ class Game:
         )
 
     def rewards(self) -> int:
-        bet = self.player["bet"]
+        bet = self.bet
         natural_21_scenario = self.banker["natural_21"]
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
@@ -236,11 +250,9 @@ class Game:
 
     def set_bet(self, amount):
         self.bet += amount
-        self.player["bet"] = self.player["bet"] + amount
 
     def set_bet_to_null(self):
         self.bet = 0
-        self.player["bet"] = 0
 
     def get_bet(self):
         return self.bet
@@ -287,6 +299,7 @@ class Game:
             "pre_phase": self.get_pre_phase().value,
             "is_session_init": self.is_session_init,
             "shoe_cut_limit": self.shoe_cut_limit,
+            "bet_type": self.bet_type,
         }
 
     @classmethod
@@ -302,12 +315,17 @@ class Game:
         game.is_round_active = data.get("is_round_active", False)
         raw_pre = data.get("pre_phase")
         raw_target = data.get("target_phase")
+        if raw_target:
+            game.target_phase = PhaseState(raw_target)
+        if raw_pre:
+            game.pre_phase = PhaseState(raw_pre)
         # Ha valamiért nem volt a mentésben, a get_ függvények adják meg az alapot
         if not raw_target:
             game.target_phase = game.get_target_phase()
         if not raw_pre:
             game.pre_phase = game.get_pre_phase()
         game.is_session_init = data.get("is_session_init", False)
-        game.shoe_cut_limit = data["shoe_cut_limit"]
+        game.shoe_cut_limit = data.get("shoe_cut_limit", 0)
+        game.bet_type = data.get("bet_type", 0)
 
         return game

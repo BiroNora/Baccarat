@@ -8,10 +8,10 @@ interface TableProps {
 }
 
 const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
-  if (!gameState || !gameState.player || !gameState.dealer_unmasked) {
+  if (!gameState || !gameState.player || !gameState.banker) {
     return null;
   }
-  const { player, dealer_unmasked, currentGameState } = gameState;
+  const { player, banker, currentGameState } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
     const suit = card[0]; // Az első karakter a szín
@@ -64,16 +64,16 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
   };
 
   const p_state = states[player.hand_state];
-  const d_state = !dealer_unmasked.hand_state ? (
+  const d_state = !banker.hand_state ? (
     <span className="opacity-0"> &nbsp;&nbsp; </span>
   ) : (
-    states[dealer_unmasked.hand_state]
+    states[banker.hand_state]
   );
 
   const shouldShowScore = currentGameState !== "SPLIT_FINISH";
 
   const playerHand = loop(player.hand);
-  const dealerHand = loop(dealer_unmasked.hand);
+  const dealerHand = loop(banker.hand);
 
   const formattedPlayerHand = formatHand(playerHand);
   const formattedDealerHand =
@@ -84,11 +84,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
     );
 
   const sum =
-    dealer_unmasked.sum === 0 ? (
-      <span className="opacity-0"> &nbsp; </span>
-    ) : (
-      dealer_unmasked.sum
-    );
+    banker.sum === 0 ? <span className="opacity-0"> &nbsp; </span> : banker.sum;
 
   const fadeProps = {
     initial: { opacity: 0 },
@@ -108,7 +104,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
   };
 
   return (
-    <div >
+    <div>
       <div id="dealer-hand" className="play">
         <motion.div
           key={`d-hand-${dealerHand.length}`}
@@ -119,7 +115,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
         </motion.div>
         <div className="score-area-wrapper">
           <motion.span
-            key={`d-state-${dealer_unmasked.hand_state}`}
+            key={`d-state-${banker.hand_state}`}
             {...fadeProps}
             className="score-mood merriweather5grey2 animate-fade"
           >
@@ -129,7 +125,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
         <div className="band-area-wrapper">
           <span className="label-text">Dealer: </span>
           <motion.span
-            key={`d-sum-${dealer_unmasked.sum}`}
+            key={`d-sum-${banker.sum}`}
             {...fadeProps}
             className="label-text1 animate-fade"
           >

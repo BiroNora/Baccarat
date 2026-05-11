@@ -1,0 +1,63 @@
+.picker-container {
+  position: relative;
+  height: 150px; /* 3 elem látszik egyszerre (50px * 3) */
+  width: 160px;
+  margin: 15px auto;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.wheel-picker {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory; /* Ez "kattintja" be az elemeket középre */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.wheel-picker::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.picker-item {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Merriweather', serif; /* Vagy amit használsz */
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #888;
+  scroll-snap-align: center; /* Ez a kulcs a beugráshoz */
+  transition: all 0.2s ease;
+  letter-spacing: 1px;
+}
+
+/* Kiemelés, amikor az elem középre kerül (opcionális finomítás JS-sel lehetne pontosabb, de CSS-sel is szép) */
+.picker-item:hover {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.picker-spacer {
+  height: 50px; /* Pontosan egy elemnyi hely az eltoláshoz */
+}
+
+.picker-selection-overlay {
+  position: absolute;
+  top: 50px; /* A középső 50px-es sávra kerül */
+  left: 0;
+  right: 0;
+  height: 50px;
+  border-top: 1px solid rgba(255, 215, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.4);
+  background: linear-gradient(
+    rgba(255, 215, 0, 0.05),
+    rgba(255, 215, 0, 0.1),
+    rgba(255, 215, 0, 0.05)
+  );
+  pointer-events: none; /* Fontos: ne zavarja a görgetést! */
+}

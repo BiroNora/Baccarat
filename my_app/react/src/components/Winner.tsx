@@ -6,10 +6,9 @@ interface TableProps {
 }
 
 const Winner: React.FC<TableProps> = ({ gameState }) => {
-  const { dealer_unmasked, winner } = gameState;
-  
-  const index =
-    dealer_unmasked.natural_21 !== 0 ? dealer_unmasked.natural_21 : winner;
+  const { banker, winner } = gameState;
+
+  const index = banker.natural_21 !== 0 ? banker.natural_21 : winner;
   const winners = states[index];
 
   const props = {

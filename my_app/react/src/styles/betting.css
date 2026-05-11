@@ -23,6 +23,7 @@
 
 .betting-screen-container {
   padding-top: var(--extra-vertical-padding1);
+  font-family: "Merriweather", serif;
 }
 
 .deal-bank {
@@ -36,7 +37,7 @@
   justify-content: flex-start;
   font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   font-weight: 500;
-  padding-top: var(--extra-vertical-padding1);
+  padding-top: var(--extra-vertical-padding2);
 }
 
 .bank1 {
@@ -81,6 +82,28 @@
   font-weight: 500;
 }
 
+.bettype-button-group {
+  display: flex;
+  flex-wrap: wrap; /* Ez a kulcs: engedi az egymás alá ugrást */
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 1rem 0; /* Rövidítve: top/bottom 1rem, left/right 0 */
+  font-family:
+    "Merriweather", serif; /* Figyelj a pontos névre és a fallbackre */
+}
+
+.target-selector-btn {
+  color: black !important;
+}
+
+.target-selector-btn.active {
+  filter: brightness(0.85) !important; /* Kicsit sötétebb lesz, mintha be lenne nyomva */
+  border-style: inset !important; /* "Belső" keret, amitől benyomottnak tűnik */
+  background-color: #a00d0d !important;
+  outline: 2px solid #000 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
+  color: white !important;
+}
 /* Példa: Ha láthatóvá akarod tenni a Deal Bank szekciót egy bizonyos állapotban */
 /* Ezt egy React komponenssel vagy JavaScripttel adnád hozzá az elemhez */
 /* .deal-bank.active {

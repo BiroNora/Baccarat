@@ -100,7 +100,7 @@ class GameSerializer:
     ) -> Dict[str, Any]:
         return {
             "player": game.player,
-            "dealer_masked": game.dealer_masked,
+            "banker": game.banker,
             "deck_len": game.get_deck_len(),
             "bet": game.bet,
             "target_phase": (

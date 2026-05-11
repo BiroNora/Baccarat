@@ -8,7 +8,7 @@ interface BettingProps {
   gameState: GameStateData;
   onPlaceBet: (amount: number) => void;
   retakeBet: () => void;
-  onStartGame: () => void;
+  onStartGame: (type: number) => void;
   isWFSR: boolean;
 }
 
@@ -24,7 +24,7 @@ const Betting: React.FC<BettingProps> = ({
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
   const [selectedBetType, setSelectedBetType] = useState<number>(BetTypes.NONE);
-
+  console.log("selectedBetType: ", selectedBetType)
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
@@ -98,14 +98,27 @@ const Betting: React.FC<BettingProps> = ({
     transition: { duration: 0.8 }, // Egy picit gyorsabb animáció általában profibb érzetet kelt
   };
 
+  const handleBetType = (type: number) => {
+    console.log("Kattintás történt! Új típus:", type);
+    setSelectedBetType(type);
+  };
+
+  const getButtonClass = (type: number) => {
+    return `target-selector-btn ${selectedBetType === type ? "active" : ""}`;
+  };
+
   return (
     <div className="betting-screen-container">
       <motion.button
         id="start-button"
-        onClick={onStartGame}
+        onClick={() => onStartGame(selectedBetType)}
         disabled={isDisabled || isWFSR || selectedBetType === BetTypes.NONE}
         variants={variants}
-        animate={isDisabled || isWFSR || selectedBetType === BetTypes.NONE ? "disabled" : "enabled"}
+        animate={
+          isDisabled || isWFSR || selectedBetType === BetTypes.NONE
+            ? "disabled"
+            : "enabled"
+        }
         transition={isWFSR ? { duration: 0.3 } : undefined}
       >
         <motion.span variants={textVariants}>Start Game</motion.span>
@@ -123,42 +136,6 @@ const Betting: React.FC<BettingProps> = ({
           <motion.span variants={textVariants}>
             Bet: {"  " + formatNumber(bet)}
           </motion.span>
-        </motion.button>
-      </div>
-
-      <div className="bettype-button-group">
-        <motion.button
-          id="player-button"
-          onClick={() => setSelectedBetType(BetTypes.PLAYER)}
-          className={`target-selector-btn ${selectedBetType === BetTypes.PLAYER ? 'active' : ''}`}
-          disabled={isWFSR}
-          variants={variants}
-          animate={isWFSR ? "disabled" : "enabled"}
-          transition={isWFSR ? { duration: 0.3 } : undefined}
-        >
-          <motion.span variants={textVariants}>PLAYER</motion.span>
-        </motion.button>
-        <motion.button
-          id="tie-button"
-          onClick={() => setSelectedBetType(BetTypes.TIE)}
-          className={`target-selector-btn ${selectedBetType === BetTypes.TIE ? 'active' : ''}`}
-          disabled={isWFSR}
-          variants={variants}
-          animate={isWFSR ? "disabled" : "enabled"}
-          transition={isWFSR ? { duration: 0.3 } : undefined}
-        >
-          <motion.span variants={textVariants}>TIE</motion.span>
-        </motion.button>
-        <motion.button
-          id="banker-button"
-          onClick={() => setSelectedBetType(BetTypes.BANKER)}
-          className={`target-selector-btn ${selectedBetType === BetTypes.BANKER ? 'active' : ''}`}
-          disabled={isWFSR}
-          variants={variants}
-          animate={isWFSR ? "disabled" : "enabled"}
-          transition={isWFSR ? { duration: 0.3 } : undefined}
-        >
-          <motion.span variants={textVariants}>BANKER</motion.span>
         </motion.button>
       </div>
 
@@ -195,6 +172,31 @@ const Betting: React.FC<BettingProps> = ({
         id="chips"
         className={`button-container ${showButtons ? "show-buttons" : ""}`}
       >
+        <div className="bettype-button-group">
+          <motion.button
+            id="player-button"
+            onClick={() => handleBetType(BetTypes.PLAYER)}
+            className={getButtonClass(BetTypes.PLAYER)}
+          >
+            <motion.span>PLAYER</motion.span>
+          </motion.button>
+
+          <motion.button
+            id="banker-button"
+            onClick={() => handleBetType(BetTypes.BANKER)}
+            className={getButtonClass(BetTypes.BANKER)}
+          >
+            <motion.span>BANKER</motion.span>
+          </motion.button>
+
+          <motion.button
+            id="tie-button"
+            onClick={() => handleBetType(BetTypes.TIE)}
+            className={getButtonClass(BetTypes.TIE)}
+          >
+            <motion.span>TIE</motion.span>
+          </motion.button>
+        </div>
         <motion.button
           id="all-in"
           type="button"

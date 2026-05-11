@@ -6,14 +6,14 @@ import type {
 } from "../types/game-types";
 
 export function extractGameStateData(
-  apiResponse: unknown
+  apiResponse: unknown,
 ): Partial<GameStateData> | undefined {
   if (
     typeof apiResponse !== "object" ||
     apiResponse === null ||
     !("current_tokens" in apiResponse) ||
     typeof (apiResponse as { current_tokens: unknown }).current_tokens !==
-    "number" ||
+      "number" ||
     !("game_state" in apiResponse) ||
     typeof (apiResponse as { game_state: unknown }).game_state !== "object" ||
     (apiResponse as { game_state: unknown }).game_state === null
@@ -37,7 +37,7 @@ export function extractGameStateData(
 }
 
 export function extractGameStateData1(
-  apiResponse: unknown
+  apiResponse: unknown,
 ): Partial<GameStateData> | undefined {
   if (typeof apiResponse !== "object" || apiResponse === null) {
     //console.error("extractGameStateData Hiba: Az API válasz nem objektum vagy null.");
@@ -47,7 +47,7 @@ export function extractGameStateData1(
   if (
     !("current_tokens" in apiResponse) ||
     typeof (apiResponse as { current_tokens: unknown }).current_tokens !==
-    "number" ||
+      "number" ||
     !("game_state" in apiResponse) ||
     typeof (apiResponse as { game_state: unknown }).game_state !== "object" ||
     (apiResponse as { game_state: unknown }).game_state === null
@@ -65,7 +65,7 @@ export function extractGameStateData1(
     const processedData: Partial<GameStateData> = {
       player: rawGameState.player as PlayerData,
       dealer_masked: rawGameState.dealer_masked as DealerMaskedData,
-      dealer_unmasked: rawGameState.dealer_unmasked as DealerUnmaskedData,
+      banker: rawGameState.banker as DealerUnmaskedData,
       aces: rawGameState.aces,
       winner: rawGameState.winner as number,
       players: rawGameState.players as Record<string, PlayerData>,
@@ -79,7 +79,7 @@ export function extractGameStateData1(
   } catch (e) {
     console.error(
       "extractGameStateData Hiba: Hiba történt a game_state mezőinek kinyerésekor.",
-      e
+      e,
     );
     return undefined;
   }

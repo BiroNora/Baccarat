@@ -8,19 +8,14 @@ import PlayerDealer from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
-import SplitPlayButtons from "./components/SplitPlayButtons";
-import SplitPlayDisabledButtons from "./components/SplitPlayDisabledButtons";
-import SplitPlayDoubleDisabledButtons from "./components/SplitPlayDoubleDisabledButtons";
-import SplitPlayers from "./components/SplitPlayers";
-import SplitWinner from "./components/SplitWinner";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import Betting from "./components/Betting";
 import { AnimatePresence, motion } from "motion/react";
-import SplitPlayerDealerMasked from "./components/SplitPlayerDealerMasked";
 import { Reloading } from "./components/Reloading";
 import RecoveryDec from "./components/RecoveryDec";
 import UniqueBetBank from "./components/UniqueBetBank";
+import CutSlider from "./components/CutSlider";
 
 function App() {
   const {
@@ -29,19 +24,10 @@ function App() {
     handleOnStartNew,
     handlePlaceBet,
     handleRetakeBet,
+    handleShoeCut,
     handleStartGame,
-    handleHitRequest,
-    handleStandRequest,
-    handleDoubleRequest,
-    handleSplitRequest,
-    handleSplitHitRequest,
-    handleSplitStandRequest,
-    handleSplitDoubleRequest,
-    handleInsRequest,
     preRewardBet,
     preRewardTokens,
-    insPlaced,
-    showInsLost,
     initDeckLen,
     isWFSR,
   } = useGameStateMachine();
@@ -94,6 +80,22 @@ function App() {
                   </PageWrapper>
                 </div>
               );
+            case "CUTSLIDER":
+              return (
+                <div>
+                  <PageWrapper>
+                    <CutSlider onConfirm={handleShoeCut}/>
+                  </PageWrapper>
+                </div>
+              );
+            case "SHIFTING_THE_STACKS":
+              return (
+                <div>
+                  <PageWrapper>
+                    <CutSlider onConfirm={handleShoeCut}/>
+                  </PageWrapper>
+                </div>
+              );
             case "INIT_GAME":
               return (
                 <div>
@@ -120,18 +122,11 @@ function App() {
                   <div className="player-dealer-area-wrapper">
                     <PlayerDealerMasked
                       gameState={gameState}
-                      showInsLost={showInsLost}
                     />
                   </div>
                   <div className="game-action-area-wrapper">
                     <PlayButtons
                       gameState={gameState}
-                      onHit={handleHitRequest}
-                      onStand={handleStandRequest}
-                      onDouble={handleDoubleRequest}
-                      onSplit={handleSplitRequest}
-                      onInsurance={handleInsRequest}
-                      insPlaced={insPlaced}
                       isWFSR={isWFSR}
                     />
                   </div>
@@ -168,7 +163,6 @@ function App() {
                   <div className="player-dealer-area-wrapper">
                     <PlayerDealerMasked
                       gameState={gameState}
-                      showInsLost={showInsLost}
                     />
                   </div>
                   <div className="game-action-area-wrapper">
@@ -180,160 +174,6 @@ function App() {
                     preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
                     isResultPhase={true}
                   />
-                </div>
-              );
-            case "SPLIT_TURN":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <SplitPlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayButtons
-                      gameState={gameState}
-                      onHit={handleSplitHitRequest}
-                      onStand={handleSplitStandRequest}
-                      onSplit={handleSplitRequest}
-                      onDouble={handleSplitDoubleRequest}
-                      isWFSR={isWFSR}
-                    />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_STAND":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <SplitPlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_STAND_DOUBLE":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <SplitPlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDoubleDisabledButtons gameState={gameState} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_NAT21_TRANSIT":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <SplitPlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_FINISH":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealer gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    {/* <SplitWinner gameState={gameState} /> */}
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={true}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_FINISH_OUTCOME":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealer gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitWinner gameState={gameState} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={true}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_ACE_TRANSIT":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <SplitPlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
                 </div>
               );
             case "OUT_OF_TOKENS":

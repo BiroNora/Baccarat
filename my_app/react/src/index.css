@@ -24,6 +24,7 @@
   --extra-vertical-padding02: 0.2em;
   --extra-vertical-padding05: 0.5em;
   --extra-vertical-padding1: 1em;
+  --extra-vertical-padding2: 2em;
   box-sizing: border-box;
   scrollbar-gutter: stable;
 }
@@ -116,6 +117,7 @@ body {
   margin: 0;
   text-align: left;
   color: #118634;
+  color:  rgb(24, 22, 5)
 }
 .title2 {
   font-size: clamp(2.2rem, 8vw, 3.45rem);
@@ -124,9 +126,11 @@ body {
   padding-bottom: 0.5em;
   margin: 0;
   text-align: left;
+  color:  rgb(95, 83, 13)
 }
 .red-suit {
   color: #d41515;
+  background: rgb(53, 154, 74)
 }
 .black-suit {
   color: black;
@@ -140,17 +144,15 @@ button {
   font-size: inherit;
   font-weight: 700;
   border-radius: 5px;
-  background-color: rgb(199, 239, 205);
-  color: black;
+  background-color: rgb(214, 231, 217);
   border: 2px solid rgb(166, 180, 199);
   padding: 0.2rem 1.1rem;
   cursor: pointer;
 }
 
 button:not(:disabled) {
-  background-color: rgb(199, 239, 205);
-  color: black;
-  border: 2px solid rgb(207, 215, 228);
+  background-color: rgb(214, 231, 217);
+  border: 2px solid rgb(88, 85, 59);
   cursor: pointer;
 }
 
@@ -158,15 +160,14 @@ button:not(:disabled):hover,
 button:not(:disabled):focus {
   background-color: #a00d0d !important;
   color: white;
-  border-color: rgb(206, 212, 220) !important;
-  border: 2px solid rgb(53, 154, 74) !important;
+  border: 2px solid rgb(88, 85, 59) ;
   outline: none;
 }
 
 /* --- Styles for the DISABLED state --- */
 button:disabled {
-  background-color: rgb(199, 239, 205); /* Szürke háttér, hogy egyértelmű legyen */
-  border: 2px solid rgba(195, 206, 220, 1);
+  background-color: rgb(206, 205, 194); /* Szürke háttér, hogy egyértelmű legyen */
+  border: 2px solid rgb(186, 190, 196);
   color: #666666;
   cursor: not-allowed;
   opacity: 0.7;
@@ -178,7 +179,6 @@ button:disabled {
   gap: 0.5rem;
   opacity: 0;
   transition: opacity 1s ease-out;
-  padding-top: var(--extra-vertical-padding1);
 }
 
 .button-container.show-buttons {
@@ -211,9 +211,8 @@ button:disabled {
   font-size: clamp(1.2rem, 1.3vw, 1.4rem);
 }
 
-/* Hover és Focus stílusok a tiszta átláthatóság érdekében */
-#start-button:hover,
-#start-button:focus,
+
+
 #start-button:disabled {
   padding: 0.2em 0.6em;
   font-size: clamp(1.2rem, 1.3vw, 1.4rem);
