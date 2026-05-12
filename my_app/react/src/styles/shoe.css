@@ -1,0 +1,24 @@
+/* 1. Alapállapot: a vonalak léteznek, de láthatatlanok */
+.drawing-line {
+  opacity: 0;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  /* Nem adunk itt meg animációt, hogy ne induljon el magától */
+}
+
+/* 2. Amikor a React ráteszi a szülőre a start-animation osztályt */
+.start-animation .drawing-line {
+  opacity: 1;
+  /* Itt indul az egyetlen, végleges animáció */
+  animation: drawShoe 2.5s ease-in-out 0.5s forwards;
+}
+
+/* 3. Az animáció definíciója */
+@keyframes drawShoe {
+  from {
+    stroke-dashoffset: 600;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

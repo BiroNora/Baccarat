@@ -88,7 +88,7 @@
   height: 1rem;
   background-color: #dc2626;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 1px solid #8e7a08;
   cursor: pointer;
 }
 
@@ -115,4 +115,29 @@
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+
+.shoe-icon-container {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.high-heel-svg {
+  width: 100%;
+  height: 100%;
+  /* Itt is alkalmazhatod a már megírt waveOnce animációt a stroke-ra! */
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
+}
+
+.high-heel-svg path {
+  /* Itt tudod animálni a körvonalat, ha szeretnéd */
+  stroke-dasharray: 200;
+  animation: drawShoe 3s ease-in-out forwards;
+}
+
+@keyframes drawShoe {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
 }

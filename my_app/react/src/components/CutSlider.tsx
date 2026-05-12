@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../styles/cutslider.css";
+import Shoe from "./Shoe";
 
 interface CutSliderProps {
   initDeckLen: number | null;
@@ -9,22 +10,14 @@ interface CutSliderProps {
 const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm }) => {
   const [cutValue, setCutValue] = useState(Math.floor(initDeckLen! / 2));
 
-  const percentage = (cutValue / initDeckLen!) * 100;
+  //const percentage = (cutValue / initDeckLen!) * 100;
 
   return (
     <div className="cut-container">
       <h2 className="cut-title">Cut the Shoe</h2>
 
-      <div className="deck-visual">
-        <div className="deck-texture">
-          {[...Array(25)].map((_, i) => (
-            <div key={i} className="deck-line"></div>
-          ))}
-        </div>
-
-        <div className="cut-card-indicator" style={{ left: `${percentage}%` }}>
-          <div className="cut-card-diamond"></div>
-        </div>
+      <div className="shoe-icon-container">
+        <Shoe />
       </div>
 
       <input
