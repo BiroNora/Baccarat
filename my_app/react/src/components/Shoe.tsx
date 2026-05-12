@@ -31,7 +31,7 @@ const HighHeelIcon = ({ width = 150, color = "#d4af37" }) => {
       height={width}
       fill="none" // Itt kapcsoljuk ki a fekete foltokat
       stroke={color} // Itt állítjuk be a vonal színét
-      strokeWidth="2"
+      strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"
       className="animated-shoe"
