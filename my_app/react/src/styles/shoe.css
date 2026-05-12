@@ -10,7 +10,7 @@
 .start-animation .drawing-line {
   opacity: 1;
   /* Itt indul az egyetlen, végleges animáció */
-  animation: drawShoe 2.5s ease-in-out 0.5s forwards;
+  animation: drawShoe 3s ease-in-out 0.7s forwards;
 }
 
 /* 3. Az animáció definíciója */

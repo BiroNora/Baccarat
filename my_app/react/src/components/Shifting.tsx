@@ -16,17 +16,25 @@ export function Shifting() {
     <div className="loading-container-centered">
       {/* Ha nincs kész, a töltést mutatjuk, ha kész, a szöveget */}
       {!isDone ? (
-        <h1>
-          S H I F T I N G the S T A C K S<span className="dot dot-1">.</span>
-          <span className="dot dot-2">.</span>
-          <span className="dot dot-3">.</span>
-        </h1>
+        <>
+          <div>
+            <h1>S H I F T I N G</h1>
+          </div>
+          <div>
+            <h1>the</h1>
+          </div>
+          <div>
+            <h1>
+              S T A C K S<span className="dot dot-1">.</span>
+              <span className="dot dot-2">.</span>
+              <span className="dot dot-3">.</span>
+            </h1>
+          </div>
+        </>
       ) : (
         <div className="fade-in" style={{ textAlign: "center" }}>
           <h1>S H O E &nbsp; C U T T E D</h1>
-            <p>
-              Cut card placed about the last fifth of the shoe.
-            </p>
+          <p>Cut card placed about the last fifth of the shoe.</p>
         </div>
       )}
     </div>

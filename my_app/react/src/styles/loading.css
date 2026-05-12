@@ -7,7 +7,6 @@
   align-items: center;
   text-align: center;
   justify-content: center;
-  position: fixed; /* Fixen a képernyőn, hogy ne befolyásolja más tartalom */
 
   background-color: transparent; /* Teljesen átlátszó háttér */
   z-index: 9999; /* Legyen felül, ha van más tartalom */
@@ -19,23 +18,25 @@
   font-size: clamp(1.8rem, 2.3vw, 5.5rem);
   font-weight: 600;
   color: #504343ff; /* A szöveg színe */
-  display: inline-flex; /* <-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
+  display: flex;  /*<-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
   align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */
   gap: 0; /* Ne legyen extra rés a "LOADING" és az első pont között */
   white-space: pre; /* Fontos! Megakadályozza, hogy a böngésző törje a sort a pontok előtt */
+
   margin: 0; /* Ne legyen alapértelmezett margó a h1-en */
   padding: 0; /* Ne legyen alapértelmezett padding a h1-en */
   /* --- HULLÁMZÁS (GRADIENS) BEÁLLÍTÁSA --- */
   background: linear-gradient(
     to right,
-    #504343 0%,   /* Alap sötétbarna szín */
-    #d4af37 50%,  /* Arany csillanás középen */
-    #504343 100%  /* Alap sötétbarna szín */
+    #504343 0%,
+    /* Alap sötétbarna szín */ #d4af37 50%,
+    /* Arany csillanás középen */ #504343 100% /* Alap sötétbarna szín */
   );
   background-size: 200% auto;
   color: transparent;
   background-clip: text;
   -webkit-background-clip: text;
+  -webkit-text-stroke: 0.5px rgb(88, 72, 12);
 
   /* Az animáció: egyszer fut le (1.5s), majd megáll */
   animation: waveOnce 1.5s ease-out infinite;
@@ -45,7 +46,8 @@
   gap: 0;
   white-space: pre;
   margin: 0;
-  padding: 0;
+  padding: 0.5rem 0;
+  max-width: 60rem;
 }
 
 @keyframes waveOnce {
@@ -66,7 +68,11 @@
   color: transparent;
   opacity: 0; /* Kezdetben láthatatlanok */
   animation: dot-fade 1.4s infinite ease-in-out; /* Animáció */
-  font-size: clamp(1.8rem, 2.3vw, 5rem); /* Ugyanakkora méret, mint a "LOADING" szó */
+  font-size: clamp(
+    1.8rem,
+    2.3vw,
+    5rem
+  ); /* Ugyanakkora méret, mint a "LOADING" szó */
   padding-left: 0.2rem;
   line-height: 1; /* Nincs extra sorköz */
   vertical-align: baseline; /* <-- Hozzáadva: biztosítja az alapvonalhoz igazítást */
