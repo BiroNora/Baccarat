@@ -11,6 +11,7 @@
   background-color: transparent; /* Teljesen átlátszó háttér */
   z-index: 9999; /* Legyen felül, ha van más tartalom */
   box-sizing: border-box;
+  padding-top: clamp(1.4em, 1.8vw, 2em);
 }
 
 /* A LOADING... felirat stílusa */
