@@ -15,18 +15,6 @@ class GameSerializer:
                 game, is_recovery=True
             )
 
-        if "split_stand_and_rewards" in p:
-            return GameSerializer.serialize_split_stand_and_rewards(game)
-        if "add_to_players_list_by_stand" in p:
-            return GameSerializer.serialize_add_to_players_list_by_stand(game)
-        if "add_player_from_players" in p:
-            return GameSerializer.serialize_add_player_from_players(game)
-        if "split" in p:
-            return GameSerializer.serialize_split_hand(game)
-        if "ins_request" in p:
-            return GameSerializer.serialize_for_insurance(game)
-        if "double_request" in p:
-            return GameSerializer.serialize_double_state(game)
         if "rewards" in p:
             return GameSerializer.serialize_reward_state(game)
         if "create_deck" in p:
@@ -35,9 +23,6 @@ class GameSerializer:
             return GameSerializer.serialize_start_game(game)
         if "clear_game_state" in p:
             return GameSerializer.serialize_clear_game_state(game)
-
-        if any(x in p for x in ["hit"]):
-            return GameSerializer.serialize_initial_and_hit_state(game)
 
         if any(x in p for x in ["bet", "retake_bet", "restart"]):
             return GameSerializer.serialize_for_client_bets(game)
@@ -49,6 +34,7 @@ class GameSerializer:
         return {
             "deck_len": game.deck_len_init if len(game.deck) == 0 else len(game.deck),
             "target_phase": game.get_target_phase().value,
+            "pre_phase": game.get_pre_phase().value
         }
 
     @staticmethod
@@ -114,12 +100,10 @@ class GameSerializer:
     def serialize_start_game(game) -> Dict[str, Any]:
         return {
             "player": game.player,
-            "dealer_masked": game.dealer_masked,
             "deck_len": game.get_deck_len(),
             "bet": game.bet,
             "target_phase": game.get_target_phase().value,
         }
-
 
     @staticmethod
     def serialize_reward_state(game) -> Dict[str, Any]:

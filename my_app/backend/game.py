@@ -15,11 +15,14 @@ class Game:
     NUM_DECKS = 8
     CARDS_IN_DECK = 52
     TOTAL_INITIAL_CARDS = NUM_DECKS * CARDS_IN_DECK
-    IMMEDIATE_STOP = {WinnerState.NATURAL_DEALER_WON, WinnerState.NATURAL_PLAYER_WON, WinnerState.NATURAL_PUSH}
+    IMMEDIATE_STOP = {
+        WinnerState.NATURAL_DEALER_WON,
+        WinnerState.NATURAL_PLAYER_WON,
+        WinnerState.NATURAL_PUSH,
+    }
 
     def __init__(self):
         self.player: Dict[str, Any] = {
-            "id": Game.NONE,
             "hand": [],
             "sum": 0,
         }
@@ -49,14 +52,13 @@ class Game:
         cut_offset = random.randint(60, 90)
         return total_cards - cut_offset
 
-    def set_bet_type(self, type_value):
-        self.bet_type = BetType(type_value)
-
     def create_deck(self):
         single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
         self.deck = single_deck * Game.NUM_DECKS
         random.shuffle(self.deck)
-        self.target_phase = PhaseState.INIT_GAME
+
+        self.target_phase = PhaseState.CUTSLIDER
+
         return self.deck
 
     def shoe_cut(self, cut_index: int):
@@ -67,6 +69,7 @@ class Game:
             print("67 shoe_cut_limit: ", self.shoe_cut_limit)
 
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
+            self.pre_phase = PhaseState.INIT_GAME
 
         return self.deck
 
@@ -76,12 +79,9 @@ class Game:
 
         return random.randint(lower_limit, upper_limit)
 
-
-    def initialize_new_round(self, bet_type):
+    def initialize_new_round(self):
         self.clear_up()
 
-        self.bet_type = bet_type
-        print("59 bettype: ", self.bet_type)
         card1 = self.deck.pop(0)
         card2 = self.deck.pop(0)
         card3 = self.deck.pop(0)
@@ -99,7 +99,6 @@ class Game:
         self.target_phase = PhaseState.INIT_GAME
 
         self.player = {
-            "id": self._generate_sequential_id(),
             "hand": player_hand,
             "sum": player_sum,
         }
@@ -128,10 +127,10 @@ class Game:
         if is_player:
             self.set_player_sum(res)
         else:
-            self.set_dealer_sum(res)
+            self.player
+            # self.set_dealer_sum(res)
 
         return res
-
 
     def winner_state(self):
         player = self.player["sum"]
@@ -215,6 +214,7 @@ class Game:
 
         self.set_bet_to_null()
         self.set_bet_list_to_null()
+        self.bet_type = BetType.NONE
         self.is_round_active = bool(self.players)
 
         return reward_amount
@@ -229,7 +229,6 @@ class Game:
 
     def clear_up(self):
         self.player: Dict[str, Any] = {
-            "id": Game.NONE,
             "hand": [],
             "sum": 0,
         }
@@ -238,8 +237,6 @@ class Game:
             "sum": 0,
         }
         self.winner = WinnerState.NONE
-        self.hand_counter = 0
-
         self.is_round_active = False
         self.target_phase = PhaseState.BETTING
 
@@ -263,9 +260,6 @@ class Game:
     def set_player_sum(self, sum):
         self.player["sum"] = sum
 
-    def set_dealer_sum(self, sum):
-        self.dealer_masked["sum"] = sum
-
     def set_bet(self, amount):
         self.bet += amount
 
@@ -283,6 +277,9 @@ class Game:
 
     def set_bet_list_to_null(self):
         self.bet_list = []
+
+    def set_bet_type(self, type_value):
+        self.bet_type = BetType(type_value)
 
     def get_deck_len(self):
         if len(self.deck) > 0:

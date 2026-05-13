@@ -17,7 +17,7 @@ export type GameState =
 export interface GameStateData {
   currentGameState: GameState;
   player: PlayerData;
-  banker: Banker;
+  banker: BankerData;
   winner: number;
   deck_len: number;
   tokens: number;
@@ -29,12 +29,11 @@ export interface GameStateData {
 }
 
 export interface PlayerData {
-  id: string;
   hand: string[];
   sum: number;
 }
 
-export interface Banker {
+export interface BankerData {
   hand: string[];
   sum: number;
 }
@@ -75,6 +74,7 @@ export type GameStateMachineHookResult = {
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => void;
   handleShoeCut: (amount: number) => Promise<void>;
+  handleShiftingFirstPhaseEnd: () => void;
   handleStartGame: (type: number) => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;

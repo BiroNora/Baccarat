@@ -26,6 +26,7 @@ function App() {
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
+    handleShiftingFirstPhaseEnd,
     handleStartGame,
     preRewardBet,
     preRewardTokens,
@@ -98,7 +99,7 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <Shifting />
+                    <Shifting onAnimationEnd={handleShiftingFirstPhaseEnd}/>
                   </PageWrapper>
                 </div>
               );

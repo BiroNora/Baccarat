@@ -7,6 +7,7 @@ import {
   recoverGameState,
   getShuffling,
   setShoeCut,
+  registerBetType,
   startGame,
   handleStandAndRewards,
   setRestart,
@@ -199,23 +200,29 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const handleStartGame = useCallback(
     async (type: number) => {
       if (type === 0) return;
-      const response = state.gameState;
-      console.log("response startGame: ", response)
-
-      if (!response) return;
-
-      dispatch({ type: "SET_SELECTED_BET_TYPE", payload: type });
+      console.log("START GAME KATTINTVA - Típus:", type);
       setIsWFSR(true);
 
-      // A logika egyszerű: ha a szerver szerint kell valami "elő-fázis" (pl. SHUFFLING),
-      // akkor oda megyünk. Ha nincs ilyen, akkor a végcélhoz (pl. INIT_GAME).
-      const nextState = response.pre_phase || response.target_phase || "ERROR";
+      try {
+        const data = await handleApiAction(() => registerBetType(type));
+        const response = extractGameStateData(data);
 
-      transitionToState(nextState, response);
+        if (response) {
+          dispatch({ type: "SET_SELECTED_BET_TYPE", payload: type });
 
-      setIsWFSR(false);
+          // 3. ÁTMENET: Megyünk a szerver által diktált következő fázisba
+          // (Ez lehet SHUFFLING vagy rögtön az osztás előkészítése)
+          const nextState =
+            response.pre_phase || response.target_phase || "ERROR";
+          transitionToState(nextState, response);
+        }
+      } catch (error) {
+        console.error("Hiba a játék indításakor:", error);
+      } finally {
+        setIsWFSR(false); // Felszabadítjuk a felületet
+      }
     },
-    [state.gameState, transitionToState],
+    [handleApiAction, transitionToState], // Itt nem kell a state.gameState-től függeni!
   );
 
   const handleShoeCut = useCallback(
@@ -227,22 +234,47 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         const response = extractGameStateData(data);
         if (!response) return;
-
+        console.log("TARGET: ", response?.target_phase);
         transitionToState(response?.target_phase as GameState, response);
       });
     },
-    [
-      executeAsyncAction,
-      handleApiAction,
-      transitionToState,
-    ],
+    [executeAsyncAction, handleApiAction, transitionToState],
   );
 
+  const handleShiftingFirstPhaseEnd = useCallback(() => {
+    if (state.gameState.currentGameState !== "SHIFTING_THE_STACKS") return;
+
+    if (timeoutIdRef.current) window.clearTimeout(timeoutIdRef.current);
+
+    timeoutIdRef.current = window.setTimeout(() => {
+      if (isMountedRef.current) {
+        const nextDestination = state.gameState.pre_phase as GameState;
+
+        isProcessingRef.current = false; // Felszabadítjuk a zárat
+        transitionToState(nextDestination, state.gameState);
+      }
+    }, 4000);
+  }, [state.gameState, transitionToState]);
+
   // --- useEffect blokkok ---
+  useEffect(() => {
+    if (
+      state.gameState.currentGameState !== "SHIFTING_THE_STACKS" ||
+      isProcessingRef.current
+    )
+      return;
+
+    isProcessingRef.current = true;
+  }, [state.gameState.currentGameState]);
+
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+
+      if (timeoutIdRef.current) {
+        window.clearTimeout(timeoutIdRef.current);
+      }
     };
   }, []);
 
@@ -330,7 +362,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 response.deck_len ?? state.totalInitialCards;
 
               dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
-              transitionToState("CUTSLIDER", response);
+              transitionToState(response.target_phase as GameState, response);
               isProcessingRef.current = false;
             }
           }, 4000);
@@ -357,6 +389,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState,
   ]);
 
+  // --- SHIFTING_THE_STACKS ---
+  useEffect(() => {
+    if (
+      state.gameState.currentGameState !== "SHIFTING_THE_STACKS" ||
+      isProcessingRef.current
+    )
+      return;
+
+    isProcessingRef.current = true;
+    //console.log("--- SHIFTING_THE_STACKS INDUL ---");
+  }, [
+    state.gameState.currentGameState,
+    state.gameState.pre_phase,
+    transitionToState,
+  ]);
+
   // --- INIT_GAME ---
   useEffect(() => {
     if (
@@ -366,7 +414,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       return;
 
     isProcessingRef.current = true;
-    //console.log("--- INIT_GAME BLOKK INDUL ---");
+    console.log("--- INIT_GAME BLOKK INDUL ---");
 
     const initGameAct = async () => {
       try {
@@ -376,14 +424,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const currentDeckLen = state.gameState.deck_len;
         dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
-        const data = await handleApiAction(() => startGame(state.gameState.bet_type));
+        const data = await handleApiAction(() =>
+          startGame(),
+        );
         const response = extractGameStateData(data);
 
         if (!response || !isMountedRef.current) {
           isProcessingRef.current = false;
           return;
         }
-
+        console.log("INIT GAME TARGET: ", response.target_phase);
         transitionToState(response?.pre_phase as GameState, response);
       } catch (error) {
         console.error("Init Game hiba:", error);
@@ -603,6 +653,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
+    handleShiftingFirstPhaseEnd,
     preRewardBet: state.preRewardBet,
     preRewardTokens: state.preRewardTokens,
     initDeckLen: state.initDeckLen,

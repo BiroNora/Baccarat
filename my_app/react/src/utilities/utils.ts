@@ -1,6 +1,5 @@
 import type {
-  DealerMaskedData,
-  DealerUnmaskedData,
+  BankerData,
   GameStateData,
   PlayerData,
 } from "../types/game-types";
@@ -64,12 +63,8 @@ export function extractGameStateData1(
   try {
     const processedData: Partial<GameStateData> = {
       player: rawGameState.player as PlayerData,
-      dealer_masked: rawGameState.dealer_masked as DealerMaskedData,
-      banker: rawGameState.banker as DealerUnmaskedData,
-      aces: rawGameState.aces,
+      banker: rawGameState.banker as BankerData,
       winner: rawGameState.winner as number,
-      players: rawGameState.players as Record<string, PlayerData>,
-      split_req: rawGameState.split_req as number,
       deck_len: rawGameState.deck_len as number,
       tokens: token,
       bet: rawGameState.bet as number,

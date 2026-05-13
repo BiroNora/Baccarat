@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import "../styles/loading.css";
 
-export function Shifting() {
+interface ShiftingProps {
+  onAnimationEnd: () => void;
+}
+
+export function Shifting({ onAnimationEnd }: ShiftingProps) {
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsDone(true);
+      onAnimationEnd();
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [onAnimationEnd]);
 
   return (
     <div className="loading-container-centered">

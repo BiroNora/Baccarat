@@ -23,7 +23,6 @@ export const initialGameDataState: GameDataState = {
   gameState: {
     currentGameState: "LOADING",
     player: {
-      id: "NONE",
       hand: [],
       sum: 0,
     },
@@ -53,7 +52,7 @@ export function gameReducer(
       return {
         ...state,
         gameState: {
-          ...state.gameState, // Megtartjuk a meglévő mezőket (pl. dealer_masked, tokens)
+          ...state.gameState, // Megtartjuk a meglévő mezőket (pl. tokens)
           ...action.payload, // Felülírjuk azokkal, amik a szervertől jöttek
         },
       };

@@ -63,11 +63,20 @@ export async function setShoeCut(amount: number) {
   return data;
 }
 
-export async function startGame(betType: number) {
-  const data = await callApiEndpoint("/api/start_game", "POST", { type: betType });
+export async function registerBetType(betType: number) {
+  console.log("API MEGHÍVVA! betType: ", betType)
+  const data = await callApiEndpoint("/api/reg_bet_type", "POST", { type: betType });
 
   return data;
 }
+
+export async function startGame() {
+  const data = await callApiEndpoint("/api/start_game", "POST");
+
+  return data;
+}
+
+
 
 
 

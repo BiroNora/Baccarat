@@ -17,7 +17,6 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
   preRewardTokens,
 }) => {
   // Belső állapot a megjelenített értékeknek
-  const [displayedBet, setDisplayBet] = useState(gameState.player.bet);
   const [displayedTokens, setDisplayTokens] = useState(gameState.tokens);
 
   useEffect(() => {
@@ -27,22 +26,18 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
       preRewardTokens !== undefined
     ) {
       // 1. Eredmény fázisban először beállítjuk a "snapshot" (régi) értékeket
-      setDisplayBet(preRewardBet ?? gameState.player.bet);
       setDisplayTokens(preRewardTokens ?? gameState.tokens);
 
       // 2. Majd 2 másodperc múlva frissítünk a végsőre
       const timer = setTimeout(() => {
-        setDisplayBet(gameState.player.bet);
         setDisplayTokens(gameState.tokens);
       }, 2000);
       return () => clearTimeout(timer);
     } else {
       // 3. Játék közben (MAIN_TURN stb.) azonnal frissítünk, nincs várakozás
-      setDisplayBet(gameState.player.bet);
       setDisplayTokens(gameState.tokens);
     }
   }, [
-    gameState.player.bet,
     gameState.tokens,
     isResultPhase,
     preRewardBet,
@@ -51,8 +46,6 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
 
   const tokensToDisplay =
     displayedTokens !== null ? formatNumber(displayedTokens) : "---";
-  const betToDisplay =
-    displayedBet !== null ? formatNumber(displayedBet) : "---";
 
   const fadeProps = {
     initial: { opacity: 0 },
@@ -68,14 +61,7 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
         Bet:{"\u00A0"}
         <div style={{ display: "inline-grid", verticalAlign: "bottom" }}>
           <AnimatePresence mode="popLayout">
-            <motion.span
-              key={betToDisplay}
-              {...fadeProps}
-              className="bet-amount"
-              style={{ gridArea: "1 / 1", whiteSpace: "nowrap" }}
-            >
-              {betToDisplay}
-            </motion.span>
+            
           </AnimatePresence>
         </div>
       </div>

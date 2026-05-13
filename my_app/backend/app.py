@@ -138,11 +138,11 @@ def with_game_state(f):
         data = request.get_json(silent=True) or {}
         ikey = data.get("idempotency_key")
 
-        print(">>>>>>> IKEY: ", ikey)
+        print(">>>>>>> 141 app.py IKEY: ", ikey)
 
         # Deszerializálunk (szükség van rá az idempotens válaszhoz is)
         game = Game.deserialize(user.current_game_state)
-        print(f"DEBUG: Path keresése: {request.path}")
+        print(f"145 app.py DEBUG: Path keresése: {request.path}")
         if ikey and user.idempotency_key == ikey:
             # Ha a kulcs egyezik, nem futtatjuk le a függvényt (f),
             # csak visszaadjuk az aktuális állapotot.
@@ -398,6 +398,34 @@ def retake_bet(user, game):
 
 
 # 3
+@app.route("/api/reg_bet_type", methods=["POST"])
+@api_error_handler
+@login_required
+@with_game_state
+def reg_bet_type(user, game):
+    data = request.get_json() or {}
+    bet_type = data.get("type", 0)
+    print("BET TYPE: ", bet_type)
+    print("BT: ", BetType.NONE)
+    if not isinstance(bet_type, int) or bet_type == BetType.NONE:
+        raise ValueError(f"Bet must be added.")
+
+    game.set_bet_type(bet_type)
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "current_tokens": user.tokens,
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "game_state_hint": "BET_TYPE_SUCCESSFULLY_PLACED",
+            }
+        ),
+        200,
+    )
+
+
+# 3
 @app.route("/api/create_deck", methods=["POST"])
 @api_error_handler
 @login_required
@@ -457,10 +485,7 @@ def shoe_cut(user, game):
 @login_required
 @with_game_state
 def start_game(user, game):
-    data = request.get_json() or {}
-    bet_type = data.get("type", 0)
-    print("bet_type: ", bet_type)
-    game.initialize_new_round(bet_type)
+    game.initialize_new_round()
 
     return (
         jsonify(
