@@ -1,13 +1,26 @@
 import React, { type JSX } from "react";
 import "../styles/burningCards.css";
 import type { GameStateData } from "../types/game-types";
+import { ClubIcon, DiamondIcon, HeartIcon, SpadeIcon } from "./CardIcons";
 
+// --- KOMPONENS ---
 interface BurningCardsProps {
   gameState: GameStateData;
 }
 
 const BurningCards: React.FC<BurningCardsProps> = ({ gameState }) => {
   const card = gameState.first_card;
+
+  // Segédfüggvény az ikon kiválasztásához
+  const getSuitIcon = (suit: string) => {
+    switch (suit) {
+      case "♥": return <HeartIcon />;
+      case "♦": return <DiamondIcon />;
+      case "♠": return <SpadeIcon />;
+      case "♣": return <ClubIcon />;
+      default: return suit;
+    }
+  };
 
   const formatCard = (cardStr: string | null): JSX.Element | string => {
     if (!cardStr) return "?";
@@ -25,30 +38,25 @@ const BurningCards: React.FC<BurningCardsProps> = ({ gameState }) => {
     }
 
     return (
-      <span style={{ whiteSpace: "nowrap" }}>
-        <span className={suitClass}>{suit}</span>
+      <span style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
+        <span className={suitClass}>{getSuitIcon(suit)}</span>
         <span className="merriweatherblack">{value}</span>
       </span>
     );
   };
 
   return (
-    <>
     <div className="cut-container">
       <div className="cut-title">B U R N</div>
-
 
       <div className="burning-card-display">
         <span className="burning_card">{formatCard(card)}</span>
       </div>
 
       <p className="burning-info-text">
-        <i>The dealer is burning cards based on the value of the first card.</i>
+        Cards burned based on the value of the first card.
       </p>
     </div>
-    </>
-
-
   );
 };
 
