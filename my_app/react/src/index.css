@@ -4,7 +4,7 @@
   line-height: clamp(1.4em, 1.8vw, 2em)
   font-weight: 400;
 
-  background-color: #e96687;
+  background-color: #de5477;
   opacity: 1;
   box-sizing: border-box;
   color: #171515;
@@ -130,8 +130,7 @@ body {
   color:  rgb(95, 83, 13)
 }
 .red-suit {
-  color: #d41515;
-  background: rgb(53, 154, 74)
+  color: #060a0b;
 }
 .black-suit {
   color: black;

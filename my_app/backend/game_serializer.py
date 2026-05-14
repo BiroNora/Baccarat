@@ -19,6 +19,8 @@ class GameSerializer:
             return GameSerializer.serialize_reward_state(game)
         if "create_deck" in p:
             return GameSerializer.serialize_create_deck(game)
+        if "shoe_cut" in p:
+            return GameSerializer.serialize_shoe_cut(game)
         if "start_game" in p:
             return GameSerializer.serialize_start_game(game)
         if "clear_game_state" in p:
@@ -78,6 +80,16 @@ class GameSerializer:
             "bet": game.bet,
             "deck_len": game.deck_len_init,
             "target_phase": game.get_target_phase().value,
+        }
+
+    @staticmethod
+    def serialize_shoe_cut(game) -> Dict[str, Any]:
+        return {
+            "bet": game.bet,
+            "deck_len": game.get_deck_len(),
+            "first_card": game.first_card,
+            "target_phase": game.get_target_phase().value,
+            "pre_phase": game.get_pre_phase().value,
         }
 
     @staticmethod

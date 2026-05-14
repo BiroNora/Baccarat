@@ -424,9 +424,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const currentDeckLen = state.gameState.deck_len;
         dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
-        const data = await handleApiAction(() =>
-          startGame(),
-        );
+        const data = await handleApiAction(() => startGame());
         const response = extractGameStateData(data);
 
         if (!response || !isMountedRef.current) {
@@ -452,6 +450,29 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     resetGameVariables,
     setIsWFSR,
   ]);
+
+  useEffect(() => {
+    if (
+      state.gameState.currentGameState !== "BURNING_CARDS" ||
+      isProcessingRef.current
+    ) {
+      return;
+    }
+
+    isProcessingRef.current = true;
+    console.log("--- BURNING_CARDS BLOKK INDUL ---");
+
+    /* const timer = setTimeout(() => {
+      dispatch({ type: "SET_UI_PHASE", payload: "INIT_GAME" });
+
+      isProcessingRef.current = false;
+    }, 4000);
+ */
+    return () => {
+      clearTimeout(timer);
+      isProcessingRef.current = false;
+    };
+  }, [dispatch, state.gameState.currentGameState]);
 
   // --- MAIN_STAND ---
   useEffect(() => {

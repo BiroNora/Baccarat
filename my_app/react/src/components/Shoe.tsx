@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/shoe.css";
 
-const HighHeelIcon = ({ width = 150, color = "#d4af37" }) => {
+const HighHeelIcon = ({ width = 150, color = "#937616" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const svgRef = useRef(null);
 
@@ -26,11 +26,11 @@ const HighHeelIcon = ({ width = 150, color = "#d4af37" }) => {
   return (
     <svg
       ref={svgRef}
-      viewBox="150 130 250 250" // Kicsit szűkítettem a nézetet, hogy ne legyen pici a cipő
+      viewBox="150 130 250 250"
       width={width}
       height={width}
-      fill="none" // Itt kapcsoljuk ki a fekete foltokat
-      stroke={color} // Itt állítjuk be a vonal színét
+      fill="none"
+      stroke={color}
       strokeWidth="3"
       strokeLinecap="round"
       strokeLinejoin="round"

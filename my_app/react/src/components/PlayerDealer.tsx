@@ -1,6 +1,6 @@
 import React, { type JSX } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { states, type GameStateData } from "../types/game-types";
+import { motion } from "motion/react";
+import { type GameStateData } from "../types/game-types";
 import "../styles/playerDealer.css";
 
 interface TableProps {
@@ -11,7 +11,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
   if (!gameState || !gameState.player || !gameState.banker) {
     return null;
   }
-  const { player, banker, currentGameState } = gameState;
+  const { player, banker } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
     const suit = card[0]; // Az első karakter a szín
@@ -63,14 +63,9 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
     return data.map((card) => String(card).trim());
   };
 
-  const p_state = states[player.hand_state];
-  const d_state = !banker.hand_state ? (
-    <span className="opacity-0"> &nbsp;&nbsp; </span>
-  ) : (
-    states[banker.hand_state]
-  );
 
-  const shouldShowScore = currentGameState !== "SPLIT_FINISH";
+
+  //const shouldShowScore = currentGameState !== "SPLIT_FINISH";
 
   const playerHand = loop(player.hand);
   const dealerHand = loop(banker.hand);
@@ -95,13 +90,13 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
     },
   };
 
-  const fadeProps1 = {
+  /* const fadeProps1 = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     transition: {
       duration: 0.8,
     },
-  };
+  }; */
 
   return (
     <div>
@@ -115,11 +110,11 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
         </motion.div>
         <div className="score-area-wrapper">
           <motion.span
-            key={`d-state-${banker.hand_state}`}
+
             {...fadeProps}
             className="score-mood merriweather5grey2 animate-fade"
           >
-            {d_state}
+            {}
           </motion.span>
         </div>
         <div className="band-area-wrapper">
@@ -139,28 +134,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
           <span className="label-text1">{player.sum}</span>
         </div>
         <div className="score-area-wrapper">
-          <AnimatePresence mode="wait">
-            {" "}
-            {/* Ajánlott a sima váltáshoz */}
-            {shouldShowScore ? (
-              <motion.span
-                key={`p-state-${p_state}`}
-                {...fadeProps1}
-                className="score-mood merriweather5grey"
-              >
-                {p_state}
-              </motion.span>
-            ) : (
-              /* Ez a láthatatlan span megtartja a helyet */
-              <motion.span
-                key="empty-state"
-                initial={{ opacity: 0 }}
-                className="score-mood"
-              >
-                {"\u00A0"}
-              </motion.span>
-            )}
-          </AnimatePresence>
+
         </div>
         <div className="hand hand-area-wrapper">{formattedPlayerHand}</div>
       </div>

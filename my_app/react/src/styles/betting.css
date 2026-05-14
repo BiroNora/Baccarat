@@ -21,7 +21,13 @@
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
-  background-color: #9f2438; /* gray-900 */
+  background: radial-gradient(
+    circle,
+    #f91e43 0%,    /* Középen az eredeti világosabb szín */
+    #e01f3f 40%,   /* Kicsit sötétebb átmenet */
+    #a31e34 100%   /* A legszélén mély sötétbordó */
+  );
+  /*background-color: #a31e34;*/
   border-radius: 0.75rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   border: 1px solid #ca8a04; /* yellow-600 */

@@ -17,6 +17,7 @@ import RecoveryDec from "./components/RecoveryDec";
 import UniqueBetBank from "./components/UniqueBetBank";
 import CutSlider from "./components/CutSlider";
 import { Shifting } from "./components/Shifting";
+import BurningCards from "./components/BurningCards";
 
 function App() {
   const {
@@ -100,6 +101,15 @@ function App() {
                 <div>
                   <PageWrapper>
                     <Shifting onAnimationEnd={handleShiftingFirstPhaseEnd}/>
+                  </PageWrapper>
+                </div>
+              );
+            case "BURNING_CARDS":
+              return (
+                <div>
+                  <PageWrapper>
+                    <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                    <BurningCards gameState={gameState} />
                   </PageWrapper>
                 </div>
               );

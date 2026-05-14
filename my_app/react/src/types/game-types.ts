@@ -4,6 +4,7 @@ export type GameState =
   | "SHUFFLING"
   | "CUTSLIDER"
   | "SHIFTING_THE_STACKS"
+  | "BURNING_CARDS"
   | "BETTING"
   | "INIT_GAME"
   | "MAIN_TURN"
@@ -26,6 +27,7 @@ export interface GameStateData {
   target_phase: GameState | null;
   pre_phase: GameState | null;
   bet_type: number;
+  first_card: string | null;
 }
 
 export interface PlayerData {

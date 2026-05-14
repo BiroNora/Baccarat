@@ -57,15 +57,15 @@ export async function getShuffling() {
   return data;
 }
 
-export async function setShoeCut(amount: number) {
-  const data = await callApiEndpoint("/api/shoe_cut", "POST", { cut: amount });
+export async function registerBetType(betType: number) {
+  console.log("API MEGHÍVVA! betType: ", betType)
+  const data = await callApiEndpoint("/api/reg_bet_type", "POST", { type: betType });
 
   return data;
 }
 
-export async function registerBetType(betType: number) {
-  console.log("API MEGHÍVVA! betType: ", betType)
-  const data = await callApiEndpoint("/api/reg_bet_type", "POST", { type: betType });
+export async function setShoeCut(amount: number) {
+  const data = await callApiEndpoint("/api/shoe_cut", "POST", { cut: amount });
 
   return data;
 }

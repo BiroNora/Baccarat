@@ -10,8 +10,6 @@ interface CutSliderProps {
 const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm }) => {
   const [cutValue, setCutValue] = useState(Math.floor(initDeckLen! / 2));
 
-  //const percentage = (cutValue / initDeckLen!) * 100;
-
   return (
     <div className="cut-container">
       <div className="cut-title">C U T the S H O E</div>

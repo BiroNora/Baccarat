@@ -35,6 +35,7 @@ export const initialGameDataState: GameDataState = {
     target_phase: "LOADING",
     pre_phase: "BETTING",
     bet_type: 0,
+    first_card: null,
   } as GameStateData,
   preRewardBet: null,
   preRewardTokens: null,

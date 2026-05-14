@@ -44,6 +44,7 @@ class Game:
         self.is_session_init = False
         self.shoe_cut_limit = 0
         self.bet_type = BetType.NONE
+        self.first_card = None
 
     def get_cut_card_position(self):
         total_cards = Game.TOTAL_INITIAL_CARDS
@@ -67,9 +68,10 @@ class Game:
 
             self.shoe_cut_limit = self.deck_penetration()
             print("67 shoe_cut_limit: ", self.shoe_cut_limit)
+            self.first_card = self.burn_cards()
 
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
-            self.pre_phase = PhaseState.INIT_GAME
+            self.pre_phase = PhaseState.BURNING_CARDS
 
         return self.deck
 
@@ -78,6 +80,14 @@ class Game:
         upper_limit = int(Game.TOTAL_INITIAL_CARDS * 0.25)
 
         return random.randint(lower_limit, upper_limit)
+
+    def burn_cards(self):
+        self.first_card = self.deck.pop(0)
+        rank = self.first_card[-1]
+        burn_count = 10 if rank in "KQJ0" else (1 if rank == "A" else int(rank))
+        self.deck = self.deck[burn_count:]
+
+        return self.first_card
 
     def initialize_new_round(self):
         self.clear_up()
