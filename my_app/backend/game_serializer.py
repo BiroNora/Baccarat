@@ -90,6 +90,7 @@ class GameSerializer:
             "first_card": game.first_card,
             "target_phase": game.get_target_phase().value,
             "pre_phase": game.get_pre_phase().value,
+            "final_phase": game.get_final_phase().value,
         }
 
     @staticmethod

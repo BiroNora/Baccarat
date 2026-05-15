@@ -76,11 +76,6 @@ export async function startGame() {
   return data;
 }
 
-
-
-
-
-
 export async function handleStandAndRewards() {
   const data = await callApiEndpoint("/api/stand_and_rewards", "POST");
 

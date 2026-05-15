@@ -66,5 +66,5 @@
   border-style: inset !important; /* "Belső" keret, amitől benyomottnak tűnik */
   background-color: #a00d0d !important;
   outline: 1px solid #2a2720 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
-  color: white !important;
+  color: #feedc9 !important;
 }

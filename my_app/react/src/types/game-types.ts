@@ -26,6 +26,7 @@ export interface GameStateData {
   bet_list: number[];
   target_phase: GameState | null;
   pre_phase: GameState | null;
+  final_phase: GameState | null;
   bet_type: number;
   first_card: string | null;
 }
@@ -101,7 +102,9 @@ export const states = [
 
 export const BetTypes = {
   NONE: 0,
-  BANKER: 1,
-  PLAYER: 2,
+  PLAYER: 1,
+  BANKER: 2,
   TIE: 3,
+  PLAYER_PAIR: 4,
+  BANKER_PAIR: 5,
 };

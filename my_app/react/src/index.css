@@ -151,7 +151,7 @@ button {
 button:not(:disabled):hover,
 button:not(:disabled):focus {
   background-color: #a00d0d !important;
-  color: white;
+  color: #f5e2b7;
   border: 1px solid rgb(88, 85, 59) ;
   outline: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);

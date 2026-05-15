@@ -455,24 +455,31 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (
       state.gameState.currentGameState !== "BURNING_CARDS" ||
       isProcessingRef.current
-    ) {
+    )
       return;
-    }
 
     isProcessingRef.current = true;
-    console.log("--- BURNING_CARDS BLOKK INDUL ---");
+    console.log("--- BURNING_CARDS SZALAD ---");
 
-    /* const timer = setTimeout(() => {
-      dispatch({ type: "SET_UI_PHASE", payload: "INIT_GAME" });
+    const target = state.gameState.final_phase as GameState;
+    const data = state.gameState;
+
+    const timer = setTimeout(() => {
+      console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
+      transitionToState(target, data);
 
       isProcessingRef.current = false;
     }, 4000);
- */
+
     return () => {
       clearTimeout(timer);
-      isProcessingRef.current = false;
+      if (state.gameState.currentGameState !== "BURNING_CARDS") {
+        isProcessingRef.current = false;
+      }
     };
-  }, [dispatch, state.gameState.currentGameState]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.gameState.currentGameState]);
 
   // --- MAIN_STAND ---
   useEffect(() => {

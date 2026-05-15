@@ -1,8 +1,6 @@
-import copy
 import math
 import random
 
-from collections import Counter
 from typing import Any, Dict
 
 from my_app.backend.bet_type import BetType
@@ -15,11 +13,6 @@ class Game:
     NUM_DECKS = 8
     CARDS_IN_DECK = 52
     TOTAL_INITIAL_CARDS = NUM_DECKS * CARDS_IN_DECK
-    IMMEDIATE_STOP = {
-        WinnerState.NATURAL_DEALER_WON,
-        WinnerState.NATURAL_PLAYER_WON,
-        WinnerState.NATURAL_PUSH,
-    }
 
     def __init__(self):
         self.player: Dict[str, Any] = {
@@ -37,10 +30,18 @@ class Game:
         self.deck = []
         self.deck_len_init = Game.TOTAL_INITIAL_CARDS
         self.bet: int = 0
-        self.bet_list = []
+        self.bets = {
+            BetType.PLAYER: 0,
+            BetType.BANKER: 0,
+            BetType.TIE: 0,
+            BetType.PLAYER_PAIR: 0,
+            BetType.BANKER_PAIR: 0,
+        }
+        self.bet_list = [[], [], [], [], []]
         self.is_round_active = False
-        self.target_phase = PhaseState.LOADING
         self.pre_phase = PhaseState.NONE
+        self.target_phase = PhaseState.LOADING
+        self.final_phase = PhaseState.NONE
         self.is_session_init = False
         self.shoe_cut_limit = 0
         self.bet_type = BetType.NONE
@@ -48,9 +49,8 @@ class Game:
 
     def get_cut_card_position(self):
         total_cards = Game.TOTAL_INITIAL_CARDS
-        # A vágókártyát a végétől számítva 60 és 90 lap közé tesszük
-        # Ez kb. a pakli 78% - 85% közötti része
-        cut_offset = random.randint(60, 90)
+
+        cut_offset = random.randint(60, 90)  # A pakli 78% - 85% közötti része
         return total_cards - cut_offset
 
     def create_deck(self):
@@ -67,11 +67,11 @@ class Game:
             self.deck = self.deck[cut_index:] + self.deck[:cut_index]
 
             self.shoe_cut_limit = self.deck_penetration()
-            print("67 shoe_cut_limit: ", self.shoe_cut_limit)
             self.first_card = self.burn_cards()
 
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
             self.pre_phase = PhaseState.BURNING_CARDS
+            self.final_phase = PhaseState.INIT_GAME
 
         return self.deck
 
@@ -92,142 +92,116 @@ class Game:
     def initialize_new_round(self):
         self.clear_up()
 
-        card1 = self.deck.pop(0)
-        card2 = self.deck.pop(0)
-        card3 = self.deck.pop(0)
-        card4 = self.deck.pop(0)
+        card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
+        p_hand, b_hand = [card1, card3], [card2, card4]
 
-        player_hand = [card1, card3]
-        banker_hand = [card2, card4]
+        self.player = {"hand": p_hand, "sum": self.sum(p_hand)}
+        self.banker = {"hand": b_hand, "sum": self.sum(b_hand)}
 
-        player_sum = self.sum(player_hand, True)
-        banker_sum = self.sum(banker_hand, False)
+        if self.isNatural(self.player["sum"], self.banker["sum"]):
+            self.is_natural = True
+            self.target_phase = PhaseState.MAIN_STAND_REWARDS_TRANSIT
+        else:
+            self.check_third_card_rules()
 
-        self.is_round_active = True
-        self.is_session_init = False
-
-        self.target_phase = PhaseState.INIT_GAME
-
-        self.player = {
-            "hand": player_hand,
-            "sum": player_sum,
-        }
-        self.banker: Dict[str, Any] = {
-            "hand": banker_hand,
-            "sum": banker_sum,
-        }
-
-    def sum(self, hand, is_player):
+    def sum(self, hand):
         ranks = self.hand_to_ranks(hand)
-        counts = Counter(ranks)
-        nums_of_ace = counts["A"]
-        res = 0
-        BLACKJACK_LIMIT = 21
-        for rank in ranks:
-            if rank in ["K", "Q", "J", "0"]:
-                res += 10
-            elif rank.isdigit():
-                res += int(rank)
-        if nums_of_ace > 0:
-            for _ in range(nums_of_ace):
-                if res + 11 <= BLACKJACK_LIMIT:
-                    res += 11
-                else:
-                    res += 1
-        if is_player:
-            self.set_player_sum(res)
+        total = 0
+
+        values = {
+            "A": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+            "7": 7,
+            "8": 8,
+            "9": 9,
+            "0": 0,
+            "J": 0,
+            "Q": 0,
+            "K": 0,
+        }
+
+        for r in ranks:
+            total += values.get(r, 0)
+
+        return total % 10
+
+    def isNatural(self, player_sum, banker_sum):
+        return player_sum >= 8 or banker_sum >= 8
+
+    def determine_winner(self):
+        p_s, b_s = self.player["sum"], self.banker["sum"]
+
+        if p_s > b_s:
+            self.winner = BetType.PLAYER.value
+        elif b_s > p_s:
+            self.winner = BetType.BANKER.value
         else:
-            self.player
-            # self.set_dealer_sum(res)
+            self.winner = BetType.TIE.value
 
-        return res
+        self.is_round_active = False
 
-    def winner_state(self):
-        player = self.player["sum"]
-        dealer = self.banker["sum"]
+    def rewards(self):
+        if self.winner == BetType.NONE.value:
+            return 0
 
-        if player > 21:
-            self.winner = WinnerState.PLAYER_LOST
+        bet_amount = self.bet.get("amount", 0)
+        chosen_side = self.bet_type
 
-        elif dealer > 21:
-            self.winner = WinnerState.PLAYER_WON
+        if chosen_side == self.winner:
+            if chosen_side == BetType.PLAYER.value:
+                # Player kifizetés: 1:1 (pl. 100 tét -> 200 jön vissza)
+                return bet_amount * 2
 
-        elif player == dealer:
-            self.winner = WinnerState.PUSH
+            elif chosen_side == BetType.BANKER.value:
+                # Banker kifizetés: 1:1 mínusz 5% jutalék (pl. 100 tét -> 195 jön vissza)
+                return int(bet_amount + (bet_amount * 0.95))
 
-        elif player > dealer:
-            self.winner = WinnerState.PLAYER_WON
+            elif chosen_side == BetType.TIE.value:
+                # Tie kifizetés: 8:1 (pl. 100 tét -> 900 jön vissza)
+                return bet_amount * 9
 
-        else:
-            self.winner = WinnerState.DEALER_WON
+        # PUSH (Döntetlen lett, de P-re vagy B-re fogadott)
+        elif self.winner == BetType.TIE.value and chosen_side in [
+            BetType.PLAYER.value,
+            BetType.BANKER.value,
+        ]:
+            return bet_amount
 
-        return self.winner
+        return 0
 
-    def hit(self, is_double, has_split):
-        if not self.is_round_active:
-            return
-        new_card = self.deck.pop(0)
-        self.set_player_hand(new_card)
-        self.player["has_hit"] = self.player.get("has_hit", 0) + 1
+    def rewards(self):
+        if self.winner == BetType.NONE.value:
+            return 0
 
-        curr_sum = self.sum(self.player["hand"], True)
-        self.player["sum"] = curr_sum
+        bet_amount = self.bet["amount"]
+        bet_type = self.bet["type"]
 
-        if not has_split:
-            self.target_phase = (
-                PhaseState.MAIN_STAND_REWARDS_TRANSIT
-                if curr_sum >= 21 or is_double
-                else PhaseState.MAIN_TURN
-            )
-        else:
-            if is_double:
-                self.target_phase = PhaseState.SPLIT_STAND_DOUBLE
-            elif curr_sum >= 21:
-                self.target_phase = (
-                    PhaseState.SPLIT_STAND_DOUBLE
-                    if self.player.get("has_hit") == 1
-                    else PhaseState.SPLIT_STAND
-                )
-            else:
-                self.target_phase = PhaseState.SPLIT_TURN
+        # 1. Ha a játékos eltalálta a győztest
+        if bet_type == self.winner:
+            if bet_type == BetType.PLAYER.value:
+                return bet_amount * 2  # 1:1 kifizetés (visszakapja a tétet + nyeremény)
 
-    def stand(self, has_split):
-        count = self.sum(self.banker["hand"], False)
-        if self.sum(self.player["hand"], True) <= 21:
-            while count < 17:
-                card = self.deck.pop(0)
-                self.banker["hand"].append(card)
-                count = self.sum(self.banker["hand"], False)
-                self.banker["sum"] = count
+            elif bet_type == BetType.BANKER.value:
+                # Banker nyeremény: 1:1, de 5% jutalék (0.95-ös szorzó)
+                # Tehát visszakapja a tétet + (tét * 0.95)
+                return int(bet_amount + (bet_amount * 0.95))
 
-        self.banker["sum"] = count
-        self.winner = Game.NONE
-        self.winner = self.winner_state()
+            elif bet_type == BetType.TIE.value:
+                return (
+                    bet_amount * 9
+                )  # 8:1 kifizetés (visszakapja a tétet + 8x nyeremény)
 
-        self.target_phase = (
-            PhaseState.MAIN_STAND if not has_split else PhaseState.SPLIT_FINISH_OUTCOME
-        )
+        # 2. Ha Döntetlen (TIE) lett, de a játékos P-re vagy B-re fogadott
+        # A Baccarat szabályai szerint ilyenkor a tét VISSZAJÁR (Push)
+        elif self.winner == BetType.TIE.value:
+            return bet_amount
 
-    def rewards(self) -> int:
-        bet = self.bet
-        natural_21_scenario = self.banker["natural_21"]
-        reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
-
-        if self.natural_21 == 1:
-            reward_amount = math.floor(bet * 2.5)  # Eredeti tét + 1.5x nyeremény
-        elif self.winner == 6 and natural_21_scenario != 3:
-            reward_amount = bet * 2  # Eredeti tét + 1x nyeremény
-        elif (
-            self.winner == 4 and natural_21_scenario != 3
-        ) or natural_21_scenario == 2:
-            reward_amount = bet
-
-        self.set_bet_to_null()
-        self.set_bet_list_to_null()
-        self.bet_type = BetType.NONE
-        self.is_round_active = bool(self.players)
-
-        return reward_amount
+        # 3. Minden egyéb esetben (vesztett)
+        return 0
 
     def retake_bet_from_bet_list(self):
         if len(self.bet_list) != 0:
@@ -246,6 +220,7 @@ class Game:
             "hand": [],
             "sum": 0,
         }
+        self.is_natural = False
         self.winner = WinnerState.NONE
         self.is_round_active = False
         self.target_phase = PhaseState.BETTING
@@ -310,6 +285,9 @@ class Game:
     def get_pre_phase(self):
         return self.pre_phase
 
+    def get_final_phase(self):
+        return self.final_phase
+
     def serialize(self):
         return {
             "deck": self.deck,
@@ -322,6 +300,7 @@ class Game:
             "is_round_active": self.is_round_active,
             "target_phase": self.get_target_phase().value,
             "pre_phase": self.get_pre_phase().value,
+            "final_phase": self.get_final_phase().value,
             "is_session_init": self.is_session_init,
             "shoe_cut_limit": self.shoe_cut_limit,
             "bet_type": self.bet_type,
@@ -339,16 +318,15 @@ class Game:
         game.bet_list = data["bet_list"]
         game.is_round_active = data.get("is_round_active", False)
         raw_pre = data.get("pre_phase")
+        game.pre_phase = PhaseState(raw_pre) if raw_pre else game.get_pre_phase()
         raw_target = data.get("target_phase")
-        if raw_target:
-            game.target_phase = PhaseState(raw_target)
-        if raw_pre:
-            game.pre_phase = PhaseState(raw_pre)
-        # Ha valamiért nem volt a mentésben, a get_ függvények adják meg az alapot
-        if not raw_target:
-            game.target_phase = game.get_target_phase()
-        if not raw_pre:
-            game.pre_phase = game.get_pre_phase()
+        game.target_phase = (
+            PhaseState(raw_target) if raw_target else game.get_target_phase()
+        )
+        raw_final = data.get("final_phase")
+        game.final_phase = (
+            PhaseState(raw_final) if raw_final else game.get_final_phase()
+        )
         game.is_session_init = data.get("is_session_init", False)
         game.shoe_cut_limit = data.get("shoe_cut_limit", 0)
         game.bet_type = data.get("bet_type", 0)

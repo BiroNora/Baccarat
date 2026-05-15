@@ -486,6 +486,8 @@ def shoe_cut(user, game):
 @with_game_state
 def start_game(user, game):
     game.initialize_new_round()
+    token_change = game.rewards()
+    user.tokens += token_change
 
     return (
         jsonify(
