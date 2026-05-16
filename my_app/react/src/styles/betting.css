@@ -68,3 +68,68 @@
   outline: 1px solid #2a2720 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
   color: #feedc9 !important;
 }
+
+/* A fő tároló, ami összefogja az egészet */
+.bet-type-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Sorok közötti távolság */
+  width: 100%;
+  max-width: 400px; /* Vagy amekkora a panelod */
+  margin: 0 auto;
+  padding-bottom: 1rem;
+}
+
+/* Egy sor (pl. DRAGON gomb + a 0 gomb) */
+.bet-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Ez nyomja szét a két oldalra */
+  width: 100%;
+  position: relative;
+}
+
+/* A bal oldali szöveges gombok */
+.target-selector-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 7.0rem;
+}
+
+/* A jobb oldali fix oszlop a számoknak */
+.mini-bet-display {
+  min-width: 7.0rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-shrink: 0;
+}
+
+.bank-display {
+  display: flex;          /* Flexbox-szal egy sorba rendezi a gyerekeket */
+  align-items: center;    /* Függőlegesen középre igazítja a szöveget és a számot */
+  justify-content: center; /* Ha középre akarod az egész sort az oldalon */
+  white-space: nowrap;    /* Megakadályozza, hogy véletlenül törjön a sor */
+}
+
+.bank-value-wrapper {
+  display: inline-flex;   /* Csak akkora helyet foglal, amekkora a szám */
+  position: relative;     /* Segít az AnimatePresence-nek az animáció alatt */
+  min-width: 50px;        /* Opcionális: fix helyet hagy a számnak, hogy ne ugráljon a szöveg */
+}
+
+.chips-section {
+  padding-top: 0.5rem;
+}
+
+.chips-wrapper {
+  display: flex;         /* Egy sorba rendezi a gombokat */
+  flex-wrap: wrap;       /* Ha elfogy a hely, új sorba teszi őket */
+  justify-content: center; /* Vízszintesen középre igazítja a csoportot */
+  align-items: center;   /* Függőlegesen is középre igazít */
+  gap: 12px;             /* A kért 12 pixeles távolság minden gomb között */
+  width: 100%;
+  padding: 2px;         /* Egy kis belső margó, hogy ne érjenek a szélhez */
+}

@@ -347,15 +347,15 @@ def initialize_session():
 def bet(user, game):
     data = request.get_json() or {}
     bet_amount = data.get("bet", 0)
-    print("BET: ", bet_amount)
+    bet_type_name = data.get("type")
+
     if not isinstance(bet_amount, (int, float)) or bet_amount < MINIMUM_BET:
         raise ValueError(f"Bet must be at least {MINIMUM_BET}.")
 
     if user.tokens < bet_amount:
         raise ValueError("Insufficient tokens.")
 
-    game.set_bet(bet_amount)
-    game.set_bet_list(bet_amount)
+    game.set_bet(bet_amount, bet_type_name)
     user.tokens -= bet_amount
 
     return (
@@ -377,11 +377,13 @@ def bet(user, game):
 @login_required
 @with_game_state
 def retake_bet(user, game):
-    current_bet_list = game.get_bet_list()
-    if not current_bet_list:
-        raise ValueError("No bet to retake.")
+    data = request.get_json() or {}
+    bet_type_name = data.get("type")
 
-    amount_to_return = game.retake_bet_from_bet_list()
+    if bet_type_name is None or not game.bet_list[bet_type_name]:
+        raise ValueError("No bet to retake on this field.")
+
+    amount_to_return = game.retake_bet_from_bet_list(bet_type_name)
     user.tokens += amount_to_return
 
     return (
@@ -398,41 +400,12 @@ def retake_bet(user, game):
 
 
 # 3
-@app.route("/api/reg_bet_type", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def reg_bet_type(user, game):
-    data = request.get_json() or {}
-    bet_type = data.get("type", 0)
-    print("BET TYPE: ", bet_type)
-    print("BT: ", BetType.NONE)
-    if not isinstance(bet_type, int) or bet_type == BetType.NONE:
-        raise ValueError(f"Bet must be added.")
-
-    game.set_bet_type(bet_type)
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "BET_TYPE_SUCCESSFULLY_PLACED",
-            }
-        ),
-        200,
-    )
-
-
-# 3
 @app.route("/api/create_deck", methods=["POST"])
 @api_error_handler
 @login_required
 @with_game_state
 def create_deck(user, game):
-    deck = game.create_deck()
-    print("deck: ", deck)
+    game.create_deck()
 
     return (
         jsonify(
@@ -455,7 +428,7 @@ def create_deck(user, game):
 def shoe_cut(user, game):
     data = request.get_json() or {}
     cut_index = data.get("cut")
-    print("CUT: ", cut_index)
+    
     initial_cards = Game.TOTAL_INITIAL_CARDS
 
     if not isinstance(cut_index, int):

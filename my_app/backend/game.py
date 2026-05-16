@@ -7,6 +7,8 @@ from my_app.backend.bet_type import BetType
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
+VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON"]
+
 
 class Game:
     NONE = 0
@@ -30,21 +32,13 @@ class Game:
         self.deck = []
         self.deck_len_init = Game.TOTAL_INITIAL_CARDS
         self.bet: int = 0
-        self.bets = {
-            BetType.PLAYER: 0,
-            BetType.BANKER: 0,
-            BetType.TIE: 0,
-            BetType.PLAYER_PAIR: 0,
-            BetType.BANKER_PAIR: 0,
-        }
-        self.bet_list = [[], [], [], [], []]
+        self.set_bets_to_null()
         self.is_round_active = False
         self.pre_phase = PhaseState.NONE
         self.target_phase = PhaseState.LOADING
         self.final_phase = PhaseState.NONE
         self.is_session_init = False
         self.shoe_cut_limit = 0
-        self.bet_type = BetType.NONE
         self.first_card = None
 
     def get_cut_card_position(self):
@@ -203,11 +197,13 @@ class Game:
         # 3. Minden egyéb esetben (vesztett)
         return 0
 
-    def retake_bet_from_bet_list(self):
-        if len(self.bet_list) != 0:
-            bet = self.bet_list.pop()
-            self.set_bet(-bet)
-            return bet
+    def retake_bet_from_bet_list(self, bet_type_name):
+        if bet_type_name in self.bet_list and self.bet_list[bet_type_name]:
+            removed_chip = self.bet_list[bet_type_name].pop()
+            self.bets[bet_type_name] -= removed_chip
+            self.bets["TOTAL"] -= removed_chip
+
+            return removed_chip
         else:
             return 0
 
@@ -245,23 +241,18 @@ class Game:
     def set_player_sum(self, sum):
         self.player["sum"] = sum
 
-    def set_bet(self, amount):
-        self.bet += amount
+    def set_bet(self, amount, bet_type_name):
+        if bet_type_name in VALID_BET_TYPES:
+            self.bets[bet_type_name] += amount
+            self.bets["TOTAL"] += amount
+            self.bet_list[bet_type_name].append(amount)
+        else:
+            print(f"Hiba: {bet_type_name} nem érvényes fogadás!")
 
-    def set_bet_to_null(self):
-        self.bet = 0
-
-    def get_bet(self):
-        return self.bet
-
-    def get_bet_list(self):
-        return self.bet_list
-
-    def set_bet_list(self, bet):
-        self.bet_list.append(bet)
-
-    def set_bet_list_to_null(self):
-        self.bet_list = []
+    def set_bets_to_null(self):
+        self.bets = {key: 0 for key in VALID_BET_TYPES}
+        self.bet_list = {key: [] for key in VALID_BET_TYPES}
+        self.bets["TOTAL"] = 0
 
     def set_bet_type(self, type_value):
         self.bet_type = BetType(type_value)
@@ -295,7 +286,7 @@ class Game:
             "banker": self.banker,
             "winner": self.winner,
             "deck_len": self.get_deck_len(),
-            "bet": self.bet,
+            "bets": self.bets,
             "bet_list": self.bet_list,
             "is_round_active": self.is_round_active,
             "target_phase": self.get_target_phase().value,
@@ -303,7 +294,6 @@ class Game:
             "final_phase": self.get_final_phase().value,
             "is_session_init": self.is_session_init,
             "shoe_cut_limit": self.shoe_cut_limit,
-            "bet_type": self.bet_type,
         }
 
     @classmethod
@@ -314,8 +304,11 @@ class Game:
         game.banker = data["banker"]
         game.winner = data["winner"]
         game.deck_len = data["deck_len"]
-        game.bet = data["bet"]
-        game.bet_list = data["bet_list"]
+        game.set_bets_to_null()
+        raw_bets = data.get("bets", {})
+        game.bets.update(raw_bets)
+        raw_bet_list = data.get("bet_list", {})
+        game.bet_list.update(raw_bet_list)
         game.is_round_active = data.get("is_round_active", False)
         raw_pre = data.get("pre_phase")
         game.pre_phase = PhaseState(raw_pre) if raw_pre else game.get_pre_phase()
@@ -328,7 +321,9 @@ class Game:
             PhaseState(raw_final) if raw_final else game.get_final_phase()
         )
         game.is_session_init = data.get("is_session_init", False)
-        game.shoe_cut_limit = data.get("shoe_cut_limit", 0)
-        game.bet_type = data.get("bet_type", 0)
+        try:
+            game.shoe_cut_limit = int(data.get("shoe_cut_limit", 0))
+        except (TypeError, ValueError):
+            game.shoe_cut_limit = 0
 
         return game

@@ -10,7 +10,6 @@ import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
-import Betting from "./components/Betting";
 import { AnimatePresence, motion } from "motion/react";
 import { Reloading } from "./components/Reloading";
 import RecoveryDec from "./components/RecoveryDec";
@@ -18,6 +17,7 @@ import UniqueBetBank from "./components/UniqueBetBank";
 import CutSlider from "./components/CutSlider";
 import { Shifting } from "./components/Shifting";
 import BurningCards from "./components/BurningCards";
+import Betting from "./components/Betting";
 
 function App() {
   const {

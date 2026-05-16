@@ -2,10 +2,10 @@ from enum import IntEnum
 
 
 class BetType(IntEnum):
-  NONE = 0
+  NONE = -1
 
-  PLAYER = 1
-  BANKER = 2
-  TIE = 3
-  PLAYER_PAIR = 4
-  BANKER_PAIR = 5
+  PLAYER = 0
+  BANKER = 1
+  TIE = 2
+  PANDA = 3
+  DRAGON = 4

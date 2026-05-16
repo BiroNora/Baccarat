@@ -46,8 +46,8 @@
 @media (min-width: 300px) {
   #root {
     padding-top: 2rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
@@ -201,7 +201,7 @@ button:disabled {
 
 /* Általános stílus a Start gomb engedélyezett állapotához, ha a hover és focus nem kell, hogy eltérjen: */
 #start-button {
-  margin-top: 1rem;
+  margin: 1rem;
   padding: 0.2em 0.6em;
   font-size: clamp(1.2rem, 1.3vw, 1.4rem);
 }

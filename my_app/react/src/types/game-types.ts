@@ -22,12 +22,11 @@ export interface GameStateData {
   winner: number;
   deck_len: number;
   tokens: number;
-  bet: number;
-  bet_list: number[];
+  bets: BetMap;
+  bet_list: BetListMap;
   target_phase: GameState | null;
   pre_phase: GameState | null;
   final_phase: GameState | null;
-  bet_type: number;
   first_card: string | null;
 }
 
@@ -73,12 +72,12 @@ export type GameStateMachineHookResult = {
   ) => void;
   handleOnContinue: () => void;
   handleOnStartNew: () => void;
-  handlePlaceBet: (amount: number) => Promise<void>;
+  handlePlaceBet: (amount: number, selectedBetType: BetKey) => Promise<void>;
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
-  handleRetakeBet: () => void;
+  handleRetakeBet: (selectedBetType: BetKey) => void;
   handleShoeCut: (amount: number) => Promise<void>;
   handleShiftingFirstPhaseEnd: () => void;
-  handleStartGame: (type: number) => Promise<void>;
+  handleStartGame: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;
   initDeckLen: number | null;
@@ -101,10 +100,31 @@ export const states = [
 ];
 
 export const BetTypes = {
-  NONE: 0,
-  PLAYER: 1,
-  BANKER: 2,
-  TIE: 3,
-  PLAYER_PAIR: 4,
-  BANKER_PAIR: 5,
+  NONE: -1,
+  PLAYER: 0,
+  BANKER: 1,
+  TIE: 2,
+  PANDA: 3,
+  DRAGON: 4,
 };
+
+export type BetKey = "PLAYER" | "BANKER" | "TIE" | "PANDA" | "DRAGON" | "TOTAL";
+
+export interface BetMap {
+  PLAYER: number;
+  BANKER: number;
+  TIE: number;
+  PANDA: number;
+  DRAGON: number;
+  TOTAL: number;
+  [key: string]: number | undefined;
+}
+
+export interface BetListMap {
+  PLAYER: number[];
+  BANKER: number[];
+  TIE: number[];
+  PANDA: number[];
+  DRAGON: number[];
+  [key: string]: number[] | undefined; // Index signature a biztonság kedvéért
+}

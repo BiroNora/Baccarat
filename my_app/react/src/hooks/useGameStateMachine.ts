@@ -2,12 +2,11 @@ import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import {
   initializeSessionAPI,
   setBet,
-  takeBackDeal,
+  retakeBet,
   clearGameState,
   recoverGameState,
   getShuffling,
   setShoeCut,
-  registerBetType,
   startGame,
   handleStandAndRewards,
   setRestart,
@@ -15,6 +14,7 @@ import {
   type HttpError,
 } from "../api/api-calls";
 import {
+  type BetKey,
   type GameState,
   type GameStateData,
   type GameStateMachineHookResult,
@@ -63,7 +63,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       dispatch({
         type: "SET_BET_SNAPSHOTS",
         payload: {
-          bet: currentData.bet,
+          bets: {
+            TOTAL: currentData.bets.TOTAL || 0,
+          },
           tokens: currentData.tokens,
         },
       });
@@ -156,12 +158,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [executeAsyncAction, handleApiAction, transitionToState]);
 
   const handlePlaceBet = useCallback(
-    async (amount: number) => {
+    async (amount: number, selectedBetType: BetKey) => {
       const currentTokens = state.gameState.tokens;
       if (currentTokens < amount || amount <= 0) return;
 
       executeAsyncAction(async () => {
-        const data = await handleApiAction(() => setBet(amount));
+        const data = await handleApiAction(() =>
+          setBet(amount, selectedBetType),
+        );
 
         const response = extractGameStateData(data);
         if (!response) return;
@@ -177,54 +181,48 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     ],
   );
 
-  const handleRetakeBet = useCallback(() => {
-    // Guard clause: csak akkor indítunk, ha van mit visszavenni
-    const currentBetList = state.gameState.bet_list;
-    if (!currentBetList || currentBetList.length === 0) return;
+  const handleRetakeBet = useCallback(
+    async (selectedBetType: BetKey) => {
+      const currentBetList = state.gameState.bet_list;
+      if (
+        !currentBetList ||
+        !currentBetList[selectedBetType] ||
+        currentBetList[selectedBetType].length === 0
+      )
+        return;
 
-    executeAsyncAction(async () => {
-      const data = await handleApiAction(takeBackDeal);
+      executeAsyncAction(async () => {
+        const data = await handleApiAction(() => retakeBet(selectedBetType));
 
-      const response = extractGameStateData(data);
-      if (!response) return;
-
-      transitionToState(response?.target_phase as GameState, response);
-    });
-  }, [
-    state.gameState.bet_list,
-    executeAsyncAction,
-    handleApiAction,
-    transitionToState,
-  ]);
-
-  const handleStartGame = useCallback(
-    async (type: number) => {
-      if (type === 0) return;
-      console.log("START GAME KATTINTVA - Típus:", type);
-      setIsWFSR(true);
-
-      try {
-        const data = await handleApiAction(() => registerBetType(type));
         const response = extractGameStateData(data);
+        if (!response) return;
 
-        if (response) {
-          dispatch({ type: "SET_SELECTED_BET_TYPE", payload: type });
-
-          // 3. ÁTMENET: Megyünk a szerver által diktált következő fázisba
-          // (Ez lehet SHUFFLING vagy rögtön az osztás előkészítése)
-          const nextState =
-            response.pre_phase || response.target_phase || "ERROR";
-          transitionToState(nextState, response);
-        }
-      } catch (error) {
-        console.error("Hiba a játék indításakor:", error);
-      } finally {
-        setIsWFSR(false); // Felszabadítjuk a felületet
-      }
+        transitionToState(response?.target_phase as GameState, response);
+      });
     },
-    [handleApiAction, transitionToState], // Itt nem kell a state.gameState-től függeni!
+    [
+      state.gameState.bet_list,
+      executeAsyncAction,
+      handleApiAction,
+      transitionToState,
+    ],
   );
 
+  const handleStartGame = useCallback(async () => {
+    const response = state.gameState;
+
+    if (!response) return;
+
+    setIsWFSR(true);
+
+    // A logika egyszerű: ha a szerver szerint kell valami "elő-fázis" (pl. SHUFFLING),
+    // akkor oda megyünk. Ha nincs ilyen, akkor a végcélhoz (pl. INIT_GAME).
+    const nextState = response.pre_phase || response.target_phase || "ERROR";
+
+    transitionToState(nextState, response);
+
+    setIsWFSR(false);
+  }, [state.gameState, transitionToState]);
   const handleShoeCut = useCallback(
     async (amount: number) => {
       if (amount === 0 || amount === 1 || amount === 416) return;
@@ -257,6 +255,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [state.gameState, transitionToState]);
 
   // --- useEffect blokkok ---
+  // --- SPECIAL FOR SHIFFTING AND SHOE CUT ---
   useEffect(() => {
     if (
       state.gameState.currentGameState !== "SHIFTING_THE_STACKS" ||
@@ -405,6 +404,37 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState,
   ]);
 
+  // --- BURNING_CARDS ---
+  useEffect(() => {
+    if (
+      state.gameState.currentGameState !== "BURNING_CARDS" ||
+      isProcessingRef.current
+    )
+      return;
+
+    isProcessingRef.current = true;
+    console.log("--- BURNING_CARDS SZALAD ---");
+
+    const target = state.gameState.final_phase as GameState;
+    const data = state.gameState;
+
+    const timer = setTimeout(() => {
+      console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
+      transitionToState(target, data);
+
+      isProcessingRef.current = false;
+    }, 4000);
+
+    return () => {
+      clearTimeout(timer);
+      if (state.gameState.currentGameState !== "BURNING_CARDS") {
+        isProcessingRef.current = false;
+      }
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.gameState.currentGameState]);
+
   // --- INIT_GAME ---
   useEffect(() => {
     if (
@@ -450,36 +480,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     resetGameVariables,
     setIsWFSR,
   ]);
-
-  useEffect(() => {
-    if (
-      state.gameState.currentGameState !== "BURNING_CARDS" ||
-      isProcessingRef.current
-    )
-      return;
-
-    isProcessingRef.current = true;
-    console.log("--- BURNING_CARDS SZALAD ---");
-
-    const target = state.gameState.final_phase as GameState;
-    const data = state.gameState;
-
-    const timer = setTimeout(() => {
-      console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
-      transitionToState(target, data);
-
-      isProcessingRef.current = false;
-    }, 4000);
-
-    return () => {
-      clearTimeout(timer);
-      if (state.gameState.currentGameState !== "BURNING_CARDS") {
-        isProcessingRef.current = false;
-      }
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.gameState.currentGameState]);
 
   // --- MAIN_STAND ---
   useEffect(() => {

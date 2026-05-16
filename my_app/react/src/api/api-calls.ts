@@ -1,5 +1,8 @@
-import type { ErrorResponse, SessionInitResponse } from "../types/game-types";
-import { v4 as uuidv4 } from 'uuid';
+import {
+  type ErrorResponse,
+  type SessionInitResponse,
+} from "../types/game-types";
+import { v4 as uuidv4 } from "uuid";
 
 export async function initializeSessionAPI(): Promise<SessionInitResponse> {
   // 1. Megpróbáljuk lekérni a meglévő azonosítót (ha van)
@@ -12,7 +15,7 @@ export async function initializeSessionAPI(): Promise<SessionInitResponse> {
     const data = await callApiEndpoint<SessionInitResponse>(
       "/api/initialize_session",
       "POST",
-      { client_id: clientUuid } // Elküldjük, de a szerver dönt, hogy elfogadja-e
+      { client_id: clientUuid }, // Elküldjük, de a szerver dönt, hogy elfogadja-e
     );
 
     // 3. Ha a szerver új/másik ID-t adott vissza, elmentjük emlékeztetőnek
@@ -39,27 +42,23 @@ export async function recoverGameState() {
   return data;
 }
 
-export async function setBet(betAmount: number) {
-  const data = await callApiEndpoint("/api/bet", "POST", { bet: betAmount });
+export async function setBet(betAmount: number, selectedBetTypeName: string) {
+  const data = await callApiEndpoint("/api/bet", "POST", {
+    bet: betAmount,
+    type: selectedBetTypeName,
+  });
 
   return data;
 }
 
-export async function takeBackDeal() {
-  const data = await callApiEndpoint("/api/retake_bet", "POST");
+export async function retakeBet(selectedBetTypeName: string) {
+  const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetTypeName});
 
   return data;
 }
 
 export async function getShuffling() {
   const data = await callApiEndpoint("/api/create_deck", "POST");
-
-  return data;
-}
-
-export async function registerBetType(betType: number) {
-  console.log("API MEGHÍVVA! betType: ", betType)
-  const data = await callApiEndpoint("/api/reg_bet_type", "POST", { type: betType });
 
   return data;
 }
@@ -81,8 +80,6 @@ export async function handleStandAndRewards() {
 
   return data;
 }
-
-
 
 export async function setRestart() {
   const data = await callApiEndpoint("/api/set_restart", "POST");
@@ -113,13 +110,13 @@ export async function callApiEndpoint<T>(
   endpoint: string,
   method: string = "GET",
   body: ApiRequestBody = null,
-  isRetry: boolean = false
+  isRetry: boolean = false,
 ): Promise<T> {
   try {
     const options: RequestInit = {
       method: method,
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       credentials: "include", // Sütik küldése a sessionhöz
     };
@@ -158,7 +155,9 @@ export async function callApiEndpoint<T>(
       }
 
       // Hiba objektum összeállítása
-      const errorToThrow = new Error(errorData.message || `HTTP hiba: ${status}`) as HttpError;
+      const errorToThrow = new Error(
+        errorData.message || `HTTP hiba: ${status}`,
+      ) as HttpError;
       errorToThrow.response = {
         status: status,
         statusText: response.statusText,
@@ -169,12 +168,13 @@ export async function callApiEndpoint<T>(
 
     if (response.status === 204) return {} as T;
     return (await response.json()) as T;
-
   } catch (error: unknown) {
     // Típusbiztos hibakezelés a catch ágban
     const httpError = error as HttpError;
     const isAuthError = httpError.response?.status === 401;
-    const isSplitError = httpError.response?.status === 400 && httpError.response?.data?.error === "No more split hands.";
+    const isSplitError =
+      httpError.response?.status === 400 &&
+      httpError.response?.data?.error === "No more split hands.";
 
     if (!isAuthError && !isSplitError) {
       console.error("Váratlan hiba:", error);

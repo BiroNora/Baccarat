@@ -9,13 +9,18 @@ export interface GameDataState {
   selectedBetType: number;
 }
 
+export interface BetMap {
+  [key: number]: number; // A BetTypes (0, 1, 2...)
+  TOTAL: number; // Az összesítő mező
+}
+
 // Definiáljuk az akciókat, ha még nincsenek a types-ban
 export type GameAction =
   | { type: "SYNC_SERVER_DATA"; payload: GameStateData }
   | { type: "SET_UI_PHASE"; payload: GameState }
   | { type: "SET_CONFIG"; payload: { totalInitialCards: number } }
   | { type: "SET_DECK_LEN"; payload: number | null }
-  | { type: "SET_BET_SNAPSHOTS"; payload: { bet: number; tokens: number } }
+  | { type: "SET_BET_SNAPSHOTS"; payload: { bets: BetMap; tokens: number } }
   | { type: "SET_SELECTED_BET_TYPE"; payload: number }
   | { type: "RESET_TURN_VARIABLES" };
 
@@ -30,12 +35,24 @@ export const initialGameDataState: GameDataState = {
     winner: 0,
     deck_len: 0,
     tokens: 0,
-    bet: 0,
-    bet_list: [],
+    bets: {
+      PLAYER: 0,
+      BANKER: 0,
+      TIE: 0,
+      PANDA: 0,
+      DRAGON: 0,
+      TOTAL: 0,
+    },
+    bet_list: {
+      PLAYER: [],
+      BANKER: [],
+      TIE: [],
+      PANDA: [],
+      DRAGON: [],
+    },
     target_phase: "LOADING",
     pre_phase: "BETTING",
     final_phase: "BETTING",
-    bet_type: 0,
     first_card: null,
   } as GameStateData,
   preRewardBet: null,
@@ -80,7 +97,7 @@ export function gameReducer(
     case "SET_BET_SNAPSHOTS":
       return {
         ...state,
-        preRewardBet: action.payload.bet,
+        preRewardBet: action.payload.bets.TOTAL,
         preRewardTokens: action.payload.tokens,
       };
     case "SET_SELECTED_BET_TYPE":
@@ -88,7 +105,6 @@ export function gameReducer(
         ...state,
         gameState: {
           ...state.gameState,
-          bet_type: action.payload,
         },
       };
     case "RESET_TURN_VARIABLES":
