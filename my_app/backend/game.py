@@ -167,36 +167,6 @@ class Game:
 
         return 0
 
-    def rewards(self):
-        if self.winner == BetType.NONE.value:
-            return 0
-
-        bet_amount = self.bet["amount"]
-        bet_type = self.bet["type"]
-
-        # 1. Ha a játékos eltalálta a győztest
-        if bet_type == self.winner:
-            if bet_type == BetType.PLAYER.value:
-                return bet_amount * 2  # 1:1 kifizetés (visszakapja a tétet + nyeremény)
-
-            elif bet_type == BetType.BANKER.value:
-                # Banker nyeremény: 1:1, de 5% jutalék (0.95-ös szorzó)
-                # Tehát visszakapja a tétet + (tét * 0.95)
-                return int(bet_amount + (bet_amount * 0.95))
-
-            elif bet_type == BetType.TIE.value:
-                return (
-                    bet_amount * 9
-                )  # 8:1 kifizetés (visszakapja a tétet + 8x nyeremény)
-
-        # 2. Ha Döntetlen (TIE) lett, de a játékos P-re vagy B-re fogadott
-        # A Baccarat szabályai szerint ilyenkor a tét VISSZAJÁR (Push)
-        elif self.winner == BetType.TIE.value:
-            return bet_amount
-
-        # 3. Minden egyéb esetben (vesztett)
-        return 0
-
     def retake_bet_from_bet_list(self, bet_type_name):
         if bet_type_name in self.bet_list and self.bet_list[bet_type_name]:
             removed_chip = self.bet_list[bet_type_name].pop()
@@ -226,9 +196,6 @@ class Game:
 
     def hand_to_ranks(self, hand):
         return "".join(c[-1] for c in hand)
-
-    def load_state_from_data(self, data):
-        self.is_round_active = data.get("is_round_active", False)
 
     def clear_game_state(self):
         self.__init__()

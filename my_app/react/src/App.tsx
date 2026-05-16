@@ -12,7 +12,6 @@ import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import { AnimatePresence, motion } from "motion/react";
 import { Reloading } from "./components/Reloading";
-import RecoveryDec from "./components/RecoveryDec";
 import UniqueBetBank from "./components/UniqueBetBank";
 import CutSlider from "./components/CutSlider";
 import { Shifting } from "./components/Shifting";
@@ -22,8 +21,6 @@ import Betting from "./components/Betting";
 function App() {
   const {
     gameState,
-    handleOnContinue,
-    handleOnStartNew,
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -61,19 +58,6 @@ function App() {
                 <div>
                   <PageWrapper>
                     <Loading />
-                  </PageWrapper>
-                </div>
-              );
-            case "RECOVERY_DECISION":
-              return (
-                <div>
-                  <PageWrapper>
-                    <RecoveryDec
-                      gameState={gameState}
-                      onContinue={handleOnContinue}
-                      onStartNew={handleOnStartNew}
-                      isWFSR={isWFSR}
-                    />
                   </PageWrapper>
                 </div>
               );

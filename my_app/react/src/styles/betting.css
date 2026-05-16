@@ -73,9 +73,9 @@
 .bet-type-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Sorok közötti távolság */
+  gap: 12px;
+  max-width: 15rem;
   width: 100%;
-  max-width: 400px; /* Vagy amekkora a panelod */
   margin: 0 auto;
   padding-bottom: 1rem;
 }
@@ -121,7 +121,7 @@
 }
 
 .chips-section {
-  padding-top: 0.5rem;
+  padding: 1.0rem 0 0.7rem 0;
 }
 
 .chips-wrapper {

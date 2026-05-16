@@ -3,8 +3,6 @@ import {
   initializeSessionAPI,
   setBet,
   retakeBet,
-  clearGameState,
-  recoverGameState,
   getShuffling,
   setShoeCut,
   startGame,
@@ -127,36 +125,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     [transitionToState],
   );
 
-  const handleOnContinue = useCallback(() => {
-    executeAsyncAction(async () => {
-      const data = await handleApiAction(recoverGameState);
-
-      const response = extractGameStateData(data);
-      if (!response) return;
-      dispatch({
-        type: "SET_DECK_LEN",
-        payload: response.deck_len ?? null,
-      });
-
-      transitionToState(response?.target_phase as GameState, response);
-    });
-  }, [executeAsyncAction, handleApiAction, transitionToState]);
-
-  const handleOnStartNew = useCallback(() => {
-    executeAsyncAction(async () => {
-      // 1. Meghívjuk az API-t a diplomata (handleApiAction) segítségével
-      // Ha hiba van, a throw miatt itt megáll, és az executeAsyncAction catch ága vált ERROR-ra
-      const data = await handleApiAction(clearGameState);
-
-      // 2. Feldolgozzuk az adatot (itt már biztosan van data, különben throw történt volna)
-      const response = extractGameStateData(data);
-      if (!response) return;
-
-      // 4. Átlépünk az új fázisba (SHUFFLING vagy BETTING a szerver döntése alapján)
-      transitionToState(response?.target_phase as GameState, response);
-    });
-  }, [executeAsyncAction, handleApiAction, transitionToState]);
-
   const handlePlaceBet = useCallback(
     async (amount: number, selectedBetType: BetKey) => {
       const currentTokens = state.gameState.tokens;
@@ -223,6 +191,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     setIsWFSR(false);
   }, [state.gameState, transitionToState]);
+  
   const handleShoeCut = useCallback(
     async (amount: number) => {
       if (amount === 0 || amount === 1 || amount === 416) return;
@@ -676,8 +645,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     currentGameState: state.gameState.currentGameState,
     transitionToState,
     handleStartGame,
-    handleOnContinue,
-    handleOnStartNew,
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,

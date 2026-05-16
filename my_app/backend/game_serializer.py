@@ -8,13 +8,6 @@ class GameSerializer:
     def serialize_by_context(game, path: str) -> Dict[str, Any]:
         p = path or ""
 
-        if "recover_game_state" in p:
-            if game.players or game.split_req > 0:
-                return GameSerializer.serialize_split_hand(game)
-            return GameSerializer.serialize_initial_and_hit_state(
-                game, is_recovery=True
-            )
-
         if "rewards" in p:
             return GameSerializer.serialize_reward_state(game)
         if "create_deck" in p:
@@ -55,7 +48,7 @@ class GameSerializer:
             if (not game.is_round_active and game.is_session_init)
             else game.get_deck_len()
         )
-        
+
         calc_phase = (
             PhaseState.NONE
             if not game.bet_list

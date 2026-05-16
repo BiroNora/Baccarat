@@ -312,15 +312,12 @@ def initialize_session():
 
     if user.tokens <= 0 and not game_instance.is_round_active:
         calculated_phase = PhaseState.OUT_OF_TOKENS
-    elif game_instance.is_round_active:
-        calculated_phase = PhaseState.RECOVERY_DECISION
     else:
         calculated_phase = PhaseState.BETTING
 
     custom_game_state = {
         "deck_len": game_instance.deck_len_init,
         "target_phase": calculated_phase,
-        "bet": game_instance.bet,
     }
 
     return (
@@ -428,7 +425,7 @@ def create_deck(user, game):
 def shoe_cut(user, game):
     data = request.get_json() or {}
     cut_index = data.get("cut")
-    
+
     initial_cards = Game.TOTAL_INITIAL_CARDS
 
     if not isinstance(cut_index, int):
