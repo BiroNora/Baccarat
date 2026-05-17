@@ -66,6 +66,7 @@ class User(db.Model):
     )
     tokens = db.Column(db.Integer, default=1000)
     current_game_state = db.Column(JSONB, nullable=True)
+    road_map = db.Column(JSONB, nullable=False, server_default='[]', default=list)
     idempotency_key = db.Column(db.String(36), nullable=True)
     last_activity = db.Column(
         db.TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
