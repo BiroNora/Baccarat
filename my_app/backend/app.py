@@ -329,6 +329,7 @@ def initialize_session():
                 "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
+                "road_map": [],
                 "game_state_hint": "USER_SESSION_INITIALIZED",
                 "total_initial_cards": Game.TOTAL_INITIAL_CARDS,
             }
@@ -371,6 +372,7 @@ def bet(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "road_map": user.road_map,
                 "game_state_hint": "BET_SUCCESSFULLY_PLACED",
             }
         ),
@@ -404,6 +406,7 @@ def retake_bet(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "road_map": user.road_map,
                 "game_state_hint": "BET_SUCCESSFULLY_RETAKEN",
             }
         ),
@@ -425,6 +428,7 @@ def create_deck(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "road_map": [],
                 "game_state_hint": "DECK_CREATED",
             }
         ),
@@ -457,6 +461,7 @@ def shoe_cut(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "road_map": [],
                 "game_state_hint": "DECK_SHIFTED",
             }
         ),
@@ -481,88 +486,8 @@ def start_game(user, game):
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "road_map": user.road_map,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
-            }
-        ),
-        200,
-    )
-
-
-# 5
-@app.route("/api/ins_request", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def ins_request(user, game):
-    bet = game.get_bet()
-    insurance_amount = math.ceil(bet / 2)
-
-    if user.tokens < insurance_amount:
-        raise ValueError("Insufficient tokens.")
-
-    ins = game.insurance_request()
-    user.tokens += ins
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Insurance placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "INSURANCE_PROCESSED",
-            }
-        ),
-        200,
-    )
-
-
-# 6
-@app.route("/api/hit", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def hit(user, game):
-    game.hit(False, False)
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "tokens": user.tokens,
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "HIT_RECIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 7
-@app.route("/api/double_request", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def double_request(user, game):
-    bet_amount_to_double = game.get_bet()
-
-    if user.tokens < bet_amount_to_double:
-        raise ValueError("Insufficient tokens.")
-
-    amount_deducted = game.double_request()
-    user.tokens -= amount_deducted
-    game.hit(True, False)
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Double placed successfully.",
-                "double_amount": amount_deducted,
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "DOUBLE_RECIEVED",
             }
         ),
         200,

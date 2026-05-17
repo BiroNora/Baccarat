@@ -24,6 +24,7 @@ export interface GameStateData {
   is_banker_third_card: boolean;
   deck_len: number;
   tokens: number;
+  road_map: RoadMapUnit[];
   bets: BetMap;
   bet_list: BetListMap;
   payouts: BetMap;
@@ -41,6 +42,15 @@ export interface PlayerData {
 export interface BankerData {
   hand: string[];
   sum: number;
+}
+
+export interface RoadMapUnit {
+  winner: string;         // 'PLAYER', 'BANKER', 'TIE'
+  player_score: number;
+  banker_score: number;
+  is_natural: boolean;
+  is_dragon: boolean;
+  is_panda: boolean;
 }
 
 export type GameStateForClient = {

@@ -7,6 +7,7 @@ from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
 VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON"]
+ROAD_MAP_UNIT = ["winner", "player_score", "banker_score", "is_natural", "is_dragon", "is_panda"]
 
 
 class Game:
@@ -38,6 +39,7 @@ class Game:
         self.payouts = {key: 0 for key in VALID_BET_TYPES}
         self.winner = WinnerState.NONE
         self.side_winners = []
+        self.road_map_unit = {key: 0 for key in ROAD_MAP_UNIT}
         self.is_round_active = False
         self.pre_phase = PhaseState.NONE
         self.target_phase = PhaseState.LOADING
@@ -343,6 +345,7 @@ class Game:
             "bet_list": self.bet_list,
             "payouts": self.payouts,
             "side_winners": self.side_winners,
+            "road_map_unit": self.road_map_unit,
             "is_round_active": self.is_round_active,
             "target_phase": self.get_target_phase().value,
             "pre_phase": self.get_pre_phase().value,
@@ -368,6 +371,8 @@ class Game:
         game.bet_list.update(raw_bet_list)
         game.payouts = {key: 0 for key in VALID_BET_TYPES}
         game.side_winners = data["side_winners"]
+        raw_unit = data.get("road_map_unit")
+        game.road_map_unit = raw_unit if raw_unit else {key: 0 for key in ROAD_MAP_UNIT}
         game.is_round_active = data.get("is_round_active", False)
         raw_pre = data.get("pre_phase")
         game.pre_phase = PhaseState(raw_pre) if raw_pre else game.get_pre_phase()
