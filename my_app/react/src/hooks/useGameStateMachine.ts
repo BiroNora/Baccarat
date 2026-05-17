@@ -191,7 +191,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     setIsWFSR(false);
   }, [state.gameState, transitionToState]);
-  
+
   const handleShoeCut = useCallback(
     async (amount: number) => {
       if (amount === 0 || amount === 1 || amount === 416) return;
@@ -481,17 +481,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState,
   ]);
 
-  // --- MAIN_STAND_REWARDS_TRANSIT ---
+  // --- MAIN_STAND_NATURAL ---
   useEffect(() => {
     if (
-      state.gameState.currentGameState !== "MAIN_STAND_REWARDS_TRANSIT" ||
+      state.gameState.currentGameState !== "MAIN_STAND_NATURAL" ||
       isProcessingRef.current
     )
       return;
     isProcessingRef.current = true;
-    //console.log("--- MAIN_STAND_REWARDS_TRANSIT INDUL ---");
+    //console.log("--- MAIN_STAND_NATURAL INDUL ---");
 
-    const MainStandTransit = async () => {
+    const MainStandNatural = async () => {
       try {
         savePreActionState();
         const data = await handleApiAction(handleStandAndRewards);
@@ -508,7 +508,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         isProcessingRef.current = false;
       }
     };
-    MainStandTransit();
+    MainStandNatural();
   }, [
     state.gameState.currentGameState,
     handleApiAction,

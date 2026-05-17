@@ -352,6 +352,15 @@ def bet(user, game):
     if user.tokens < bet_amount:
         raise ValueError("Insufficient tokens.")
 
+    current_player_bet = game.bets.get("PLAYER", 0)
+    current_banker_bet = game.bets.get("BANKER", 0)
+
+    if bet_type_name == "PLAYER" and current_banker_bet > 0:
+        raise ValueError("Cannot bet on PLAYER when a BANKER bet is already placed.")
+
+    if bet_type_name == "BANKER" and current_player_bet > 0:
+        raise ValueError("Cannot bet on BANKER when a PLAYER bet is already placed.")
+
     game.set_bet(bet_amount, bet_type_name)
     user.tokens -= bet_amount
 
@@ -379,6 +388,11 @@ def retake_bet(user, game):
 
     if bet_type_name is None or not game.bet_list[bet_type_name]:
         raise ValueError("No bet to retake on this field.")
+
+    bet_amount = game.bets.get(bet_type_name, 0)
+
+    if bet_amount <= 0:
+        raise ValueError("No bet to retake on this field (amount must be greater than 0).")
 
     amount_to_return = game.retake_bet_from_bet_list(bet_type_name)
     user.tokens += amount_to_return

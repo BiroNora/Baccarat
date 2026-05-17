@@ -9,7 +9,7 @@ export type GameState =
   | "INIT_GAME"
   | "MAIN_TURN"
   | "MAIN_STAND"
-  | "MAIN_STAND_REWARDS_TRANSIT"
+  | "MAIN_STAND_NATURAL"
   | "OUT_OF_TOKENS"
   | "RESTART_GAME"
   | "ERROR"
@@ -20,10 +20,13 @@ export interface GameStateData {
   player: PlayerData;
   banker: BankerData;
   winner: number;
+  is_player_third_card: boolean;
+  is_banker_third_card: boolean;
   deck_len: number;
   tokens: number;
   bets: BetMap;
   bet_list: BetListMap;
+  payouts: BetMap;
   target_phase: GameState | null;
   pre_phase: GameState | null;
   final_phase: GameState | null;
@@ -71,7 +74,6 @@ export type GameStateMachineHookResult = {
     newData?: Partial<GameStateData>,
   ) => void;
   handlePlaceBet: (amount: number, selectedBetType: BetKey) => Promise<void>;
-  //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: (selectedBetType: BetKey) => void;
   handleShoeCut: (amount: number) => Promise<void>;
   handleShiftingFirstPhaseEnd: () => void;
@@ -83,19 +85,19 @@ export type GameStateMachineHookResult = {
 };
 
 export const states = [
-  "",
-  "BLACKJACK Player won!",
-  "BlackJack push",
-  "BlackJack Dealer won!",
-  "Push",
-  "Player lost",
-  "Player won",
-  "Dealer won",
-  "twenty one",
-  "bust",
-  "under 21",
-  "BlackJack",
+  "",                     // 0: NONE (üres vagy kör folyamatban)
+  "Natural Player Won!",  // 1: NATURAL_PLAYER_WON
+  "Natural Banker Won!",  // 2: NATURAL_BANKER_WON
+  "Natural Tie!",         // 3: NATURAL_TIE
+  "Player Won!",          // 4: PLAYER_WON
+  "Banker Won!",          // 5: BANKER_WON
+  "Tie!"                  // 6: TIE
 ];
+
+export const sideStates: Record<number, string> = {
+  3: "PLAYER PANDA 8", // BetType.PANDA.value = 3
+  4: "BANKER DRAGON 7",      // BetType.DRAGON.value = 4
+};
 
 export const BetTypes = {
   NONE: -1,

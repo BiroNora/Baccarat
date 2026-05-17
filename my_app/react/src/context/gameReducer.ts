@@ -33,6 +33,8 @@ export const initialGameDataState: GameDataState = {
     },
     banker: { hand: [], sum: 0 },
     winner: 0,
+    is_player_third_card: false,
+    is_banker_third_card: false,
     deck_len: 0,
     tokens: 0,
     bets: {
@@ -49,6 +51,14 @@ export const initialGameDataState: GameDataState = {
       TIE: [],
       PANDA: [],
       DRAGON: [],
+    },
+    payouts: {
+      PLAYER: 0,
+      BANKER: 0,
+      TIE: 0,
+      PANDA: 0,
+      DRAGON: 0,
+      TOTAL: 0,
     },
     target_phase: "LOADING",
     pre_phase: "BETTING",

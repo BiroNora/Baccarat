@@ -152,7 +152,7 @@ function App() {
                   />
                 </div>
               );
-            case "MAIN_STAND_REWARDS_TRANSIT":
+            case "MAIN_STAND_NATURAL":
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />

@@ -45,6 +45,8 @@ class Game:
         self.is_session_init = False
         self.shoe_cut_limit = 0
         self.first_card = None
+        self.is_player_third_card = False
+        self.is_banker_third_card = False
 
     def get_cut_card_position(self):
         total_cards = Game.TOTAL_INITIAL_CARDS
@@ -99,8 +101,11 @@ class Game:
 
         if self.isNatural(self.player["sum"], self.banker["sum"]):
             self.is_natural = True
-            self.target_phase = PhaseState.MAIN_STAND_REWARDS_TRANSIT
+            self.determine_main_outcome()
+            self.process_rewards()
+            self.target_phase = PhaseState.MAIN_STAND_NATURAL
         else:
+            self.is_natural = False
             self.check_third_card_rules()
 
     def sum(self, hand):
@@ -119,6 +124,7 @@ class Game:
         # PLAYER SZABÁLYA: Húz, ha 5 vagy kevesebb a pontja
         p_third = None
         if p_score <= 5:
+            self.is_player_third_card = True
             p_third_card = self.deck.pop(0)
             self.player["hand"].append(p_third_card)
             p_third = self.CARD_VALUES.get(self.hand_to_ranks([p_third_card])[0], 0)
@@ -135,6 +141,7 @@ class Game:
         # Ha a Player NEM húzott (mert 6 vagy 7 pontja volt): A Banker 0-5 között húz
         if p_third is None:
             if b_score <= 5:
+                self.is_banker_third_card = True
                 self.banker["hand"].append(self.deck.pop(0))
 
         # Ha a Player HÚZOTT: Ellenőrizzük a csökkentett feltételt
@@ -142,6 +149,7 @@ class Game:
             if b_score <= 2 or (
                 b_score in banker_rules and p_third in banker_rules[b_score]
             ):
+                self.is_banker_third_card = True
                 self.banker["hand"].append(self.deck.pop(0))
 
         self.player["sum"] = self.sum(self.player["hand"])
@@ -151,8 +159,6 @@ class Game:
         p_s = self.player["sum"]
         b_s = self.banker["sum"]
 
-        # Megnézzük, hogy 2 vagy 3 lap van a kézben.
-        # Ha mindkettőnél 2 lap van, és van 8 vagy 9 pont, az egy Natural!
         is_natural = len(self.player["hand"]) == 2 and len(self.banker["hand"]) == 2 and (p_s >= 8 or b_s >= 8)
 
         if p_s > b_s:
@@ -165,7 +171,6 @@ class Game:
             self.winner = WinnerState.NATURAL_TIE.value if is_natural else WinnerState.TIE.value
 
     def determine_side_outcomes(self):
-        """Meghatározza, hogy a mellékfogadások (DRAGON 7, PANDA 8) közül nyert-e valami."""
         p_s = self.player["sum"]
         b_s = self.banker["sum"]
         p_cards_count = len(self.player["hand"])
@@ -182,95 +187,64 @@ class Game:
             self.side_winners.append(BetType.PANDA.value)
 
     def process_rewards(self):
-        """
-        A kör végén lefutó fő kifizetési motor.
-        Közvetlenül a self.payouts szótárat frissíti, amit a játék állapotával
-        együtt automatikusan szerializál a rendszer a frontend felé.
-        """
-        self.payouts = {key: 0 for key in self.payouts}
-
-        self.determine_main_outcome()      # Beállítja: self.winner ("PLAYER", "BANKER" vagy "TIE")
-        self.determine_side_outcomes()      # Feltölti: self.side_winners (["DRAGON"] vagy ["PANDA"] vagy [])
+        self.payouts = {key: 0 for key in VALID_BET_TYPES}
 
         w = self.winner
         sw = self.side_winners
         b = self.bets
 
-        # --- SÍMA FOGADÁSOK SZORZÁSA ÉS PUSH KEZELÉSE ---
+        # Segédváltozók az átláthatóságért az Enumok alapján
+        is_player_win = w in [WinnerState.PLAYER_WON.value, WinnerState.NATURAL_PLAYER_WON.value]
+        is_banker_win = w in [WinnerState.BANKER_WON.value, WinnerState.NATURAL_BANKER_WON.value]
+        is_tie_win    = w in [WinnerState.TIE.value, WinnerState.NATURAL_TIE.value]
 
-        # PLAYER nyer: ha a sima PLAYER vagy a PANDA 8 nyert
-        if w == "PLAYER" or "PANDA" in sw:
-            # 1:1 kifizetés + a saját tét visszajár = 2x szorzó
+        has_panda = BetType.PANDA.value in sw
+        has_dragon = BetType.DRAGON.value in sw
+
+        # --- SIMA FOGADÁSOK SZORZÁSA ÉS PUSH KEZELÉSE ---
+        # PLAYER nyer: ha a fő kimenetel Player győzelem (sima/natural) VAGY ha PANDA 8 lett
+        if is_player_win or has_panda:
+            # 1:1 kifizetés + saját tét visszajár = 2x szorzó
             self.payouts["PLAYER"] = b.get("PLAYER", 0) * 2
 
-        # BANKER nyer
-        if w == "BANKER":
-            # 1:1 kifizetés + a saját tét visszajár = 2x szorzó
-            self.payouts["BANKER"] = b.get("BANKER", 0) * 2
-        elif "DRAGON" in sw:
-            # EZ BACCARAT PUSH SZABÁLY: Ha Dragon 7 van, a sima Banker tét visszajár (1x szorzó)
-            self.payouts["BANKER"] = b.get("BANKER", 0)
+        # BANKER nyer (Sima vagy Natural)
+        if is_banker_win:
+            if has_dragon:
+                # EZ BACCARAT PUSH SZABÁLY: Ha Dragon 7 van, a sima Banker tét csak visszajár (1x szorzó)
+                self.payouts["BANKER"] = b.get("BANKER", 0)
+            else:
+                # Sima Banker győzelem (1:1 kifizetés + saját tét = 2x szorzó)
+                self.payouts["BANKER"] = b.get("BANKER", 0) * 2
 
-        # TIE nyer
-        if w == "TIE":
-            # 8:1-et fizet + a saját tét visszajár = 9x szorzó
+        # TIE (Döntetlen) nyer (Sima vagy Natural)
+        if is_tie_win:
+            # 8:1-et fizet + saját tét visszajár = 9x szorzó
             self.payouts["TIE"] = b.get("TIE", 0) * 9
 
-            # Döntetlen esetén a sima PLAYER és BANKER tétek visszajárnak (Push -> 1x szorzó)
+            # Döntetlen esetén a sima PLAYER ÉS BANKER tétek visszajárnak (Push -> 1x szorzó)
             self.payouts["PLAYER"] = b.get("PLAYER", 0)
             self.payouts["BANKER"] = b.get("BANKER", 0)
 
 
         # --- MELLÉKFOGADÁSOK (SIDE BETS) SZORZÁSA ---
-
-        # DRAGON 7 nyer (40:1 fizet + saját tét visszajár = 41x szorzó)
-        if "DRAGON" in sw:
+        # DRAGON 7 nyer (40:1 + saját tét = 41x szorzó)
+        if has_dragon:
             self.payouts["DRAGON"] = b.get("DRAGON", 0) * 41
 
-        # PANDA 8 nyer (25:1 fizet + saját tét visszajár = 26x szorzó)
-        if "PANDA" in sw:
+        # PANDA 8 nyer (25:1 + saját tét = 26x szorzó)
+        if has_panda:
             self.payouts["PANDA"] = b.get("PANDA", 0) * 26
 
 
         # --- ÖSSZEGZÉS ÉS EGYENLEG FRISSÍTÉS ---
+        total = sum(value for key, value in self.payouts.items() if key != "TOTAL")
+        self.payouts["TOTAL"] = total
 
-        # Kiszámoljuk a bruttó kifizetést a TOTAL-ba (kivéve magát a TOTAL kulcsot)
-        self.payouts["TOTAL"] = sum(value for key, value in self.payouts.items() if key != "TOTAL")
-
-        # Jóváírjuk az összeget a játékosnál
-        self.tokens += self.payouts["TOTAL"]
-
-        # Lezárjuk a kört
         self.is_round_active = False
+        self.set_bets_to_null()
 
-        def rewards(self):
-            if self.winner == BetType.NONE.value:
-                return 0
+        return total
 
-            bet_amount = self.bet.get("amount", 0)
-            chosen_side = self.bet_type
-
-            if chosen_side == self.winner:
-                if chosen_side == BetType.PLAYER.value:
-                    # Player kifizetés: 1:1 (pl. 100 tét -> 200 jön vissza)
-                    return bet_amount * 2
-
-                elif chosen_side == BetType.BANKER.value:
-                    # Banker kifizetés: 1:1 mínusz 5% jutalék (pl. 100 tét -> 195 jön vissza)
-                    return int(bet_amount + (bet_amount * 0.95))
-
-                elif chosen_side == BetType.TIE.value:
-                    # Tie kifizetés: 8:1 (pl. 100 tét -> 900 jön vissza)
-                    return bet_amount * 9
-
-            # PUSH (Döntetlen lett, de P-re vagy B-re fogadott)
-            elif self.winner == BetType.TIE.value and chosen_side in [
-                BetType.PLAYER.value,
-                BetType.BANKER.value,
-            ]:
-                return bet_amount
-
-            return 0
 
     def retake_bet_from_bet_list(self, bet_type_name):
         if bet_type_name in self.bet_list and self.bet_list[bet_type_name]:
@@ -291,10 +265,15 @@ class Game:
             "hand": [],
             "sum": 0,
         }
+        self.payouts = {key: 0 for key in VALID_BET_TYPES}
+        self.payouts["TOTAL"] = 0
         self.is_natural = False
+        self.is_player_third_card = False
+        self.is_banker_third_card = False
         self.winner = WinnerState.NONE
+        self.side_winners = []
         self.is_round_active = False
-        self.target_phase = PhaseState.BETTING
+        self.target_phase = PhaseState.NONE
 
     def restart_game(self):
         self.__init__()
@@ -357,6 +336,8 @@ class Game:
             "player": self.player,
             "banker": self.banker,
             "winner": self.winner,
+            "is_player_third_card": self.is_player_third_card,
+            "is_banker_third_card": self.is_banker_third_card,
             "deck_len": self.get_deck_len(),
             "bets": self.bets,
             "bet_list": self.bet_list,
@@ -377,6 +358,8 @@ class Game:
         game.player = data["player"]
         game.banker = data["banker"]
         game.winner = data["winner"]
+        game.is_player_third_card = data["is_player_third_card"]
+        game.is_banker_third_card = data["is_banker_third_card"]
         game.deck_len = data["deck_len"]
         game.set_bets_to_null()
         raw_bets = data.get("bets", {})
