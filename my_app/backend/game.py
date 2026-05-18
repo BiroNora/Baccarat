@@ -103,12 +103,21 @@ class Game:
 
         if self.isNatural(self.player["sum"], self.banker["sum"]):
             self.is_natural = True
+            self.side_winners = []
+
             self.determine_main_outcome()
             self.process_rewards()
+
             self.target_phase = PhaseState.MAIN_STAND_NATURAL
         else:
             self.is_natural = False
             self.check_third_card_rules()
+
+            self.determine_main_outcome()
+            self.determine_side_outcomes()
+            self.process_rewards()
+
+            self.target_phase = PhaseState.MAIN_STAND
 
     def sum(self, hand):
         ranks = self.hand_to_ranks(hand)
@@ -188,7 +197,29 @@ class Game:
         if p_s == 8 and p_cards_count == 3 and p_s > b_s:
             self.side_winners.append(BetType.PANDA.value)
 
+    def update_road_map_unit(self):
+        p_s = self.player["sum"]
+        b_s = self.banker["sum"]
+
+        # Megnézzük, hogy a nyertes benne van-e a Naturalok között
+        is_natural_round = self.winner in [
+            WinnerState.NATURAL_PLAYER_WON.value,
+            WinnerState.NATURAL_BANKER_WON.value,
+            WinnerState.NATURAL_TIE.value
+        ]
+
+        self.road_map_unit = {
+            "winner": self.winner,  # Tiszta IntEnum érték (1-6)
+            "player_score": p_s,
+            "banker_score": b_s,
+            "is_natural": is_natural_round,
+            "is_dragon": BetType.DRAGON.value in self.side_winners,
+            "is_panda": BetType.PANDA.value in self.side_winners
+        }
+
     def process_rewards(self):
+        self.update_road_map_unit()
+
         self.payouts = {key: 0 for key in VALID_BET_TYPES}
 
         w = self.winner
@@ -274,6 +305,7 @@ class Game:
         self.is_banker_third_card = False
         self.winner = WinnerState.NONE
         self.side_winners = []
+        self.road_map_unit = {key: 0 for key in ROAD_MAP_UNIT}
         self.is_round_active = False
         self.target_phase = PhaseState.NONE
 

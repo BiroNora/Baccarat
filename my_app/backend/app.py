@@ -156,6 +156,7 @@ def with_game_state(f):
                         "game_state": GameSerializer.serialize_by_context(
                             game, request.path
                         ),
+                        "road_map": user.road_map,
                     }
                 ),
                 200,
@@ -478,6 +479,8 @@ def start_game(user, game):
     game.initialize_new_round()
     token_change = game.rewards()
     user.tokens += token_change
+
+    user.road_map.append(game.road_map_unit)
 
     return (
         jsonify(

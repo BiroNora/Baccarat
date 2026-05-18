@@ -2,7 +2,6 @@ import unittest
 from my_app.backend.game import Game
 from my_app.backend.winner_state import WinnerState
 from my_app.backend.phase_state import PhaseState
-from my_app.backend.bet_type import BetType
 
 class TestBaccaratNaturalOutcomes(unittest.TestCase):
 
@@ -39,6 +38,13 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.payouts["TOTAL"], 200)
         self.assertEqual(self.game.side_winners, [], "Naturalnál nem lehet mellékfogadás nyertes!")
 
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_PLAYER_WON.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 9)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 0)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
     # 2
     def test_natural_banker_won_with_dragon_bet_placed(self):
         """Teszt: Banker Natural 8-cal nyer. Van tét Dragonon is, de az elvész (Natural miatt)."""
@@ -62,6 +68,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.payouts["BANKER"], 100)
         self.assertEqual(self.game.payouts["DRAGON"], 0)
         self.assertEqual(self.game.payouts["TOTAL"], 100)
+
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 5)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 8)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
 
     # 3
     def test_natural_tie_payout_and_main_bets_push(self):
@@ -89,6 +103,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         # Összesen: 90 + 100 + 50 = 240
         self.assertEqual(self.game.payouts["TOTAL"], 240)
 
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_TIE.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 8)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 8)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
+
     # 4
     def test_natural_player_9_vs_banker_8(self):
         """Teszt: Player Natural 9-cel nyer a Banker Natural 8-asa ellen."""
@@ -113,6 +135,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.payouts["PLAYER"], 200)
         self.assertEqual(self.game.payouts["TOTAL"], 200)
 
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_PLAYER_WON.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 9)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 8)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
+
     # 5
     def test_natural_player_8_vs_banker_9(self):
         """Teszt: Banker Natural 9-cel nyer a Player Natural 8-asa ellen."""
@@ -135,6 +165,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         # Kifizetés: Banker tét 2x
         self.assertEqual(self.game.payouts["BANKER"], 100)
         self.assertEqual(self.game.payouts["TOTAL"], 100)
+
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 8)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 9)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
 
     # 6
     def test_natural_all_allowed_bets_placed_banker_wins(self):
@@ -168,6 +206,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
 
         # A teljes egyenlegnövekedés pontosan 200
         self.assertEqual(self.game.payouts["TOTAL"], 200)
+
+        # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
+        self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)
+        self.assertEqual(self.game.road_map_unit["player_score"], 0)
+        self.assertEqual(self.game.road_map_unit["banker_score"], 9)
+        self.assertTrue(self.game.road_map_unit["is_natural"])
+        self.assertFalse(self.game.road_map_unit["is_dragon"])
+        self.assertFalse(self.game.road_map_unit["is_panda"])
 
 if __name__ == "__main__":
     unittest.main()
