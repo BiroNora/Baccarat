@@ -7,7 +7,6 @@ export type GameState =
   | "BURNING_CARDS"
   | "BETTING"
   | "INIT_GAME"
-  | "MAIN_TURN"
   | "MAIN_STAND"
   | "MAIN_STAND_NATURAL"
   | "OUT_OF_TOKENS"

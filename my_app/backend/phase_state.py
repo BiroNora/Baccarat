@@ -21,6 +21,5 @@ class PhaseState(str, Enum):
     RESTART_GAME = "RESTART_GAME"
 
     # Fő játékmenet
-    MAIN_TURN = "MAIN_TURN"
     MAIN_STAND = "MAIN_STAND"
     MAIN_STAND_NATURAL = "MAIN_STAND_NATURAL"

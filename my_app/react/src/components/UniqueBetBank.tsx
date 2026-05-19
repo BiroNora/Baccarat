@@ -34,7 +34,6 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
       }, 2000);
       return () => clearTimeout(timer);
     } else {
-      // 3. Játék közben (MAIN_TURN stb.) azonnal frissítünk, nincs várakozás
       setDisplayTokens(gameState.tokens);
     }
   }, [
@@ -61,7 +60,7 @@ const UniqueBetBank: React.FC<UniqueBetBankProps> = ({
         Bet:{"\u00A0"}
         <div style={{ display: "inline-grid", verticalAlign: "bottom" }}>
           <AnimatePresence mode="popLayout">
-            
+
           </AnimatePresence>
         </div>
       </div>

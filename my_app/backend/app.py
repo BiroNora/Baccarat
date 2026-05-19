@@ -427,13 +427,15 @@ def retake_bet(user, game):
 def create_deck(user, game):
     game.create_deck()
 
+    user.road_map = []
+
     return (
         jsonify(
             {
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": [],
+                "road_map": user.road_map,
                 "game_state_hint": "DECK_CREATED",
             }
         ),
@@ -466,7 +468,7 @@ def shoe_cut(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": [],
+                "road_map": user.road_map,
                 "game_state_hint": "DECK_SHIFTED",
             }
         ),

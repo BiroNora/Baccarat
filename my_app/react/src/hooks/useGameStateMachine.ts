@@ -6,7 +6,7 @@ import {
   getShuffling,
   setShoeCut,
   startGame,
-  handleStandAndRewards,
+  //handleStandAndRewards,
   setRestart,
   forceRestart,
   type HttpError,
@@ -431,7 +431,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           return;
         }
         console.log("INIT GAME TARGET: ", response.target_phase);
-        transitionToState(response?.pre_phase as GameState, response);
+        transitionToState(response?.target_phase as GameState, response);
       } catch (error) {
         console.error("Init Game hiba:", error);
         isProcessingRef.current = false;
@@ -458,7 +458,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     )
       return;
 
-    isProcessingRef.current = true;
+    /* isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
 
     timeoutIdRef.current = window.setTimeout(() => {
@@ -473,8 +473,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }; */
+    
   }, [
     state.gameState.currentGameState,
     state.gameState.pre_phase,
@@ -488,7 +488,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       isProcessingRef.current
     )
       return;
-    isProcessingRef.current = true;
+    /* isProcessingRef.current = true;
     //console.log("--- MAIN_STAND_NATURAL INDUL ---");
 
     const MainStandNatural = async () => {
@@ -508,7 +508,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         isProcessingRef.current = false;
       }
     };
-    MainStandNatural();
+    MainStandNatural(); */
   }, [
     state.gameState.currentGameState,
     handleApiAction,

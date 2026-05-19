@@ -3,12 +3,8 @@ import { ErrorPage } from "./components/ErrorPage";
 import HeaderTitles from "./components/HeaderTitles";
 import { Loading } from "./components/Loading";
 import { OutOfTokens } from "./components/OutOfTokens";
-import PlayButtons from "./components/PlayButtons";
-import PlayerDealer from "./components/PlayerDealer";
-import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
-import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import { AnimatePresence, motion } from "motion/react";
 import { Reloading } from "./components/Reloading";
@@ -17,6 +13,7 @@ import CutSlider from "./components/CutSlider";
 import { Shifting } from "./components/Shifting";
 import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
+import StandardGame from "./components/StandardGame";
 
 function App() {
   const {
@@ -116,33 +113,15 @@ function App() {
                   />
                 </div>
               );
-            case "MAIN_TURN":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <PlayButtons gameState={gameState} isWFSR={isWFSR} />
-                  </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={false}
-                  />
-                </div>
-              );
             case "MAIN_STAND":
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="player-dealer-area-wrapper">
-                    <PlayerDealer gameState={gameState} />
+                    <StandardGame gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
-                    <Winner gameState={gameState} />
+                    {/* <Winner gameState={gameState} /> */}
                   </div>
                   <UniqueBetBank
                     gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
@@ -157,7 +136,7 @@ function App() {
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
+                    <StandardGame gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
                     {/* <Winner gameState={gameState} /> */}

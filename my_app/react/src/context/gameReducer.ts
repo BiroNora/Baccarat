@@ -37,6 +37,7 @@ export const initialGameDataState: GameDataState = {
     is_banker_third_card: false,
     deck_len: 0,
     tokens: 0,
+    road_map: [],
     bets: {
       PLAYER: 0,
       BANKER: 0,
