@@ -75,7 +75,7 @@ class Game:
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
             self.pre_phase = PhaseState.BURNING_CARDS
             self.final_phase = PhaseState.INIT_GAME
-
+        print("78 bets: ", self.bets)
         return self.deck
 
     def deck_penetration(self):
@@ -89,11 +89,13 @@ class Game:
         rank = self.first_card[-1]
         burn_count = 10 if rank in "KQJ0" else (1 if rank == "A" else int(rank))
         self.deck = self.deck[burn_count:]
-
+        print("92 bets: ", self.bets)
         return self.first_card
 
     def initialize_new_round(self):
         self.clear_up()
+
+        print("98 bets: ", self.bets)
 
         card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
         p_hand, b_hand = [card1, card3], [card2, card4]
@@ -274,7 +276,6 @@ class Game:
         self.payouts["TOTAL"] = total
 
         self.is_round_active = False
-        self.set_bets_to_null()
 
         return total
 

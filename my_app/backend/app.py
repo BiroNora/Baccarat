@@ -1,20 +1,20 @@
 import os
 import uuid
 import logging
-import math
 from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
-from my_app.backend.bet_type import BetType
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
-from my_app.backend.game import Game
+from my_app.backend.game import VALID_BET_TYPES, Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
+
+from sqlalchemy.ext.mutable import MutableList
 
 load_dotenv()
 
@@ -66,7 +66,9 @@ class User(db.Model):
     )
     tokens = db.Column(db.Integer, default=1000)
     current_game_state = db.Column(JSONB, nullable=True)
-    road_map = db.Column(JSONB, nullable=False, server_default='[]', default=list)
+    road_map = db.Column(
+        MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
+    )
     idempotency_key = db.Column(db.String(36), nullable=True)
     last_activity = db.Column(
         db.TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -396,7 +398,9 @@ def retake_bet(user, game):
     bet_amount = game.bets.get(bet_type_name, 0)
 
     if bet_amount <= 0:
-        raise ValueError("No bet to retake on this field (amount must be greater than 0).")
+        raise ValueError(
+            "No bet to retake on this field (amount must be greater than 0)."
+        )
 
     amount_to_return = game.retake_bet_from_bet_list(bet_type_name)
     user.tokens += amount_to_return
@@ -477,10 +481,16 @@ def shoe_cut(user, game):
 @with_game_state
 def start_game(user, game):
     game.initialize_new_round()
-    token_change = game.rewards()
+
+    token_change = game.process_rewards()
     user.tokens += token_change
 
     user.road_map.append(game.road_map_unit)
+
+    serialized_game_state = GameSerializer.serialize_by_context(game, request.path)
+
+    game.set_bets_to_null()
+    game.payouts = {key: 0 for key in VALID_BET_TYPES}
 
     return (
         jsonify(
@@ -488,7 +498,7 @@ def start_game(user, game):
                 "status": "success",
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "game_state": serialized_game_state,
                 "road_map": user.road_map,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }
@@ -696,9 +706,11 @@ def split_stand_and_rewards(user, game):
     game_data = GameSerializer.serialize_by_context(game, request.path)
 
     game_data["pre_phase"] = (
-            PhaseState.OUT_OF_TOKENS.value if user.tokens <= 0 and (not game_data["players"] or len(game_data["players"]) == 0) else
-            PhaseState.BETTING.value
-        )
+        PhaseState.OUT_OF_TOKENS.value
+        if user.tokens <= 0
+        and (not game_data["players"] or len(game_data["players"]) == 0)
+        else PhaseState.BETTING.value
+    )
 
     return (
         jsonify(

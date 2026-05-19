@@ -72,7 +72,7 @@ const Betting: React.FC<BettingProps> = ({
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: { opacity: 0 },
-    transition: { duration: 0.8 },
+    transition: { duration: 0.3 },
   };
 
   // Fogadási lehetőségek listája a rendereléshez
@@ -125,7 +125,7 @@ const Betting: React.FC<BettingProps> = ({
               animate={(bets[option.id] || 0) > 0 ? "enabled" : "disabled"}
               variants={variants}
             >
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="wait">
                 <motion.span
                   key={`${option.id}-${bets[option.id]}`}
                   {...fadeProps}

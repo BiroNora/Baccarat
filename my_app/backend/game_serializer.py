@@ -71,6 +71,7 @@ class GameSerializer:
     @staticmethod
     def serialize_create_deck(game) -> Dict[str, Any]:
         return {
+            "bets": game.bets,
             "deck_len": game.deck_len_init,
             "target_phase": game.get_target_phase().value,
         }
@@ -86,27 +87,12 @@ class GameSerializer:
         }
 
     @staticmethod
-    def serialize_initial_and_hit_state(
-        game, is_recovery: bool = False
-    ) -> Dict[str, Any]:
+    def serialize_start_game(game) -> Dict[str, Any]:
         return {
             "player": game.player,
             "banker": game.banker,
             "deck_len": game.get_deck_len(),
-            "bet": game.bet,
-            "target_phase": (
-                PhaseState.MAIN_TURN.value
-                if is_recovery
-                else game.get_target_phase().value
-            ),
-        }
-
-    @staticmethod
-    def serialize_start_game(game) -> Dict[str, Any]:
-        return {
-            "player": game.player,
-            "deck_len": game.get_deck_len(),
-            "bet": game.bet,
+            "payouts": game.payouts,
             "target_phase": game.get_target_phase().value,
         }
 
