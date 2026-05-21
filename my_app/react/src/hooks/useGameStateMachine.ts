@@ -151,11 +151,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleRetakeBet = useCallback(
     async (selectedBetType: BetKey) => {
-      const currentBetList = state.gameState.bet_list;
+      const currentBets = state.gameState.bets;
       if (
-        !currentBetList ||
-        !currentBetList[selectedBetType] ||
-        currentBetList[selectedBetType].length === 0
+        !currentBets ||
+        !currentBets[selectedBetType] ||
+        currentBets[selectedBetType] <= 0
       )
         return;
 
@@ -169,7 +169,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       });
     },
     [
-      state.gameState.bet_list,
+      state.gameState.bets,
       executeAsyncAction,
       handleApiAction,
       transitionToState,
@@ -474,7 +474,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     }; */
-    
+
   }, [
     state.gameState.currentGameState,
     state.gameState.pre_phase,

@@ -303,25 +303,39 @@ def initialize_session():
     else:
         game_instance = Game.deserialize(user.current_game_state)
 
-    # Árva tétek visszatérítése
-    if not game_instance.is_round_active and game_instance.bet > 0:
-        user.tokens += game_instance.bet
-        game_instance.bet = 0
-        game_instance.bet_list = []
-
     game_instance.is_session_init = True
+
+    try:
+        game_instance.road_map = []
+    except AttributeError:
+        pass
+
+    actual_total = sum(
+        value for key, value in game_instance.bets.items()
+        if key != "TOTAL" and isinstance(value, (int, float))
+    )
+
+    game_instance.bets["TOTAL"] = actual_total
+
+    if game_instance.bets["TOTAL"] > 0:
+        game_instance.pre_phase = PhaseState.SHUFFLING
+    else:
+        game_instance.pre_phase = PhaseState.NONE
+
+    if user.tokens <= 0 and not game_instance.is_round_active:
+        game_instance.target_phase = PhaseState.OUT_OF_TOKENS
+    else:
+        game_instance.target_phase = PhaseState.BETTING
 
     user.current_game_state = game_instance.serialize()
     db.session.commit()
 
-    if user.tokens <= 0 and not game_instance.is_round_active:
-        calculated_phase = PhaseState.OUT_OF_TOKENS
-    else:
-        calculated_phase = PhaseState.BETTING
 
     custom_game_state = {
         "deck_len": game_instance.deck_len_init,
-        "target_phase": calculated_phase,
+        "bets": game_instance.bets,
+        "target_phase": game_instance.target_phase.value if hasattr(game_instance.target_phase, 'value') else game_instance.target_phase,
+        "pre_phase": game_instance.pre_phase.value if hasattr(game_instance.pre_phase, 'value') else game_instance.pre_phase,
     }
 
     return (
@@ -392,8 +406,8 @@ def retake_bet(user, game):
     data = request.get_json() or {}
     bet_type_name = data.get("type")
 
-    if bet_type_name is None or not game.bet_list[bet_type_name]:
-        raise ValueError("No bet to retake on this field.")
+    if bet_type_name is None:
+        raise ValueError("Field type must be specified.")
 
     bet_amount = game.bets.get(bet_type_name, 0)
 
@@ -402,7 +416,7 @@ def retake_bet(user, game):
             "No bet to retake on this field (amount must be greater than 0)."
         )
 
-    amount_to_return = game.retake_bet_from_bet_list(bet_type_name)
+    amount_to_return = game.clear_bet_by_type(bet_type_name)
     user.tokens += amount_to_return
 
     return (
@@ -484,15 +498,7 @@ def shoe_cut(user, game):
 def start_game(user, game):
     game.initialize_new_round()
 
-    token_change = game.process_rewards()
-    user.tokens += token_change
-
     user.road_map.append(game.road_map_unit)
-
-    serialized_game_state = GameSerializer.serialize_by_context(game, request.path)
-
-    game.set_bets_to_null()
-    game.payouts = {key: 0 for key in VALID_BET_TYPES}
 
     return (
         jsonify(
@@ -500,7 +506,7 @@ def start_game(user, game):
                 "status": "success",
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
-                "game_state": serialized_game_state,
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "road_map": user.road_map,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }

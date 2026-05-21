@@ -34,8 +34,8 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.target_phase, PhaseState.MAIN_STAND_NATURAL)
 
         # Kifizetés ellenőrzése: 100 * 2 = 200 jár vissza a Playerre
-        self.assertEqual(self.game.payouts["PLAYER"], 200)
-        self.assertEqual(self.game.payouts["TOTAL"], 200)
+        self.assertEqual(self.game.bets["PLAYER"], 200)
+        self.assertEqual(self.game.bets["TOTAL"], 200)
         self.assertEqual(self.game.side_winners, [], "Naturalnál nem lehet mellékfogadás nyertes!")
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
@@ -65,9 +65,9 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.winner, WinnerState.NATURAL_BANKER_WON.value)
 
         # Banker 50 * 2 = 100 kifizetés. A Dragon elveszett (0).
-        self.assertEqual(self.game.payouts["BANKER"], 100)
-        self.assertEqual(self.game.payouts["DRAGON"], 0)
-        self.assertEqual(self.game.payouts["TOTAL"], 100)
+        self.assertEqual(self.game.bets["BANKER"], 100)
+        self.assertEqual(self.game.bets["DRAGON"], 0)
+        self.assertEqual(self.game.bets["TOTAL"], 100)
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
         self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)
@@ -97,11 +97,11 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.winner, WinnerState.NATURAL_TIE.value)
 
         # Ellenőrizzük a pushokat és a Tie-t külön-külön
-        self.assertEqual(self.game.payouts["TIE"], 90)
-        self.assertEqual(self.game.payouts["PLAYER"], 100)
-        self.assertEqual(self.game.payouts["BANKER"], 50)
+        self.assertEqual(self.game.bets["TIE"], 90)
+        self.assertEqual(self.game.bets["PLAYER"], 100)
+        self.assertEqual(self.game.bets["BANKER"], 50)
         # Összesen: 90 + 100 + 50 = 240
-        self.assertEqual(self.game.payouts["TOTAL"], 240)
+        self.assertEqual(self.game.bets["TOTAL"], 240)
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
         self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_TIE.value)
@@ -132,8 +132,8 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.winner, WinnerState.NATURAL_PLAYER_WON.value, "A Player Natural 9-nek kell nyernie!")
 
         # Kifizetés: Player tét 2x
-        self.assertEqual(self.game.payouts["PLAYER"], 200)
-        self.assertEqual(self.game.payouts["TOTAL"], 200)
+        self.assertEqual(self.game.bets["PLAYER"], 200)
+        self.assertEqual(self.game.bets["TOTAL"], 200)
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
         self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_PLAYER_WON.value)
@@ -163,8 +163,8 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.winner, WinnerState.NATURAL_BANKER_WON.value, "A Banker Natural 9-nek kell nyernie!")
 
         # Kifizetés: Banker tét 2x
-        self.assertEqual(self.game.payouts["BANKER"], 100)
-        self.assertEqual(self.game.payouts["TOTAL"], 100)
+        self.assertEqual(self.game.bets["BANKER"], 100)
+        self.assertEqual(self.game.bets["TOTAL"], 100)
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
         self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)
@@ -198,14 +198,14 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         self.assertEqual(self.game.side_winners, [])
 
         # Kifizetések ellenőrzése
-        self.assertEqual(self.game.payouts["BANKER"], 200, "A Banker tét duplán jár vissza.")
-        self.assertEqual(self.game.payouts["PLAYER"], 0)
-        self.assertEqual(self.game.payouts["TIE"], 0)
-        self.assertEqual(self.game.payouts["DRAGON"], 0)
-        self.assertEqual(self.game.payouts["PANDA"], 0)
+        self.assertEqual(self.game.bets["BANKER"], 200, "A Banker tét duplán jár vissza.")
+        self.assertEqual(self.game.bets["PLAYER"], 0)
+        self.assertEqual(self.game.bets["TIE"], 0)
+        self.assertEqual(self.game.bets["DRAGON"], 0)
+        self.assertEqual(self.game.bets["PANDA"], 0)
 
         # A teljes egyenlegnövekedés pontosan 200
-        self.assertEqual(self.game.payouts["TOTAL"], 200)
+        self.assertEqual(self.game.bets["TOTAL"], 200)
 
         # --- ROAD MAP ADATBÁZIS ELLENŐRZÉS ---
         self.assertEqual(self.game.road_map_unit["winner"], WinnerState.NATURAL_BANKER_WON.value)

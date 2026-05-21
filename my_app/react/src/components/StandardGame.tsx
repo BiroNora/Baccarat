@@ -11,7 +11,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   }
 
   // Minden kulcsot közvetlenül a gameState tetejéről húzunk ki az IntelliSense alapján
-  const { player, banker, payouts, target_phase, road_map } = gameState;
+  const { player, banker, target_phase, road_map } = gameState;
 
   return (
     <div>
@@ -36,7 +36,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
       </div>
 
       {/* KIFIZETÉSEK (PAYOUTS) */}
-      {payouts && (
+      {/* {payouts && (
         <div>
           <h3>Payouts</h3>
           <div>BANKER: {payouts.BANKER}</div>
@@ -46,7 +46,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <div>PANDA: {payouts.PANDA}</div>
           <div><strong>TOTAL PAYOUT: {payouts.TOTAL}</strong></div>
         </div>
-      )}
+      )} */}
 
       {/* ROADMAP KÖRÖK LISTÁZÁSA */}
       {road_map && road_map.length > 0 && (

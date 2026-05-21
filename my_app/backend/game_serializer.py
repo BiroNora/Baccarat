@@ -26,17 +26,22 @@ class GameSerializer:
 
     @staticmethod
     def serialize_for_client_init(game) -> Dict[str, Any]:
+        calc_phase = (
+            PhaseState.SHUFFLING
+            if (game.bets["TOTAL"] > 0)
+            else PhaseState.NONE
+        )
+
         return {
-            "deck_len": game.deck_len_init if len(game.deck) == 0 else len(game.deck),
+            "deck_len": game.get_deck_len(),
             "target_phase": game.get_target_phase().value,
-            "pre_phase": game.get_pre_phase().value
+            "pre_phase": calc_phase.value,
         }
 
     @staticmethod
     def serialize_clear_game_state(game) -> Dict[str, Any]:
         return {
             "bets": 0,
-            "bet_list": [],
             "deck_len": game.deck_len_init,
             "target_phase": PhaseState.BETTING.value,
         }
@@ -48,21 +53,16 @@ class GameSerializer:
             if (not game.is_round_active and game.is_session_init)
             else game.get_deck_len()
         )
-
+        print("50 app.py d_len:", d_len)
         calc_phase = (
-            PhaseState.NONE
-            if not game.bet_list
-            else (
-                PhaseState.SHUFFLING
-                if (d_len == Game.TOTAL_INITIAL_CARDS or d_len < game.shoe_cut_limit)
-                else PhaseState.INIT_GAME
-            )
+            PhaseState.SHUFFLING
+            if (d_len == Game.TOTAL_INITIAL_CARDS or d_len < game.shoe_cut_limit)
+            else PhaseState.INIT_GAME
         )
 
         return {
             "shoe_cut": game.shoe_cut_limit,
             "bets": game.bets,
-            "bet_list": game.bet_list,
             "deck_len": d_len,
             "target_phase": PhaseState.BETTING.value,
             "pre_phase": calc_phase.value,
@@ -91,9 +91,10 @@ class GameSerializer:
         return {
             "player": game.player,
             "banker": game.banker,
+            "bets": game.bets,
             "deck_len": game.get_deck_len(),
-            "payouts": game.payouts,
             "target_phase": game.get_target_phase().value,
+            "pre_phase": game.get_pre_phase().value,
         }
 
     @staticmethod

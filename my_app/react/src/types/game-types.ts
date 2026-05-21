@@ -25,8 +25,6 @@ export interface GameStateData {
   tokens: number;
   road_map: RoadMapUnit[];
   bets: BetMap;
-  bet_list: BetListMap;
-  payouts: BetMap;
   target_phase: GameState | null;
   pre_phase: GameState | null;
   final_phase: GameState | null;
@@ -127,13 +125,4 @@ export interface BetMap {
   DRAGON: number;
   TOTAL: number;
   [key: string]: number | undefined;
-}
-
-export interface BetListMap {
-  PLAYER: number[];
-  BANKER: number[];
-  TIE: number[];
-  PANDA: number[];
-  DRAGON: number[];
-  [key: string]: number[] | undefined; // Index signature a biztonság kedvéért
 }

@@ -8,7 +8,7 @@ interface BettingProps {
   gameState: GameStateData;
   onPlaceBet: (amount: number, selectedBetType: BetKey) => void;
   retakeBet: (type: BetKey) => void;
-  onStartGame: (type: BetKey | null) => void;
+  onStartGame: () => void;
   isWFSR: boolean;
 }
 
@@ -27,6 +27,15 @@ const Betting: React.FC<BettingProps> = ({
 
   const betAmounts = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
+  // Fogadási lehetőségek listája a rendereléshez
+  const betOptions = [
+    { id: "DRAGON", label: "DRAGON", class: "dragon" },
+    { id: "PANDA", label: "PANDA", class: "panda" },
+    { id: "TIE", label: "TIE", class: "tie" },
+    { id: "BANKER", label: "BANKER", class: "banker" },
+    { id: "PLAYER", label: "PLAYER", class: "player" },
+  ] as const;
+
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
@@ -39,8 +48,7 @@ const Betting: React.FC<BettingProps> = ({
     };
   }, []);
 
-  // Kiszámoljuk az asztalon lévő összes tétet a Start gombhoz
-  const totalBetOnTable = bets["TOTAL"] || 0;
+  const hasActiveBet = betOptions.some((option) => (bets[option.id] || 0) > 0);
 
   const isTypeDisabled = (typeKey: BetKey) => {
     if (isWFSR) return true;
@@ -75,25 +83,16 @@ const Betting: React.FC<BettingProps> = ({
     transition: { duration: 0.3 },
   };
 
-  // Fogadási lehetőségek listája a rendereléshez
-  const betOptions = [
-    { id: "DRAGON", label: "DRAGON", class: "dragon" },
-    { id: "PANDA", label: "PANDA", class: "panda" },
-    { id: "TIE", label: "TIE", class: "tie" },
-    { id: "BANKER", label: "BANKER", class: "banker" },
-    { id: "PLAYER", label: "PLAYER", class: "player" },
-  ] as const;
-
   return (
     <div className="betting-screen-container">
       {/* START GOMB */}
       <motion.button
         id="start-button"
-        onClick={() => onStartGame(selectedBetType)}
-        disabled={totalBetOnTable === 0 || isWFSR || selectedBetType === null}
+        onClick={() => onStartGame()}
+        disabled={!hasActiveBet || isWFSR}
         variants={variants}
         animate={
-          totalBetOnTable === 0 || isWFSR || selectedBetType === null
+          !hasActiveBet || isWFSR
             ? "disabled"
             : "enabled"
         }
@@ -113,13 +112,16 @@ const Betting: React.FC<BettingProps> = ({
               <span>{option.label}</span>
             </motion.button>
 
-            {/* MINI BET KIJELZŐ - Csak akkor mutat értéket, ha ez a típus aktív */}
+            {/* MINI BET KIJELZŐ - Mindig mutatja a backend szerinti összeget! */}
             <motion.button
               className="mini-bet-display"
               onClick={(e) => {
                 e.stopPropagation(); // Ne váltsa ki a szülő clicket
                 const currentBet = bets[option.id] || 0;
                 if (currentBet > 0) retakeBet(option.id);
+                if (selectedBetType === option.id) {
+                    setSelectedBetType(null);
+                  }
               }}
               disabled={isWFSR || (bets[option.id] || 0) === 0}
               animate={(bets[option.id] || 0) > 0 ? "enabled" : "disabled"}

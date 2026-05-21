@@ -7,7 +7,14 @@ from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
 VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON"]
-ROAD_MAP_UNIT = ["winner", "player_score", "banker_score", "is_natural", "is_dragon", "is_panda"]
+ROAD_MAP_UNIT = [
+    "winner",
+    "player_score",
+    "banker_score",
+    "is_natural",
+    "is_dragon",
+    "is_panda",
+]
 
 
 class Game:
@@ -35,8 +42,8 @@ class Game:
         self.deck = []
         self.deck_len_init = Game.TOTAL_INITIAL_CARDS
         self.bet: int = 0
-        self.set_bets_to_null() # self.bets és self.bet_list
-        self.payouts = {key: 0 for key in VALID_BET_TYPES}
+        self.bets = {key: 0 for key in VALID_BET_TYPES}
+        self.clean_profit = 0
         self.winner = WinnerState.NONE
         self.side_winners = []
         self.road_map_unit = {key: 0 for key in ROAD_MAP_UNIT}
@@ -75,7 +82,7 @@ class Game:
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
             self.pre_phase = PhaseState.BURNING_CARDS
             self.final_phase = PhaseState.INIT_GAME
-        print("78 bets: ", self.bets)
+        print("85 shoe_cut bets: ", self.bets)
         return self.deck
 
     def deck_penetration(self):
@@ -94,6 +101,7 @@ class Game:
 
     def initialize_new_round(self):
         self.clear_up()
+        self.is_round_active = True
 
         print("98 bets: ", self.bets)
 
@@ -145,7 +153,17 @@ class Game:
         # BANKER SZABÁLYA: Kaszinó mátrix szótár
         # Kulcs: a Banker pontszáma. Érték: azok a Player lapok, amikre a Banker HÚZ.
         banker_rules = {
-            3: [0, 1, 2, 3, 4, 5, 6, 7, 9],  # Mindig húz, kivéve ha a Player 3. lapja 8-as
+            3: [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                9,
+            ],  # Mindig húz, kivéve ha a Player 3. lapja 8-as
             4: [2, 3, 4, 5, 6, 7],
             5: [4, 5, 6, 7],
             6: [6, 7],
@@ -172,16 +190,30 @@ class Game:
         p_s = self.player["sum"]
         b_s = self.banker["sum"]
 
-        is_natural = len(self.player["hand"]) == 2 and len(self.banker["hand"]) == 2 and (p_s >= 8 or b_s >= 8)
+        is_natural = (
+            len(self.player["hand"]) == 2
+            and len(self.banker["hand"]) == 2
+            and (p_s >= 8 or b_s >= 8)
+        )
 
         if p_s > b_s:
-            self.winner = WinnerState.NATURAL_PLAYER_WON.value if is_natural else WinnerState.PLAYER_WON.value
+            self.winner = (
+                WinnerState.NATURAL_PLAYER_WON.value
+                if is_natural
+                else WinnerState.PLAYER_WON.value
+            )
 
         elif b_s > p_s:
-            self.winner = WinnerState.NATURAL_BANKER_WON.value if is_natural else WinnerState.BANKER_WON.value
+            self.winner = (
+                WinnerState.NATURAL_BANKER_WON.value
+                if is_natural
+                else WinnerState.BANKER_WON.value
+            )
 
         else:
-            self.winner = WinnerState.NATURAL_TIE.value if is_natural else WinnerState.TIE.value
+            self.winner = (
+                WinnerState.NATURAL_TIE.value if is_natural else WinnerState.TIE.value
+            )
 
     def determine_side_outcomes(self):
         p_s = self.player["sum"]
@@ -207,7 +239,7 @@ class Game:
         is_natural_round = self.winner in [
             WinnerState.NATURAL_PLAYER_WON.value,
             WinnerState.NATURAL_BANKER_WON.value,
-            WinnerState.NATURAL_TIE.value
+            WinnerState.NATURAL_TIE.value,
         ]
 
         self.road_map_unit = {
@@ -216,77 +248,84 @@ class Game:
             "banker_score": b_s,
             "is_natural": is_natural_round,
             "is_dragon": BetType.DRAGON.value in self.side_winners,
-            "is_panda": BetType.PANDA.value in self.side_winners
+            "is_panda": BetType.PANDA.value in self.side_winners,
         }
 
     def process_rewards(self):
         self.update_road_map_unit()
 
-        self.payouts = {key: 0 for key in VALID_BET_TYPES}
-
         w = self.winner
         sw = self.side_winners
         b = self.bets
 
-        # Segédváltozók az átláthatóságért az Enumok alapján
-        is_player_win = w in [WinnerState.PLAYER_WON.value, WinnerState.NATURAL_PLAYER_WON.value]
-        is_banker_win = w in [WinnerState.BANKER_WON.value, WinnerState.NATURAL_BANKER_WON.value]
-        is_tie_win    = w in [WinnerState.TIE.value, WinnerState.NATURAL_TIE.value]
+        is_player_win = w in [
+            WinnerState.PLAYER_WON.value,
+            WinnerState.NATURAL_PLAYER_WON.value,
+        ]
+        is_banker_win = w in [
+            WinnerState.BANKER_WON.value,
+            WinnerState.NATURAL_BANKER_WON.value,
+        ]
+        is_tie_win = w in [WinnerState.TIE.value, WinnerState.NATURAL_TIE.value]
 
         has_panda = BetType.PANDA.value in sw
         has_dragon = BetType.DRAGON.value in sw
 
-        # --- SIMA FOGADÁSOK SZORZÁSA ÉS PUSH KEZELÉSE ---
-        # PLAYER nyer: ha a fő kimenetel Player győzelem (sima/natural) VAGY ha PANDA 8 lett
-        if is_player_win or has_panda:
-            # 1:1 kifizetés + saját tét visszajár = 2x szorzó
-            self.payouts["PLAYER"] = b.get("PLAYER", 0) * 2
+        # 1. Összeszámoljuk, mennyi zsetont tett fel a játékos ÖSSZESEN ebben a körben
+        # Ezt még a kifizetések kiszámítása és a zsebek felülírása ELŐTT kell megtenni!
+        total_initial_bets = sum(b.get(key, 0) for key in VALID_BET_TYPES)
 
-        # BANKER nyer (Sima vagy Natural)
+        # 2. Helyi szorzótábla az elszámoláshoz
+        local_payouts = {key: 0 for key in VALID_BET_TYPES}
+
+        # --- JUTALMAK KISZÁMÍTÁSA ---
+        if is_player_win or has_panda:
+            local_payouts["PLAYER"] = b.get("PLAYER", 0) * 2
+
         if is_banker_win:
             if has_dragon:
-                # EZ BACCARAT PUSH SZABÁLY: Ha Dragon 7 van, a sima Banker tét csak visszajár (1x szorzó)
-                self.payouts["BANKER"] = b.get("BANKER", 0)
+                local_payouts["BANKER"] = b.get("BANKER", 0)
             else:
-                # Sima Banker győzelem (1:1 kifizetés + saját tét = 2x szorzó)
-                self.payouts["BANKER"] = b.get("BANKER", 0) * 2
+                local_payouts["BANKER"] = b.get("BANKER", 0) * 2
 
-        # TIE (Döntetlen) nyer (Sima vagy Natural)
         if is_tie_win:
-            # 8:1-et fizet + saját tét visszajár = 9x szorzó
-            self.payouts["TIE"] = b.get("TIE", 0) * 9
+            local_payouts["TIE"] = b.get("TIE", 0) * 9
+            local_payouts["PLAYER"] = b.get("PLAYER", 0)
+            local_payouts["BANKER"] = b.get("BANKER", 0)
 
-            # Döntetlen esetén a sima PLAYER ÉS BANKER tétek visszajárnak (Push -> 1x szorzó)
-            self.payouts["PLAYER"] = b.get("PLAYER", 0)
-            self.payouts["BANKER"] = b.get("BANKER", 0)
-
-
-        # --- MELLÉKFOGADÁSOK (SIDE BETS) SZORZÁSA ---
-        # DRAGON 7 nyer (40:1 + saját tét = 41x szorzó)
         if has_dragon:
-            self.payouts["DRAGON"] = b.get("DRAGON", 0) * 41
+            local_payouts["DRAGON"] = b.get("DRAGON", 0) * 41
 
-        # PANDA 8 nyer (25:1 + saját tét = 26x szorzó)
         if has_panda:
-            self.payouts["PANDA"] = b.get("PANDA", 0) * 26
+            local_payouts["PANDA"] = b.get("PANDA", 0) * 26
 
+        # 3. Összegezzük a bruttó kifizetést (amennyi pénz most az asztalon landol összesen)
+        total_gross_payout = sum(local_payouts.values())
 
-        # --- ÖSSZEGZÉS ÉS EGYENLEG FRISSÍTÉS ---
-        total = sum(value for key, value in self.payouts.items() if key != "TOTAL")
-        self.payouts["TOTAL"] = total
+        # 4. KISZÁMOLJUK A TISZTA NYERESÉGET (Bruttó kifizetés - Amit feltett a kör elején)
+        # Ez az adatbázisban egy ideiglenes tulajdonság (property vagy attribútum) lesz a játékban,
+        # amit a GameSerializer gond nélkül be tud csomagolni a JSON-be!
+        self.clean_profit = total_gross_payout - total_initial_bets
+
+        # 5. A különféle BET ZSEBEK megkapják a megérdemelt jutalmukat (vagy 0-zódnak)
+        # Így a tétek automatikusan átgördülnek a következő Betting fázisra!
+        for key in VALID_BET_TYPES:
+            self.bets[key] = local_payouts[key]
+
+        self.bets["TOTAL"] = sum(self.bets[key] for key in VALID_BET_TYPES)
+        print("316 process_rewards bets: ", self.bets)
+        print("317 TOTAL: ", self.bets["TOTAL"])
 
         self.is_round_active = False
 
-        return total
+    def clear_bet_by_type(self, bet_type_name):
+        removed_amount = self.bets.get(bet_type_name, 0)
 
+        if removed_amount > 0:
+            self.bets[bet_type_name] = 0
+            self.bets["TOTAL"] -= removed_amount
 
-    def retake_bet_from_bet_list(self, bet_type_name):
-        if bet_type_name in self.bet_list and self.bet_list[bet_type_name]:
-            removed_chip = self.bet_list[bet_type_name].pop()
-            self.bets[bet_type_name] -= removed_chip
-            self.bets["TOTAL"] -= removed_chip
-
-            return removed_chip
+            return removed_amount
         else:
             return 0
 
@@ -299,8 +338,6 @@ class Game:
             "hand": [],
             "sum": 0,
         }
-        self.payouts = {key: 0 for key in VALID_BET_TYPES}
-        self.payouts["TOTAL"] = 0
         self.is_natural = False
         self.is_player_third_card = False
         self.is_banker_third_card = False
@@ -331,13 +368,11 @@ class Game:
         if bet_type_name in VALID_BET_TYPES:
             self.bets[bet_type_name] += amount
             self.bets["TOTAL"] += amount
-            self.bet_list[bet_type_name].append(amount)
         else:
             print(f"Hiba: {bet_type_name} nem érvényes fogadás!")
 
     def set_bets_to_null(self):
         self.bets = {key: 0 for key in VALID_BET_TYPES}
-        self.bet_list = {key: [] for key in VALID_BET_TYPES}
         self.bets["TOTAL"] = 0
 
     def set_bet_type(self, type_value):
@@ -375,8 +410,6 @@ class Game:
             "is_banker_third_card": self.is_banker_third_card,
             "deck_len": self.get_deck_len(),
             "bets": self.bets,
-            "bet_list": self.bet_list,
-            "payouts": self.payouts,
             "side_winners": self.side_winners,
             "road_map_unit": self.road_map_unit,
             "is_round_active": self.is_round_active,
@@ -400,9 +433,6 @@ class Game:
         game.set_bets_to_null()
         raw_bets = data.get("bets", {})
         game.bets.update(raw_bets)
-        raw_bet_list = data.get("bet_list", {})
-        game.bet_list.update(raw_bet_list)
-        game.payouts = {key: 0 for key in VALID_BET_TYPES}
         game.side_winners = data["side_winners"]
         raw_unit = data.get("road_map_unit")
         game.road_map_unit = raw_unit if raw_unit else {key: 0 for key in ROAD_MAP_UNIT}
