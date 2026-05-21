@@ -27,24 +27,6 @@ const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm }) => {
         className="cut-slider"
       />
 
-      <div className="cut-info">
-        <i>Selected card: </i>
-        <div>
-          <span className="highlight">
-            <i
-              style={{
-                display: "inline-block",
-                width: "40px",
-                textAlign: "center",
-              }}
-            >
-              {cutValue}
-            </i>
-          </span>{" "}
-          / <i>{initDeckLen}</i>
-        </div>
-      </div>
-
       <button className="cut-button" onClick={() => onConfirm(cutValue)}>
         <i>Confirm Cut</i>
       </button>

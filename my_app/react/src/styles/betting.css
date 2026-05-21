@@ -9,12 +9,6 @@
   padding-bottom: 0.2rem;
 }
 
-.main-container {
-  padding: 1rem 0.2rem;
-  margin: 0;
-  max-width: 100rem;
-}
-
 .betting-screen-container {
   padding-top: var(--extra-vertical-padding1);
   display: flex;
@@ -23,15 +17,14 @@
   padding: 0.5rem;
   background: radial-gradient(
     circle,
-    #f91e43 0%,    /* Középen az eredeti világosabb szín */
-    #e01f3f 40%,   /* Kicsit sötétebb átmenet */
-    #a31e34 100%   /* A legszélén mély sötétbordó */
+    #f91e43 0%, /* Középen az eredeti világosabb szín */
+    #e01f3f 40%, /* Kicsit sötétebb átmenet */
+    #a31e34 100% /* A legszélén mély sötétbordó */
   );
-  /*background-color: #a31e34;*/
   border-radius: 0.75rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   border: 1px solid #ca8a04; /* yellow-600 */
-  max-width: 60rem;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -48,7 +41,8 @@
   padding-top: var(--extra-vertical-padding2);
 }
 
-.bettype-button-group, .chips {
+.bettype-button-group,
+.chips {
   display: flex;
   flex-wrap: wrap; /* Ez a kulcs: engedi az egymás alá ugrást */
   justify-content: center;
@@ -62,7 +56,9 @@
 }
 
 .target-selector-btn.active {
-  filter: brightness(0.85) !important; /* Kicsit sötétebb lesz, mintha be lenne nyomva */
+  filter: brightness(
+    0.85
+  ) !important; /* Kicsit sötétebb lesz, mintha be lenne nyomva */
   border-style: inset !important; /* "Belső" keret, amitől benyomottnak tűnik */
   background-color: #a00d0d !important;
   outline: 1px solid #2a2720 !important; /* Vagy egy vékony keret, hogy látszódjon a választás */
@@ -94,12 +90,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 7.0rem;
+  min-width: 7rem;
 }
 
 /* A jobb oldali fix oszlop a számoknak */
 .mini-bet-display {
-  min-width: 7.0rem;
+  min-width: 7rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,28 +104,32 @@
 }
 
 .bank-display {
-  display: flex;          /* Flexbox-szal egy sorba rendezi a gyerekeket */
-  align-items: center;    /* Függőlegesen középre igazítja a szöveget és a számot */
+  display: flex; /* Flexbox-szal egy sorba rendezi a gyerekeket */
+  align-items: center; /* Függőlegesen középre igazítja a szöveget és a számot */
   justify-content: center; /* Ha középre akarod az egész sort az oldalon */
-  white-space: nowrap;    /* Megakadályozza, hogy véletlenül törjön a sor */
+  white-space: nowrap; /* Megakadályozza, hogy véletlenül törjön a sor */
 }
 
 .bank-value-wrapper {
-  display: inline-flex;   /* Csak akkora helyet foglal, amekkora a szám */
-  position: relative;     /* Segít az AnimatePresence-nek az animáció alatt */
-  min-width: 50px;        /* Opcionális: fix helyet hagy a számnak, hogy ne ugráljon a szöveg */
+  display: inline-flex; /* Csak akkora helyet foglal, amekkora a szám */
+  position: relative; /* Segít az AnimatePresence-nek az animáció alatt */
+  min-width: 50px; /* Opcionális: fix helyet hagy a számnak, hogy ne ugráljon a szöveg */
 }
 
 .chips-section {
-  padding: 1.0rem 0 0.7rem 0;
+  padding: 1rem 0 0.7rem 0;
 }
 
 .chips-wrapper {
-  display: flex;         /* Egy sorba rendezi a gombokat */
-  flex-wrap: wrap;       /* Ha elfogy a hely, új sorba teszi őket */
+  display: flex; /* Egy sorba rendezi a gombokat */
+  flex-wrap: wrap; /* Ha elfogy a hely, új sorba teszi őket */
   justify-content: center; /* Vízszintesen középre igazítja a csoportot */
-  align-items: center;   /* Függőlegesen is középre igazít */
-  gap: 12px;             /* A kért 12 pixeles távolság minden gomb között */
+  align-items: center; /* Függőlegesen is középre igazít */
+  gap: clamp(
+    0.1rem,
+    1.25vw,
+    0.5rem
+  ); /* A kért 12 pixeles távolság minden gomb között */
   width: 100%;
-  padding: 2px;         /* Egy kis belső margó, hogy ne érjenek a szélhez */
+  padding: 0.5rem; /* Egy kis belső margó, hogy ne érjenek a szélhez */
 }
