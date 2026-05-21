@@ -6,10 +6,14 @@ interface TableProps {
 }
 
 const Winner: React.FC<TableProps> = ({ gameState }) => {
-  const { banker, winner } = gameState;
+  const { road_map } = gameState;
 
-  const index = banker.natural_21 !== 0 ? banker.natural_21 : winner;
-  const winners = states[index];
+  if (!road_map || road_map.length === 0) {
+    return <div>No rounds played yet.</div>;
+  }
+
+  const lastRound = road_map[road_map.length - 1];
+  const lastWinnerName = (states)[lastRound.winner] || "Unknown";
 
   const props = {
     initial: { opacity: 0 },
@@ -23,7 +27,7 @@ const Winner: React.FC<TableProps> = ({ gameState }) => {
 
   return (
     <div className="winners merriweather9black">
-      <motion.span {...props}>{winners}</motion.span>
+      <motion.span {...props}>{lastWinnerName}</motion.span>
     </div>
   );
 };

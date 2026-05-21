@@ -14,6 +14,7 @@ import { Shifting } from "./components/Shifting";
 import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
+import Winner from "./components/Winner";
 
 function App() {
   const {
@@ -121,7 +122,7 @@ function App() {
                     <StandardGame gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
-                    {/* <Winner gameState={gameState} /> */}
+                    <Winner gameState={gameState} />
                   </div>
                   <UniqueBetBank
                     gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
@@ -139,7 +140,7 @@ function App() {
                     <StandardGame gameState={gameState} />
                   </div>
                   <div className="game-action-area-wrapper">
-                    {/* <Winner gameState={gameState} /> */}
+                    <Winner gameState={gameState} />
                   </div>
                   <UniqueBetBank
                     gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot

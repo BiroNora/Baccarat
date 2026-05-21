@@ -1,4 +1,4 @@
-import { type GameStateData, type RoadMapUnit } from "../types/game-types";
+import { states, type GameStateData, type RoadMapUnit } from "../types/game-types";
 
 interface TableProps {
   gameState: GameStateData;
@@ -11,7 +11,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   }
 
   // Minden kulcsot közvetlenül a gameState tetejéről húzunk ki az IntelliSense alapján
-  const { player, banker, target_phase, road_map } = gameState;
+  const { player, banker, bets, target_phase, road_map } = gameState;
 
   return (
     <div>
@@ -36,17 +36,17 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
       </div>
 
       {/* KIFIZETÉSEK (PAYOUTS) */}
-      {/* {payouts && (
+      {bets && (
         <div>
           <h3>Payouts</h3>
-          <div>BANKER: {payouts.BANKER}</div>
-          <div>PLAYER: {payouts.PLAYER}</div>
-          <div>TIE: {payouts.TIE}</div>
-          <div>DRAGON: {payouts.DRAGON}</div>
-          <div>PANDA: {payouts.PANDA}</div>
-          <div><strong>TOTAL PAYOUT: {payouts.TOTAL}</strong></div>
+          <div>BANKER: {bets.BANKER}</div>
+          <div>PLAYER: {bets.PLAYER}</div>
+          <div>TIE: {bets.TIE}</div>
+          <div>DRAGON: {bets.DRAGON}</div>
+          <div>PANDA: {bets.PANDA}</div>
+          <div><strong>TOTAL PAYOUT: {bets.TOTAL}</strong></div>
         </div>
-      )} */}
+      )}
 
       {/* ROADMAP KÖRÖK LISTÁZÁSA */}
       {road_map && road_map.length > 0 && (
@@ -54,7 +54,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <h3>Road Map History</h3>
           {road_map.map((round: RoadMapUnit, index: number) => (
             <div key={index}>
-              Round {index + 1} — Winner ID: {round.winner} |
+              Round {index + 1} — Winner ID: {states[round.winner]} |
               Player Score: {round.player_score} |
               Banker Score: {round.banker_score} |
               Dragon: {round.is_dragon ? "Yes" : "No"} |

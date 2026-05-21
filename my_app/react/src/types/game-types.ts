@@ -42,7 +42,7 @@ export interface BankerData {
 }
 
 export interface RoadMapUnit {
-  winner: string;         // 'PLAYER', 'BANKER', 'TIE'
+  winner: number;
   player_score: number;
   banker_score: number;
   is_natural: boolean;
