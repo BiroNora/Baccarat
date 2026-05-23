@@ -1,7 +1,8 @@
-import type { GameState, GameStateData } from "../types/game-types";
+import type { GameState, GameStateData, RoadMapUnit } from "../types/game-types";
 
 export interface GameDataState {
   gameState: GameStateData; // Ez tartja a szerver adatait
+  roadMap: Record<string, RoadMapUnit>;
   preRewardBet: number | null;
   preRewardTokens: number | null;
   initDeckLen: number | null; // Animációhoz
@@ -27,23 +28,21 @@ export type GameAction =
 export const initialGameDataState: GameDataState = {
   gameState: {
     currentGameState: "LOADING",
-    player: {
-      hand: [],
-      sum: 0,
-    },
+    player: { hand: [], sum: 0 },
     banker: { hand: [], sum: 0 },
     winner: 0,
     is_player_third_card: false,
     is_banker_third_card: false,
     deck_len: 0,
     tokens: 0,
-    road_map: [],
     bets: {
       PLAYER: 0,
       BANKER: 0,
       TIE: 0,
       PANDA: 0,
       DRAGON: 0,
+      "P PAIR": 0,
+      "B PAIR": 0,
       TOTAL: 0,
     },
     target_phase: "LOADING",
@@ -51,6 +50,7 @@ export const initialGameDataState: GameDataState = {
     final_phase: "BETTING",
     first_card: null,
   } as GameStateData,
+  roadMap: {},
   preRewardBet: null,
   preRewardTokens: null,
   initDeckLen: null,

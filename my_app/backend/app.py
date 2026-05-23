@@ -10,11 +10,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
-from my_app.backend.game import VALID_BET_TYPES, Game
+from my_app.backend.game import Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
 
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.ext.mutable import MutableDict
 
 load_dotenv()
 
@@ -67,7 +67,7 @@ class User(db.Model):
     tokens = db.Column(db.Integer, default=1000)
     current_game_state = db.Column(JSONB, nullable=True)
     road_map = db.Column(
-        MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
+        MutableDict.as_mutable(JSONB), nullable=False, server_default="{}", default=dict
     )
     idempotency_key = db.Column(db.String(36), nullable=True)
     last_activity = db.Column(
@@ -306,7 +306,7 @@ def initialize_session():
     game_instance.is_session_init = True
 
     try:
-        game_instance.road_map = []
+        game_instance.road_map = {}
     except AttributeError:
         pass
 
@@ -346,7 +346,7 @@ def initialize_session():
                 "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
-                "road_map": [],
+                "road_map": {},
                 "game_state_hint": "USER_SESSION_INITIALIZED",
                 "total_initial_cards": Game.TOTAL_INITIAL_CARDS,
             }
@@ -449,7 +449,6 @@ def create_deck(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": user.road_map,
                 "game_state_hint": "DECK_CREATED",
             }
         ),
@@ -482,7 +481,6 @@ def shoe_cut(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": user.road_map,
                 "game_state_hint": "DECK_SHIFTED",
             }
         ),
@@ -546,192 +544,6 @@ def stand_and_rewards(user, game):
     )
 
 
-# SPLIT part
-# 9
-@app.route("/api/split_request", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def split_request(user, game):
-    bet_amount = game.get_bet()
-
-    if user.tokens < bet_amount:
-        raise ValueError("Insufficient tokens.")
-
-    if not game.can_split(game.player["hand"]) or len(game.players) > 3:
-        raise ValueError("Split not possible.")
-
-    game.split_hand()
-    user.tokens -= bet_amount
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "SPLIT_SUCCESS",
-            }
-        ),
-        200,
-    )
-
-
-# 10
-@app.route("/api/add_to_players_list_by_stand", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def add_to_players_list_by_stand(user, game):
-    game.add_to_players_list_by_stand()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
-            }
-        ),
-        200,
-    )
-
-
-# 11
-@app.route("/api/add_split_player_to_game", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def add_split_player_to_game(user, game):
-    if not game.players:
-        raise ValueError("No more split hands.")
-
-    game.add_split_player_to_game()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
-            }
-        ),
-        200,
-    )
-
-
-# 12
-@app.route("/api/add_player_from_players", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def add_player_from_players(user, game):
-    if not game.players:
-        raise ValueError("No more split hands.")
-
-    game.add_player_from_players()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
-            }
-        ),
-        200,
-    )
-
-
-# 13
-@app.route("/api/split_hit", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def split_hit(user, game):
-    game.hit(False, True)
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "tokens": user.tokens,
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "HIT_RECIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 14
-@app.route("/api/split_double_request", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def split_double_request(user, game):
-    bet_amount_to_double = game.get_bet()
-
-    if user.tokens < bet_amount_to_double:
-        raise ValueError("Insufficient tokens.")
-
-    amount_deducted = game.double_request()
-    user.tokens -= amount_deducted
-    game.hit(True, True)
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Double placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "DOUBLE_RECIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 15
-@app.route("/api/split_stand_and_rewards", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def split_stand_and_rewards(user, game):
-    game.stand(True)
-    token_change = game.rewards()
-    user.tokens += token_change
-
-    game_data = GameSerializer.serialize_by_context(game, request.path)
-
-    game_data["pre_phase"] = (
-        PhaseState.OUT_OF_TOKENS.value
-        if user.tokens <= 0
-        and (not game_data["players"] or len(game_data["players"]) == 0)
-        else PhaseState.BETTING.value
-    )
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Rewards processed and tokens updated.",
-                "current_tokens": user.tokens,
-                "game_state": game_data,
-                "game_state_hint": "REWARDS_PROCESSED",
-            }
-        ),
-        200,
-    )
 
 
 # 16

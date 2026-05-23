@@ -23,7 +23,6 @@ export interface GameStateData {
   is_banker_third_card: boolean;
   deck_len: number;
   tokens: number;
-  road_map: RoadMapUnit[];
   bets: BetMap;
   target_phase: GameState | null;
   pre_phase: GameState | null;
@@ -41,13 +40,23 @@ export interface BankerData {
   sum: number;
 }
 
+export interface ApiResponse {
+  status: string;
+  message?: string;
+  current_tokens: number;
+  game_state: GameStateData;      // Csak a játék adatai
+  road_map?: Record<string, RoadMapUnit>; // Teljesen külön, opcionális egység!
+  game_state_hint: string;
+}
+
 export interface RoadMapUnit {
-  winner: number;
-  player_score: number;
-  banker_score: number;
-  is_natural: boolean;
-  is_dragon: boolean;
-  is_panda: boolean;
+  w: number;       // winner
+  n: boolean;      // is_natural
+  d: boolean;      // is_dragon
+  p: boolean;      // is_panda
+  t: number;       // tie_count (döntetlenek száma)
+  bp: boolean;     // is_b_pair (Banker Pair)
+  pp: boolean;     // is_p_pair (Player Pair)
 }
 
 export type GameStateForClient = {
@@ -104,6 +113,8 @@ export const states = [
 export const sideStates: Record<number, string> = {
   3: "PLAYER PANDA 8", // BetType.PANDA.value = 3
   4: "BANKER DRAGON 7",      // BetType.DRAGON.value = 4
+  5: "PLAYER PAIR",
+  6: "BANKER PAIR",
 };
 
 export const BetTypes = {
@@ -113,9 +124,11 @@ export const BetTypes = {
   TIE: 2,
   PANDA: 3,
   DRAGON: 4,
+  "P PAIR": 5,
+  "B PAIR": 6,
 };
 
-export type BetKey = "PLAYER" | "BANKER" | "TIE" | "PANDA" | "DRAGON" | "TOTAL";
+export type BetKey = "PLAYER" | "BANKER" | "TIE" | "PANDA" | "DRAGON" | "P PAIR"| "B PAIR" | "TOTAL";
 
 export interface BetMap {
   PLAYER: number;
@@ -123,6 +136,8 @@ export interface BetMap {
   TIE: number;
   PANDA: number;
   DRAGON: number;
+  "P PAIR": number;
+  "B PAIR": number;
   TOTAL: number;
   [key: string]: number | undefined;
 }

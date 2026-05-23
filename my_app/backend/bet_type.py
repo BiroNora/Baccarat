@@ -9,3 +9,5 @@ class BetType(IntEnum):
   TIE = 2
   PANDA = 3
   DRAGON = 4
+  P_PAIR = 5
+  B_PAIR = 6

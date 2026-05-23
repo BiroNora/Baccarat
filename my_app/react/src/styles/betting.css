@@ -22,9 +22,9 @@
     #a31e34 100% /* A legszélén mély sötétbordó */
   );
   border-radius: 0.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 20px -12px rgba(0, 0, 0, 0.5);
   border: 1px solid #ca8a04; /* yellow-600 */
-  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
 }
 

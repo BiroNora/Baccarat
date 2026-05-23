@@ -15,6 +15,7 @@ import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import Winner from "./components/Winner";
+import RoadMap from "./components/RoadMap";
 
 function App() {
   const {
@@ -82,7 +83,7 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <Shifting onAnimationEnd={handleShiftingFirstPhaseEnd}/>
+                    <Shifting onAnimationEnd={handleShiftingFirstPhaseEnd} />
                   </PageWrapper>
                 </div>
               );
@@ -103,15 +104,20 @@ function App() {
               );
             case "BETTING":
               return (
-                <div>
+                <div className="game-container-fullscreen">
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <Betting
-                    gameState={gameState}
-                    onPlaceBet={handlePlaceBet}
-                    retakeBet={handleRetakeBet}
-                    onStartGame={handleStartGame}
-                    isWFSR={isWFSR}
-                  />
+                  <div className="game-layout-wrapper">
+                    <RoadMap gameState={gameState} />
+                  </div>
+                  <div className="game-layout-wrapper">
+                    <Betting
+                      gameState={gameState}
+                      onPlaceBet={handlePlaceBet}
+                      retakeBet={handleRetakeBet}
+                      onStartGame={handleStartGame}
+                      isWFSR={isWFSR}
+                    />
+                  </div>
                 </div>
               );
             case "MAIN_STAND":

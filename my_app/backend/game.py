@@ -1,19 +1,21 @@
 import random
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from my_app.backend.bet_type import BetType
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
-VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON"]
-ROAD_MAP_UNIT = [
+VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON", "P PAIR", "B PAIR"]
+ROUND_RESULTS = [
     "winner",
     "player_score",
     "banker_score",
     "is_natural",
     "is_dragon",
     "is_panda",
+    "is_p_pair",
+    "is_b_pair",
 ]
 
 
@@ -46,7 +48,7 @@ class Game:
         self.clean_profit = 0
         self.winner = WinnerState.NONE
         self.side_winners = []
-        self.road_map_unit = {key: 0 for key in ROAD_MAP_UNIT}
+        self.round_result = {key: 0 for key in ROUND_RESULTS}
         self.is_round_active = False
         self.pre_phase = PhaseState.NONE
         self.target_phase = PhaseState.LOADING
@@ -137,6 +139,14 @@ class Game:
 
     def isNatural(self, player_sum, banker_sum):
         return player_sum >= 8 or banker_sum >= 8
+
+    def check_initial_pairs(self, hand):
+        first_two = hand[:2]
+
+        ranks = self.hand_to_ranks(first_two) # Pl: "00", "AK", "72"
+
+        return len(ranks) >= 2 and ranks[0] == ranks[1]
+
 
     def check_third_card_rules(self):
         p_score = self.player["sum"]
@@ -231,7 +241,7 @@ class Game:
         if p_s == 8 and p_cards_count == 3 and p_s > b_s:
             self.side_winners.append(BetType.PANDA.value)
 
-    def update_road_map_unit(self):
+    def update_round_result(self):
         p_s = self.player["sum"]
         b_s = self.banker["sum"]
 
@@ -242,17 +252,19 @@ class Game:
             WinnerState.NATURAL_TIE.value,
         ]
 
-        self.road_map_unit = {
+        self.round_result = {
             "winner": self.winner,  # Tiszta IntEnum érték (1-6)
             "player_score": p_s,
             "banker_score": b_s,
             "is_natural": is_natural_round,
             "is_dragon": BetType.DRAGON.value in self.side_winners,
             "is_panda": BetType.PANDA.value in self.side_winners,
+            "is_p_pair": self.check_initial_pairs(self.player["hand"]),
+            "is_b_pair": self.check_initial_pairs(self.banker["hand"]),
         }
 
     def process_rewards(self):
-        self.update_road_map_unit()
+        self.update_round_result()
 
         w = self.winner
         sw = self.side_winners
@@ -270,6 +282,9 @@ class Game:
 
         has_panda = BetType.PANDA.value in sw
         has_dragon = BetType.DRAGON.value in sw
+
+        has_p_pair = self.round_result.get("is_p_pair", False)
+        has_b_pair = self.round_result.get("is_b_pair", False)
 
         # 1. Összeszámoljuk, mennyi zsetont tett fel a játékos ÖSSZESEN ebben a körben
         # Ezt még a kifizetések kiszámítása és a zsebek felülírása ELŐTT kell megtenni!
@@ -299,24 +314,107 @@ class Game:
         if has_panda:
             local_payouts["PANDA"] = b.get("PANDA", 0) * 26
 
+        if has_p_pair:
+            local_payouts["P PAIR"] = b.get("P PAIR", 0) * 12
+
+        if has_b_pair:
+            local_payouts["B PAIR"] = b.get("B PAIR", 0) * 12
+
         # 3. Összegezzük a bruttó kifizetést (amennyi pénz most az asztalon landol összesen)
         total_gross_payout = sum(local_payouts.values())
 
-        # 4. KISZÁMOLJUK A TISZTA NYERESÉGET (Bruttó kifizetés - Amit feltett a kör elején)
-        # Ez az adatbázisban egy ideiglenes tulajdonság (property vagy attribútum) lesz a játékban,
-        # amit a GameSerializer gond nélkül be tud csomagolni a JSON-be!
+        # 4. KISZÁMOLJUK A TISZTA NYERESÉGET
         self.clean_profit = total_gross_payout - total_initial_bets
 
         # 5. A különféle BET ZSEBEK megkapják a megérdemelt jutalmukat (vagy 0-zódnak)
-        # Így a tétek automatikusan átgördülnek a következő Betting fázisra!
         for key in VALID_BET_TYPES:
             self.bets[key] = local_payouts[key]
 
         self.bets["TOTAL"] = sum(self.bets[key] for key in VALID_BET_TYPES)
-        print("316 process_rewards bets: ", self.bets)
-        print("317 TOTAL: ", self.bets["TOTAL"])
+        print("334 process_rewards bets: ", self.bets)
+        print("335 TOTAL: ", self.bets["TOTAL"])
 
         self.is_round_active = False
+
+    def calculate_baccarat_roadmap(self, history_list):
+        """
+        Kiszámolja a Baccarat Big Road / Dragon Tail koordinátáit a hivatalos kaszinó
+        szabályok szerint, tiszteletben tartva, hogy a sárkány alatti/feletti oszlopok blokkoltak.
+        """
+        if not history_list:
+            return []
+
+        # Foglalt cellák térképe: {(row, col): True}
+        occupied_cells = {}
+
+        # Nyomon követjük, hogy melyik oszlopban meddig jutottak a golyók függőlegesen
+        max_row_used_in_col = {}
+
+        current_col = 0
+        current_row = 0
+
+        # Megkeressük az első olyan kört, ami NEM döntetlen (Tie = 3)
+        # Ez határozza meg a legelső oszlop valódi gazdáját.
+        first_valid_winner = None
+        for item in history_list:
+            if item['winner'] != 3:
+                first_valid_winner = item['winner']
+                break
+
+        # Ha még csak döntetlenek voltak a játékban, vagy az első elem nem döntetlen
+        last_winner = first_valid_winner if first_valid_winner is not None else history_list[0]['winner']
+
+        # Első elem elhelyezése
+        history_list[0]['row'] = current_row
+        history_list[0]['col'] = current_col
+        occupied_cells[(current_row, current_col)] = True
+        max_row_used_in_col[current_col] = current_row
+
+        for index in range(1, len(history_list)):
+            item = history_list[index]
+
+            # 1. SZITUÁCIÓ: Új széria kezdődik (Váltás, pl. Player -> Banker)
+            # Ha döntetlen (3) jön, vagy az első valódi nyertes előtt vagyunk, nem váltunk oszlopot
+            if item['winner'] != 3 and item['winner'] != last_winner:
+                current_col += 1
+
+                # Addig léptetjük jobbra az új oszlopot, amíg teljesen tiszta (szűz) oszlopot nem találunk
+                while (0, current_col) in occupied_cells or current_col in max_row_used_in_col:
+                    current_col += 1
+
+                current_row = 0
+                last_winner = item['winner']
+
+            # 2. SZITUÁCIÓ: Ugyanaz a széria folytatódik (vagy Tie döntetlen jön)
+            else:
+                next_row = current_row + 1
+                next_col = current_col
+
+                # SÁRKÁNY LOGIKA (Dragon Tail):
+                # Ha elérjük a 6. sort (index 5) VAGY a következő cella már foglalt
+                if next_row >= 6 or (next_row, next_col) in occupied_cells:
+                    next_row = current_row       # Marad a sor szintjén
+                    next_col = current_col + 1   # Jobbra kanyarodik
+
+                    # Ha a sárkány futása közben is ütközés lenne, megy tovább jobbra
+                    while (next_row, next_col) in occupied_cells:
+                        next_col += 1
+
+                current_row = next_row
+                current_col = next_col
+
+            # Mentés az elembe
+            item['row'] = current_row
+            item['col'] = current_col
+
+            # Adminisztráció az ütközésekhez
+            occupied_cells[(current_row, current_col)] = True
+
+            # Frissítjük az oszlop legmagasabb használt sorának indexét
+            if current_col not in max_row_used_in_col or current_row > max_row_used_in_col[current_col]:
+                max_row_used_in_col[current_col] = current_row
+
+        return history_list
 
     def clear_bet_by_type(self, bet_type_name):
         removed_amount = self.bets.get(bet_type_name, 0)
@@ -343,7 +441,7 @@ class Game:
         self.is_banker_third_card = False
         self.winner = WinnerState.NONE
         self.side_winners = []
-        self.road_map_unit = {key: 0 for key in ROAD_MAP_UNIT}
+        self.round_result = {key: 0 for key in ROUND_RESULTS}
         self.is_round_active = False
         self.target_phase = PhaseState.NONE
 
@@ -411,7 +509,7 @@ class Game:
             "deck_len": self.get_deck_len(),
             "bets": self.bets,
             "side_winners": self.side_winners,
-            "road_map_unit": self.road_map_unit,
+            "round_result": self.round_result,
             "is_round_active": self.is_round_active,
             "target_phase": self.get_target_phase().value,
             "pre_phase": self.get_pre_phase().value,
@@ -434,8 +532,8 @@ class Game:
         raw_bets = data.get("bets", {})
         game.bets.update(raw_bets)
         game.side_winners = data["side_winners"]
-        raw_unit = data.get("road_map_unit")
-        game.road_map_unit = raw_unit if raw_unit else {key: 0 for key in ROAD_MAP_UNIT}
+        raw_unit = data.get("round_result")
+        game.round_result = raw_unit if raw_unit else {key: 0 for key in ROUND_RESULTS}
         game.is_round_active = data.get("is_round_active", False)
         raw_pre = data.get("pre_phase")
         game.pre_phase = PhaseState(raw_pre) if raw_pre else game.get_pre_phase()

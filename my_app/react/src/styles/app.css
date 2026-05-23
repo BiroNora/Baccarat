@@ -1,0 +1,31 @@
+.game-container-fullscreen {
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#cards, .titles {
+  flex-shrink: 0;
+}
+
+.game-layout-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse; /* Mobilon Roadmap felül, Betting alul */
+  gap: 1rem;
+  padding: 0.5rem 0.5rem 2rem 0.5rem;
+}
+
+ @media (min-width: 64rem) {
+  .game-layout-wrapper {
+    flex-direction: row; /* Laptopon egymás mellett */
+    overflow-y: hidden;
+  }
+} 
+
+@media (min-width: 64rem) {
+  .casino-panel {
+    flex: 1;
+    max-width: 100%;
+  }
+}
