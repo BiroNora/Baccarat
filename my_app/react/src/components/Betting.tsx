@@ -1,4 +1,9 @@
-import { type BetKey, type GameStateData } from "../types/game-types";
+import {
+  BetTypes,
+  type BetKey,
+  type BetTypeValue,
+  type GameStateData,
+} from "../types/game-types";
 import "../styles/betting.css";
 import { formatNumber } from "../utilities/utils";
 import { useEffect, useRef, useState } from "react";
@@ -6,8 +11,8 @@ import { AnimatePresence, motion } from "motion/react";
 
 interface BettingProps {
   gameState: GameStateData;
-  onPlaceBet: (amount: number, selectedBetType: BetKey) => void;
-  retakeBet: (type: BetKey) => void;
+  onPlaceBet: (amount: number, selectedBetType: BetTypeValue) => void;
+  retakeBet: (type: BetTypeValue) => void;
   onStartGame: () => void;
   isWFSR: boolean;
 }
@@ -23,17 +28,46 @@ const Betting: React.FC<BettingProps> = ({
 
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
-  const [selectedBetType, setSelectedBetType] = useState<BetKey | null>(null);
+  const [selectedBetType, setSelectedBetType] = useState<BetTypeValue | null>(
+    null,
+  );
 
   const betAmounts = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
   // Fogadási lehetőségek listája a rendereléshez
   const betOptions = [
-    { id: "DRAGON", label: "DRAGON", class: "dragon" },
-    { id: "PANDA", label: "PANDA", class: "panda" },
-    { id: "TIE", label: "TIE", class: "tie" },
-    { id: "BANKER", label: "BANKER", class: "banker" },
-    { id: "PLAYER", label: "PLAYER", class: "player" },
+    {
+      id: BetTypes.DRAGON,
+      label: "DRAGON",
+      backendKey: "DRAGON",
+      class: "dragon",
+    },
+    { id: BetTypes.PANDA, label: "PANDA", backendKey: "PANDA", class: "panda" },
+    {
+      id: BetTypes.B_PAIR,
+      label: "B PAIR",
+      backendKey: "B_PAIR",
+      class: "b-pair",
+    },
+    {
+      id: BetTypes.P_PAIR,
+      label: "P PAIR",
+      backendKey: "P_PAIR",
+      class: "p-pair",
+    },
+    { id: BetTypes.TIE, label: "TIE", backendKey: "TIE", class: "tie" },
+    {
+      id: BetTypes.BANKER,
+      label: "BANKER",
+      backendKey: "BANKER",
+      class: "banker",
+    },
+    {
+      id: BetTypes.PLAYER,
+      label: "PLAYER",
+      backendKey: "PLAYER",
+      class: "player",
+    },
   ] as const;
 
   useEffect(() => {
@@ -48,20 +82,33 @@ const Betting: React.FC<BettingProps> = ({
     };
   }, []);
 
-  const hasActiveBet = betOptions.some((option) => (bets[option.id] || 0) > 0);
+  const hasActiveBet = betOptions.some((option) => {
+    const betKey = Object.keys(BetTypes).find(
+      (key) => BetTypes[key as keyof typeof BetTypes] === option.id,
+    ) as BetKey | undefined;
+    return betKey ? (bets[betKey] || 0) > 0 : false;
+  });
 
-  const isTypeDisabled = (typeKey: BetKey) => {
+  const isTypeDisabled = (typeId: BetTypeValue) => {
     if (isWFSR) return true;
 
-    if (typeKey === "BANKER" && (bets["PLAYER"] || 0) > 0) return true;
-    if (typeKey === "PLAYER" && (bets["BANKER"] || 0) > 0) return true;
+    const betKey = Object.keys(BetTypes).find(
+      (key) => BetTypes[key as keyof typeof BetTypes] === typeId,
+    ) as BetKey | undefined;
+
+    if (!betKey) return false;
+
+    if (betKey === "BANKER" && (bets["PLAYER"] || 0) > 0) return true;
+    if (betKey === "PLAYER" && (bets["BANKER"] || 0) > 0) return true;
 
     return false;
   };
 
-  const handleBetTypeClick = (typeKey: BetKey) => {
-    if (isTypeDisabled(typeKey)) return;
-    setSelectedBetType(typeKey);
+  const handleBetTypeClick = (typeId: BetTypeValue) => {
+    if (isTypeDisabled(typeId)) return;
+    console.log("typeId: ", typeId);
+    setSelectedBetType(typeId);
+    console.log("selectedBetType: ", selectedBetType);
   };
 
   const variants = {
@@ -91,54 +138,56 @@ const Betting: React.FC<BettingProps> = ({
         onClick={() => onStartGame()}
         disabled={!hasActiveBet || isWFSR}
         variants={variants}
-        animate={
-          !hasActiveBet || isWFSR
-            ? "disabled"
-            : "enabled"
-        }
+        animate={!hasActiveBet || isWFSR ? "disabled" : "enabled"}
       >
         <motion.span variants={textVariants}>Start Game</motion.span>
       </motion.button>
 
       {/* FŐ FOGADÁSI TERÜLET GRID */}
       <div className="bet-type-grid">
-        {betOptions.map((option) => (
-          <div key={option.id} className={`bet-slot ${option.class}`}>
-            <motion.button
-              className={`target-selector-btn ${selectedBetType === option.id ? "active" : ""}`}
-              onClick={() => handleBetTypeClick(option.id)}
-              disabled={isTypeDisabled(option.id)}
-            >
-              <span>{option.label}</span>
-            </motion.button>
+        {betOptions.map((option) => {
+          const currentBetValue = bets[option.backendKey] || 0;
 
-            {/* MINI BET KIJELZŐ - Mindig mutatja a backend szerinti összeget! */}
-            <motion.button
-              className="mini-bet-display"
-              onClick={(e) => {
-                e.stopPropagation(); // Ne váltsa ki a szülő clicket
-                const currentBet = bets[option.id] || 0;
-                if (currentBet > 0) retakeBet(option.id);
-                if (selectedBetType === option.id) {
-                    setSelectedBetType(null);
+          return (
+            <div key={option.id} className={`bet-slot ${option.class}`}>
+              <motion.button
+                className={`target-selector-btn ${selectedBetType === option.id || currentBetValue > 0 ? "active" : ""}`}
+                onClick={() => handleBetTypeClick(option.id)}
+                disabled={isTypeDisabled(option.id)}
+              >
+                <span>{option.label}</span>
+              </motion.button>
+
+              {/* MINI BET KIJELZŐ - Mindig mutatja a backend szerinti összeget! */}
+              <motion.button
+                className={`mini-bet-display ${selectedBetType === option.id ? "focused" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation(); // Ne váltsa ki a szülő clicket
+                  if (currentBetValue > 0) {
+                    // Ha már ki volt jelölve, és újra rákattint a kis kijelzőre, akkor vonja vissza a tétet (retake)
+                    retakeBet(option.id);
                   }
-              }}
-              disabled={isWFSR || (bets[option.id] || 0) === 0}
-              animate={(bets[option.id] || 0) > 0 ? "enabled" : "disabled"}
-              variants={variants}
-            >
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={`${option.id}-${bets[option.id]}`}
-                  {...fadeProps}
-                >
-                  {formatNumber(bets[option.id] || 0)}
-                </motion.span>
-              </AnimatePresence>
-            </motion.button>
-          </div>
-        ))}
+                }}
+                disabled={isWFSR || currentBetValue === 0}
+                animate={currentBetValue > 0 ? "enabled" : "disabled"}
+                variants={variants}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={`${option.id}-${currentBetValue}`}
+                    {...fadeProps}
+                  >
+                    {formatNumber(currentBetValue)}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.button>
+            </div>
+          );
+        })}
       </div>
+
+      {/* JAVÍTVA: Szöveges logikai kiírás */}
+      <div>hasActiveBet: {hasActiveBet ? "TRUE" : "FALSE"}</div>
 
       {/* BANK SZEKCIÓ */}
       <div className="bank-display merriweather">

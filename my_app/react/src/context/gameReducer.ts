@@ -41,8 +41,8 @@ export const initialGameDataState: GameDataState = {
       TIE: 0,
       PANDA: 0,
       DRAGON: 0,
-      "P PAIR": 0,
-      "B PAIR": 0,
+      P_PAIR: 0,
+      B_PAIR: 0,
       TOTAL: 0,
     },
     target_phase: "LOADING",
@@ -67,8 +67,27 @@ export function gameReducer(
       return {
         ...state,
         gameState: {
-          ...state.gameState, // Megtartjuk a meglévő mezőket (pl. tokens)
-          ...action.payload, // Felülírjuk azokkal, amik a szervertől jöttek
+          ...state.gameState, // 1. Alapból megtartja a régi dolgokat, ha valami hiányozna
+          ...action.payload,   // 2. Rámásolja a szerver friss adatait
+
+          // 3. MÉLY MÁSOLÁS (Deep copy) a kritikus objektumokra, hogy a React garantáltan újrarendereljen:
+          bets: action.payload.bets
+            ? { ...action.payload.bets }
+            : state.gameState.bets, // Ez lemásolja a PLAYER, BANKER, TIE, PANDA stb. összes mezőt egyszerre!
+
+          player: action.payload.player
+            ? {
+                ...action.payload.player,
+                hand: action.payload.player.hand ? [...action.payload.player.hand] : []
+              }
+            : state.gameState.player,
+
+          banker: action.payload.banker
+            ? {
+                ...action.payload.banker,
+                hand: action.payload.banker.hand ? [...action.payload.banker.hand] : []
+              }
+            : state.gameState.banker,
         },
       };
     case "SET_UI_PHASE":

@@ -42,17 +42,18 @@ export async function recoverGameState() {
   return data;
 }
 
-export async function setBet(betAmount: number, selectedBetTypeName: string) {
+export async function setBet(betAmount: number, selectedBetType: number) {
   const data = await callApiEndpoint("/api/bet", "POST", {
     bet: betAmount,
-    type: selectedBetTypeName,
+    type: selectedBetType,
   });
 
   return data;
 }
 
-export async function retakeBet(selectedBetTypeName: string) {
-  const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetTypeName});
+export async function retakeBet(selectedBetType: number) {
+  console.log("55 selectedBetType: ", selectedBetType)
+  const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetType});
 
   return data;
 }

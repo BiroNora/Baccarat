@@ -6,7 +6,7 @@ from my_app.backend.bet_type import BetType
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
-VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON", "P PAIR", "B PAIR"]
+VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON", "P_PAIR", "B_PAIR"]
 ROUND_RESULTS = [
     "winner",
     "player_score",
@@ -338,93 +338,152 @@ class Game:
 
     def calculate_baccarat_roadmap(self, history_list):
         """
-        Kiszámolja a Baccarat Big Road / Dragon Tail koordinátáit a hivatalos kaszinó
-        szabályok szerint, tiszteletben tartva, hogy a sárkány alatti/feletti oszlopok blokkoltak.
+        Kiszámolja a Baccarat Big Road / Dragon Tail koordinátáit.
+        A váltáskor induló új oszlopok kihasználhatják a sárkányfarok feletti üres helyeket!
         """
         if not history_list:
-            return []
+            return {}
 
-        # Foglalt cellák térképe: {(row, col): True}
+        roadmap_dict = {}
+
+        # Foglalt cellák térképe az ütközésekhez: {(row, col): True}
         occupied_cells = {}
-
-        # Nyomon követjük, hogy melyik oszlopban meddig jutottak a golyók függőlegesen
-        max_row_used_in_col = {}
 
         current_col = 0
         current_row = 0
 
-        # Megkeressük az első olyan kört, ami NEM döntetlen (Tie = 3)
-        # Ez határozza meg a legelső oszlop valódi gazdáját.
+        def get_base_winner(winner_value):
+            # 1, 2 = Player | 3, 4 = Banker | minden más = Tie
+            if winner_value in [1, 2]: return 0
+            if winner_value in [3, 4]: return 1
+            return 2
+
+        # Első nem-döntetlen megkeresése
         first_valid_winner = None
         for item in history_list:
-            if item['winner'] != 3:
-                first_valid_winner = item['winner']
+            base_w = get_base_winner(item['winner'])
+            if base_w != 2:
+                first_valid_winner = base_w
                 break
 
-        # Ha még csak döntetlenek voltak a játékban, vagy az első elem nem döntetlen
-        last_winner = first_valid_winner if first_valid_winner is not None else history_list[0]['winner']
+        if first_valid_winner is not None:
+            last_real_winner = first_valid_winner
+        else:
+            last_real_winner = 2
 
         # Első elem elhelyezése
-        history_list[0]['row'] = current_row
-        history_list[0]['col'] = current_col
-        occupied_cells[(current_row, current_col)] = True
-        max_row_used_in_col[current_col] = current_row
+        first_item = history_list[0]
+        first_w = get_base_winner(first_item['winner'])
 
+        matrix_key = f"{current_row}-{current_col}"
+        roadmap_dict[matrix_key] = {
+            "w": first_w,
+            "n": first_item.get("is_natural", False),
+            "d": first_item.get("is_dragon", False),
+            "p": first_item.get("is_panda", False),
+            "t": 1 if first_w == 2 else 0,
+            "bp": first_item.get("is_b_pair", False),
+            "pp": first_item.get("is_p_pair", False)
+        }
+
+        occupied_cells[(current_row, current_col)] = True
+
+        # Ciklus a többi körre
         for index in range(1, len(history_list)):
             item = history_list[index]
+            current_w = get_base_winner(item['winner'])
 
-            # 1. SZITUÁCIÓ: Új széria kezdődik (Váltás, pl. Player -> Banker)
-            # Ha döntetlen (3) jön, vagy az első valódi nyertes előtt vagyunk, nem váltunk oszlopot
-            if item['winner'] != 3 and item['winner'] != last_winner:
+            # --- DÖNTETLEN KEZELÉSE (marad a helyén) ---
+            if current_w == 2:
+                current_key = f"{current_row}-{current_col}"
+                if current_key in roadmap_dict:
+                    roadmap_dict[current_key]["t"] += 1
+                    if item.get("is_b_pair"): roadmap_dict[current_key]["bp"] = True
+                    if item.get("is_p_pair"): roadmap_dict[current_key]["pp"] = True
+                continue
+
+            # --- VÁLTÁS (Új széria kezdődik) ---
+            if last_real_winner != 2 and current_w != last_real_winner:
                 current_col += 1
 
-                # Addig léptetjük jobbra az új oszlopot, amíg teljesen tiszta (szűz) oszlopot nem találunk
-                while (0, current_col) in occupied_cells or current_col in max_row_used_in_col:
+                # Csak azt nézzük, hogy a legfelső (0.) sor foglalt-e!
+                while (0, current_col) in occupied_cells:
                     current_col += 1
 
                 current_row = 0
-                last_winner = item['winner']
+                last_real_winner = current_w
 
-            # 2. SZITUÁCIÓ: Ugyanaz a széria folytatódik (vagy Tie döntetlen jön)
+                # Itt azonnal elmentjük és regisztráljuk a cellát,
+                # így a lenti Sárkányfarok-csúsztató logika ezt a kört már NEM fogja bántani!
+                matrix_key = f"{current_row}-{current_col}"
+                roadmap_dict[matrix_key] = {
+                    "w": current_w,
+                    "n": item.get("is_natural", False),
+                    "d": item.get("is_dragon", False),
+                    "p": item.get("is_panda", False),
+                    "t": 0,
+                    "bp": item.get("is_b_pair", False),
+                    "pp": item.get("is_p_pair", False)
+                }
+
+                occupied_cells[(current_row, current_col)] = True
+                continue # Átugorjuk a lenti alapértelmezett mentést, megyünk a következő körre!
+
+            # --- UGYANAZ A SZÉRIA FOLYTATÓDIK ---
             else:
-                next_row = current_row + 1
-                next_col = current_col
+                if last_real_winner == 2:
+                    last_real_winner = current_w
+                else:
+                    next_row = current_row + 1
+                    next_col = current_col
 
-                # SÁRKÁNY LOGIKA (Dragon Tail):
-                # Ha elérjük a 6. sort (index 5) VAGY a következő cella már foglalt
-                if next_row >= 6 or (next_row, next_col) in occupied_cells:
-                    next_row = current_row       # Marad a sor szintjén
-                    next_col = current_col + 1   # Jobbra kanyarodik
+                    # SÁRKÁNY LOGIKA (Ha eléri az alját VAGY az alatta lévő cella foglalt)
+                    if next_row >= 6 or (next_row, next_col) in occupied_cells:
+                        next_row = current_row
+                        next_col = current_col + 1
 
-                    # Ha a sárkány futása közben is ütközés lenne, megy tovább jobbra
-                    while (next_row, next_col) in occupied_cells:
-                        next_col += 1
+                        # Ha kanyarodás közben is akadályba ütközik, csúszik tovább jobbra
+                        while (next_row, next_col) in occupied_cells:
+                            next_col += 1
 
-                current_row = next_row
-                current_col = next_col
+                    current_row = next_row
+                    current_col = next_col
 
-            # Mentés az elembe
-            item['row'] = current_row
-            item['col'] = current_col
+            # Mentés az új koordinátára
+            matrix_key = f"{current_row}-{current_col}"
+            roadmap_dict[matrix_key] = {
+                "w": current_w,
+                "n": item.get("is_natural", False),
+                "d": item.get("is_dragon", False),
+                "p": item.get("is_panda", False),
+                "t": 0,
+                "bp": item.get("is_b_pair", False),
+                "pp": item.get("is_p_pair", False)
+            }
 
-            # Adminisztráció az ütközésekhez
+            # Regisztráljuk a cellát foglaltként
             occupied_cells[(current_row, current_col)] = True
 
-            # Frissítjük az oszlop legmagasabb használt sorának indexét
-            if current_col not in max_row_used_in_col or current_row > max_row_used_in_col[current_col]:
-                max_row_used_in_col[current_col] = current_row
+        return roadmap_dict
 
-        return history_list
+    def clear_bet_by_type(self, bet_type):
+        try:
+            enum_type = BetType(int(bet_type))
+            bet_type_name = enum_type.name
 
-    def clear_bet_by_type(self, bet_type_name):
-        removed_amount = self.bets.get(bet_type_name, 0)
+            removed_amount = self.bets.get(bet_type_name, 0)
 
-        if removed_amount > 0:
-            self.bets[bet_type_name] = 0
-            self.bets["TOTAL"] -= removed_amount
+            if removed_amount > 0:
+                self.bets[bet_type_name] = 0
+                self.bets["TOTAL"] -= removed_amount
+                print(f"Tét sikeresen visszavéve: {removed_amount} <- {bet_type_name}")
+                return removed_amount
+            else:
+                print(f"Nincs levehető tét a(z) {bet_type_name} mezőn.")
+                return 0
 
-            return removed_amount
-        else:
+        except ValueError:
+            print(f"Hiba: A visszavételhez kapott bet_type ({bet_type}) nem érvényes IntEnum szám!")
             return 0
 
     def clear_up(self):
@@ -462,12 +521,20 @@ class Game:
     def set_player_sum(self, sum):
         self.player["sum"] = sum
 
-    def set_bet(self, amount, bet_type_name):
-        if bet_type_name in VALID_BET_TYPES:
-            self.bets[bet_type_name] += amount
-            self.bets["TOTAL"] += amount
-        else:
-            print(f"Hiba: {bet_type_name} nem érvényes fogadás!")
+    def set_bet(self, amount, bet_type):
+        try:
+            enum_type = BetType(int(bet_type))
+            bet_type_name = enum_type.name
+
+            if bet_type_name in self.bets and enum_type != BetType.NONE:
+                self.bets[bet_type_name] += amount
+                self.bets["TOTAL"] += amount
+                print(f"Sikeres tét: {amount} -> {bet_type_name}")
+            else:
+                print(f"Hiba: {bet_type_name} nem érvényes fogadási mező a játékban!")
+
+        except ValueError:
+            print(f"Hiba: A kapott bet_type ({bet_type}) nem érvényes IntEnum szám!")
 
     def set_bets_to_null(self):
         self.bets = {key: 0 for key in VALID_BET_TYPES}

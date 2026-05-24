@@ -12,7 +12,9 @@ import {
   type HttpError,
 } from "../api/api-calls";
 import {
+  BetTypes,
   type BetKey,
+  type BetTypeValue,
   type GameState,
   type GameStateData,
   type GameStateMachineHookResult,
@@ -126,9 +128,20 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   );
 
   const handlePlaceBet = useCallback(
-    async (amount: number, selectedBetType: BetKey) => {
+    async (amount: number, selectedBetType: BetTypeValue) => {
       const currentTokens = state.gameState.tokens;
-      if (currentTokens < amount || amount <= 0) return;
+      const currentBets = state.gameState.bets;
+
+      console.log("currentBets: on bet", currentBets)
+
+      const betKey = Object.keys(BetTypes).find(
+        (key) => BetTypes[key as keyof typeof BetTypes] === selectedBetType,
+      ) as BetKey | undefined;
+
+      if (currentTokens < amount || amount <= 0 || !betKey) return;
+
+      if (betKey === "BANKER" && (currentBets["PLAYER"] || 0) > 0) return;
+      if (betKey === "PLAYER" && (currentBets["BANKER"] || 0) > 0) return;
 
       executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
@@ -138,11 +151,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const response = extractGameStateData(data);
         if (!response) return;
 
+        console.log("response: on bet", response)
+
         transitionToState(response?.target_phase as GameState, response);
       });
     },
     [
       state.gameState.tokens,
+      state.gameState.bets, // <- FONTOS: bekerült a függőségi tömbbe, mert használjuk a belső checknél!
       executeAsyncAction,
       handleApiAction,
       transitionToState,
@@ -150,20 +166,31 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   );
 
   const handleRetakeBet = useCallback(
-    async (selectedBetType: BetKey) => {
+    async (selectedBetType: BetTypeValue) => {
       const currentBets = state.gameState.bets;
+
+
+
+      const betKey = Object.keys(BetTypes).find(
+        (key) => BetTypes[key as keyof typeof BetTypes] === selectedBetType,
+      ) as BetKey | undefined;
+
       if (
         !currentBets ||
-        !currentBets[selectedBetType] ||
-        currentBets[selectedBetType] <= 0
-      )
+        !betKey ||
+        !currentBets[betKey] ||
+        currentBets[betKey] <= 0
+      ) {
         return;
+      }
 
       executeAsyncAction(async () => {
         const data = await handleApiAction(() => retakeBet(selectedBetType));
 
         const response = extractGameStateData(data);
         if (!response) return;
+
+        console.log("response: on retake bet", response)
 
         transitionToState(response?.target_phase as GameState, response);
       });
@@ -474,7 +501,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     }; */
-
   }, [
     state.gameState.currentGameState,
     state.gameState.pre_phase,

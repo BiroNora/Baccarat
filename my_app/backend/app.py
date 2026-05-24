@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
+from my_app.backend.bet_type import BetType
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -363,26 +364,46 @@ def initialize_session():
 def bet(user, game):
     data = request.get_json() or {}
     bet_amount = data.get("bet", 0)
-    bet_type_name = data.get("type")
+    bet_type = data.get("type")
 
-    if not isinstance(bet_amount, (int, float)) or bet_amount < MINIMUM_BET:
-        raise ValueError(f"Bet must be at least {MINIMUM_BET}.")
+    hint = "BET_SUCCESSFULLY_PLACED"
 
-    if user.tokens < bet_amount:
-        raise ValueError("Insufficient tokens.")
+    try:
+        # 1. VALIDÁCIÓ: Tét összegének ellenőrzése
+        if not isinstance(bet_amount, (int, float)) or bet_amount < MINIMUM_BET:
+            hint = "INVALID_BET_AMOUNT"
 
-    current_player_bet = game.bets.get("PLAYER", 0)
-    current_banker_bet = game.bets.get("BANKER", 0)
+        # 2. VALIDÁCIÓ: Van-e elég zseton
+        elif user.tokens < bet_amount:
+            hint = "INSUFFICIENT_TOKENS"
 
-    if bet_type_name == "PLAYER" and current_banker_bet > 0:
-        raise ValueError("Cannot bet on PLAYER when a BANKER bet is already placed.")
+        # 3. VALIDÁCIÓ: Típus konverzió (mivel a frontendről már szám jön!)
+        elif bet_type is None:
+            hint = "MISSING_BET_TYPE"
 
-    if bet_type_name == "BANKER" and current_player_bet > 0:
-        raise ValueError("Cannot bet on BANKER when a PLAYER bet is already placed.")
+        else:
+            enum_type = BetType(int(bet_type))
+            bet_type_name = enum_type.name  # pl. "PLAYER", "BANKER", "TIE"
 
-    game.set_bet(bet_amount, bet_type_name)
-    user.tokens -= bet_amount
+            # Kivesszük az aktuális téteket a backend string kulcsaival
+            current_player_bet = game.bets.get("PLAYER", 0)
+            current_banker_bet = game.bets.get("BANKER", 0)
 
+            # 4. VALIDÁCIÓ: Egymást kizáró tétek (PLAYER vs BANKER)
+            if bet_type_name == "PLAYER" and current_banker_bet > 0:
+                hint = "PLAYER_BET_BLOCKED_BY_BANKER"
+            elif bet_type_name == "BANKER" and current_player_bet > 0:
+                hint = "BANKER_BET_BLOCKED_BY_PLAYER"
+
+            # HA MINDEN LÉPÉS SIKERES, CSAK AKKOR HAJTJUK VÉGRE A FOGADÁST
+            else:
+                game.set_bet(bet_amount, bet_type)  # Elmentjük (ha a set_bet is fel van készítve az ID-ra vagy az enum_type-ra!)
+                user.tokens -= bet_amount
+
+    except (ValueError, TypeError):
+        hint = "INVALID_BET_TYPE"
+
+    # EGYETLEN KÖZÖS VISSZATÉRÉSI PONT – Bármi hibázik, a felület sértetlen marad!
     return (
         jsonify(
             {
@@ -390,7 +411,7 @@ def bet(user, game):
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "road_map": user.road_map,
-                "game_state_hint": "BET_SUCCESSFULLY_PLACED",
+                "game_state_hint": hint,
             }
         ),
         200,
@@ -404,20 +425,25 @@ def bet(user, game):
 @with_game_state
 def retake_bet(user, game):
     data = request.get_json() or {}
-    bet_type_name = data.get("type")
+    bet_type = data.get("type")
 
-    if bet_type_name is None:
-        raise ValueError("Field type must be specified.")
+    hint = "NO_BET_TO_RETAKE"
 
-    bet_amount = game.bets.get(bet_type_name, 0)
+    if bet_type is None:
+        hint = "MISSING_BET_TYPE"
+    else:
+        try:
+            enum_type = BetType(int(bet_type))
+            bet_type_name = enum_type.name  # pl. "P_PAIR"
 
-    if bet_amount <= 0:
-        raise ValueError(
-            "No bet to retake on this field (amount must be greater than 0)."
-        )
+            bet_amount = game.bets.get(bet_type_name, 0)
+            if bet_amount > 0:
+                amount_to_return = game.clear_bet_by_type(bet_type)
+                user.tokens += amount_to_return
+                hint = "BET_SUCCESSFULLY_RETAKEN"
 
-    amount_to_return = game.clear_bet_by_type(bet_type_name)
-    user.tokens += amount_to_return
+        except (ValueError, TypeError):
+            hint = "INVALID_BET_TYPE"
 
     return (
         jsonify(
@@ -426,7 +452,7 @@ def retake_bet(user, game):
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "road_map": user.road_map,
-                "game_state_hint": "BET_SUCCESSFULLY_RETAKEN",
+                "game_state_hint": hint,
             }
         ),
         200,

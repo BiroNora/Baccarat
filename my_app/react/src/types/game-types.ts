@@ -28,6 +28,7 @@ export interface GameStateData {
   pre_phase: GameState | null;
   final_phase: GameState | null;
   first_card: string | null;
+  road_map?: RoadMapUnit[];
 }
 
 export interface PlayerData {
@@ -89,8 +90,8 @@ export type GameStateMachineHookResult = {
     newState: GameState,
     newData?: Partial<GameStateData>,
   ) => void;
-  handlePlaceBet: (amount: number, selectedBetType: BetKey) => Promise<void>;
-  handleRetakeBet: (selectedBetType: BetKey) => void;
+  handlePlaceBet: (amount: number, selectedBetType: BetTypeValue) => Promise<void>;
+  handleRetakeBet: (selectedBetType: BetTypeValue) => void;
   handleShoeCut: (amount: number) => Promise<void>;
   handleShiftingFirstPhaseEnd: () => void;
   handleStartGame: () => Promise<void>;
@@ -117,18 +118,20 @@ export const sideStates: Record<number, string> = {
   6: "BANKER PAIR",
 };
 
+export type BetTypeValue = typeof BetTypes[keyof typeof BetTypes];
+
 export const BetTypes = {
-  NONE: -1,
-  PLAYER: 0,
-  BANKER: 1,
-  TIE: 2,
-  PANDA: 3,
-  DRAGON: 4,
-  "P PAIR": 5,
-  "B PAIR": 6,
+  NONE: 0,
+  PLAYER: 1,
+  BANKER: 2,
+  TIE: 3,
+  PANDA: 4,
+  DRAGON: 5,
+  P_PAIR: 6,
+  B_PAIR: 7,
 };
 
-export type BetKey = "PLAYER" | "BANKER" | "TIE" | "PANDA" | "DRAGON" | "P PAIR"| "B PAIR" | "TOTAL";
+export type BetKey = "PLAYER" | "BANKER" | "TIE" | "PANDA" | "DRAGON" | "P_PAIR"| "B_PAIR" | "TOTAL";
 
 export interface BetMap {
   PLAYER: number;
@@ -136,8 +139,8 @@ export interface BetMap {
   TIE: number;
   PANDA: number;
   DRAGON: number;
-  "P PAIR": number;
-  "B PAIR": number;
+  P_PAIR: number;
+  B_PAIR: number;
   TOTAL: number;
   [key: string]: number | undefined;
 }
