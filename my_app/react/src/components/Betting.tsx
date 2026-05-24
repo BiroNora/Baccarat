@@ -1,6 +1,5 @@
 import {
   BetTypes,
-  type BetKey,
   type BetTypeValue,
   type GameStateData,
 } from "../types/game-types";
@@ -34,7 +33,6 @@ const Betting: React.FC<BettingProps> = ({
 
   const betAmounts = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
-  // Fogadási lehetőségek listája a rendereléshez
   const betOptions = [
     {
       id: BetTypes.DRAGON,
@@ -82,33 +80,18 @@ const Betting: React.FC<BettingProps> = ({
     };
   }, []);
 
-  const hasActiveBet = betOptions.some((option) => {
-    const betKey = Object.keys(BetTypes).find(
-      (key) => BetTypes[key as keyof typeof BetTypes] === option.id,
-    ) as BetKey | undefined;
-    return betKey ? (bets[betKey] || 0) > 0 : false;
-  });
+  const hasActiveBet = betOptions.some((option) => (bets[option.backendKey] || 0) > 0);
 
-  const isTypeDisabled = (typeId: BetTypeValue) => {
+  const isTypeDisabled = (backendKey: string) => {
     if (isWFSR) return true;
-
-    const betKey = Object.keys(BetTypes).find(
-      (key) => BetTypes[key as keyof typeof BetTypes] === typeId,
-    ) as BetKey | undefined;
-
-    if (!betKey) return false;
-
-    if (betKey === "BANKER" && (bets["PLAYER"] || 0) > 0) return true;
-    if (betKey === "PLAYER" && (bets["BANKER"] || 0) > 0) return true;
-
+    if (backendKey === "BANKER" && (bets["PLAYER"] || 0) > 0) return true;
+    if (backendKey === "PLAYER" && (bets["BANKER"] || 0) > 0) return true;
     return false;
   };
 
-  const handleBetTypeClick = (typeId: BetTypeValue) => {
-    if (isTypeDisabled(typeId)) return;
-    console.log("typeId: ", typeId);
+  const handleBetTypeClick = (typeId: BetTypeValue, backendKey: string) => {
+    if (isTypeDisabled(backendKey)) return;
     setSelectedBetType(typeId);
-    console.log("selectedBetType: ", selectedBetType);
   };
 
   const variants = {
@@ -147,13 +130,15 @@ const Betting: React.FC<BettingProps> = ({
       <div className="bet-type-grid">
         {betOptions.map((option) => {
           const currentBetValue = bets[option.backendKey] || 0;
+          const isButtonActive = selectedBetType === option.id;
+          const isDisabled = isTypeDisabled(option.backendKey);
 
           return (
             <div key={option.id} className={`bet-slot ${option.class}`}>
               <motion.button
-                className={`target-selector-btn ${selectedBetType === option.id || currentBetValue > 0 ? "active" : ""}`}
-                onClick={() => handleBetTypeClick(option.id)}
-                disabled={isTypeDisabled(option.id)}
+                className={`target-selector-btn ${isButtonActive || currentBetValue > 0 ? "active" : ""}`}
+                onClick={() => handleBetTypeClick(option.id, option.backendKey)}
+                disabled={isDisabled}
               >
                 <span>{option.label}</span>
               </motion.button>
@@ -164,7 +149,6 @@ const Betting: React.FC<BettingProps> = ({
                 onClick={(e) => {
                   e.stopPropagation(); // Ne váltsa ki a szülő clicket
                   if (currentBetValue > 0) {
-                    // Ha már ki volt jelölve, és újra rákattint a kis kijelzőre, akkor vonja vissza a tétet (retake)
                     retakeBet(option.id);
                   }
                 }}
@@ -185,9 +169,6 @@ const Betting: React.FC<BettingProps> = ({
           );
         })}
       </div>
-
-      {/* JAVÍTVA: Szöveges logikai kiírás */}
-      <div>hasActiveBet: {hasActiveBet ? "TRUE" : "FALSE"}</div>
 
       {/* BANK SZEKCIÓ */}
       <div className="bank-display merriweather">
