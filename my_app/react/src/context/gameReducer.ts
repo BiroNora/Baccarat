@@ -1,12 +1,12 @@
 import type {
   GameState,
   GameStateData,
-  RoadMapUnit,
+  HistoryUnit,
 } from "../types/game-types";
 
 export interface GameDataState {
   gameState: GameStateData; // Ez tartja a szerver adatait
-  roadMap: Record<string, RoadMapUnit>;
+  history?: HistoryUnit[];
   preRewardBet: number | null;
   preRewardTokens: number | null;
   initDeckLen: number | null; // Animációhoz
@@ -54,7 +54,7 @@ export const initialGameDataState: GameDataState = {
     final_phase: "BETTING",
     first_card: null,
   } as GameStateData,
-  roadMap: {},
+  history: [],
   preRewardBet: null,
   preRewardTokens: null,
   initDeckLen: null,
@@ -97,9 +97,7 @@ export function gameReducer(
               }
             : state.gameState.banker,
 
-          road_map: action.payload.road_map
-            ? { ...action.payload.road_map } // Ez létrehoz egy új objektum referenciát
-            : state.gameState.road_map,
+          history: action.payload.history ? [...action.payload.history] : state.gameState.history,
         },
       };
     case "SET_UI_PHASE":

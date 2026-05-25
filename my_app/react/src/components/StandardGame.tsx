@@ -1,4 +1,4 @@
-import { states, type GameStateData, type RoadMapUnit } from "../types/game-types";
+import { type GameStateData, type HistoryUnit } from "../types/game-types";
 
 interface TableProps {
   gameState: GameStateData;
@@ -11,7 +11,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   }
 
   // Minden kulcsot közvetlenül a gameState tetejéről húzunk ki az IntelliSense alapján
-  const { player, banker, bets, target_phase, road_map } = gameState;
+  const { player, banker, bets, target_phase, history } = gameState;
 
   return (
     <div>
@@ -49,10 +49,10 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
       )}
 
       {/* ROADMAP KÖRÖK LISTÁZÁSA */}
-      {road_map && road_map.length > 0 && (
+      {history && history.length > 0 && (
         <div>
           <h3>Road Map History</h3>
-          {road_map.map((round: RoadMapUnit, index: number) => (
+          {/* {history.map((round: HistoryUnit, index: number) => (
             <div key={index}>
               Round {index + 1} — Winner ID: {states[round.winner]} |
               Player Score: {round.player_score} |
@@ -61,7 +61,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               Panda: {round.is_panda ? "Yes" : "No"} |
               Natural: {round.is_natural ? "Yes" : "No"}
             </div>
-          ))}
+          ))}*/}
         </div>
       )}
     </div>

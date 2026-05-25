@@ -1,4 +1,4 @@
-import type { ApiResponse, GameStateData, RoadMapData } from "../types/game-types";
+import type { ApiResponse, GameStateData, HistoryUnit } from "../types/game-types";
 
 export function extractGameStateData(
   apiResponse: unknown,
@@ -20,13 +20,13 @@ export function extractGameStateData(
   const typedResponse = apiResponse as ApiResponse;
   const rawGameState = (apiResponse as { game_state: GameStateData }).game_state;
 
-  const roadMapData: RoadMapData = typedResponse.road_map || {};
+  const historyData: HistoryUnit[] = typedResponse.history || [];
 
   try {
     const processedData: Partial<GameStateData> = {
       ...rawGameState,
       tokens: typedResponse.current_tokens,
-      road_map: roadMapData,
+      history: historyData,
       bets: rawGameState.bets
         ? { ...rawGameState.bets }
         : {

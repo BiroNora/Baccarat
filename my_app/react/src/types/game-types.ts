@@ -28,7 +28,7 @@ export interface GameStateData {
   pre_phase: GameState | null;
   final_phase: GameState | null;
   first_card: string | null;
-  road_map?: RoadMapData;
+  history?: HistoryUnit[];
 }
 
 export interface PlayerData {
@@ -46,22 +46,19 @@ export interface ApiResponse {
   message?: string;
   current_tokens: number;
   game_state: GameStateData;      // Csak a játék adatai
-  road_map?: Record<string, RoadMapUnit>; // Teljesen külön, opcionális egység!
+  history?: HistoryUnit[]; // Teljesen külön, opcionális egység!
   game_state_hint: string;
 }
 
-export interface RoadMapUnit {
-  w: number;       // winner
-  n: boolean;      // is_natural
-  d: boolean;      // is_dragon
-  p: boolean;      // is_panda
-  t: number;       // tie_count (döntetlenek száma)
-  bp: boolean;     // is_b_pair (Banker Pair)
-  pp: boolean;     // is_p_pair (Player Pair)
-}
-
-export interface RoadMapData {
-  [key: string]: RoadMapUnit;
+export interface HistoryUnit {
+  coord: string;     // <-- Kell a koordináta, hogy tudd, hova teszed!
+  w: number;         // winner
+  n: boolean;        // is_natural
+  d: boolean;        // is_dragon
+  p: boolean;        // is_panda
+  t: number;         // tie_count
+  bp: boolean;       // is_b_pair
+  pp: boolean;       // is_p_pair
 }
 
 export type GameStateForClient = {

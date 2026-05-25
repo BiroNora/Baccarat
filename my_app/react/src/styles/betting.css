@@ -10,7 +10,6 @@
 }
 
 .betting-screen-container {
-  padding-top: var(--extra-vertical-padding1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,10 +21,11 @@
     #a31e34 100% /* A legszélén mély sötétbordó */
   );
   border-radius: 0.75rem;
-  box-shadow: 0 25px 20px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 20px 25px 25px -12px rgba(29, 17, 17, 0.5);
   border: 1px solid #ca8a04; /* yellow-600 */
   width: 100%;
   margin: 0 auto;
+  margin-bottom: 0.9rem;
 }
 
 .deal-bank {
@@ -117,7 +117,7 @@
 }
 
 .chips-section {
-  padding: 1rem 0 0.7rem 0;
+  padding-bottom: 0.5rem;
 }
 
 .chips-wrapper {
