@@ -92,7 +92,7 @@ class GameSerializer:
             "player": game.player,
             "banker": game.banker,
             "bets": game.bets,
-            "winner": game.winner,
+            "round_result": game.round_result,
             "deck_len": game.get_deck_len(),
             "target_phase": game.get_target_phase().value,
             "pre_phase": game.get_pre_phase().value,

@@ -49,6 +49,16 @@ export const initialGameDataState: GameDataState = {
       B_PAIR: 0,
       TOTAL: 0,
     },
+    round_result: {
+      winner: 0,
+      player_score: 0,
+      banker_score: 0,
+      is_natural: false,
+      is_dragon: false,
+      is_panda: false,
+      is_p_pair: false,
+      is_b_pair: false,
+    },
     target_phase: "LOADING",
     pre_phase: "BETTING",
     final_phase: "BETTING",
@@ -97,7 +107,9 @@ export function gameReducer(
               }
             : state.gameState.banker,
 
-          history: action.payload.history ? [...action.payload.history] : state.gameState.history,
+          history: action.payload.history
+            ? [...action.payload.history]
+            : state.gameState.history,
         },
       };
     case "SET_UI_PHASE":

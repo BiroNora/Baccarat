@@ -28,6 +28,7 @@ export interface GameStateData {
   pre_phase: GameState | null;
   final_phase: GameState | null;
   first_card: string | null;
+  round_result: RoundResultUnit;
   history?: HistoryUnit[];
 }
 
@@ -59,6 +60,17 @@ export interface HistoryUnit {
   t: number;         // tie_count
   bp: boolean;       // is_b_pair
   pp: boolean;       // is_p_pair
+}
+
+export interface RoundResultUnit {
+  winner: number;        // A "winner" kulcsból jön
+  player_score: number;  // "player_score"
+  banker_score: number;  // "banker_score"
+  is_natural: boolean;   // "is_natural"
+  is_dragon: boolean;    // "is_dragon"
+  is_panda: boolean;     // "is_panda"
+  is_p_pair: boolean;    // "is_p_pair"
+  is_b_pair: boolean;    // "is_b_pair"
 }
 
 export type GameStateForClient = {

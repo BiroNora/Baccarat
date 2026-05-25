@@ -6,11 +6,7 @@ interface TableProps {
 }
 
 const Winner: React.FC<TableProps> = ({ gameState }) => {
-  const { winner } = gameState;
-
-  const winnerText = (winner >= 0 && winner < states.length)
-    ? states[winner]
-    : "Unknown Result";
+  const { round_result } = gameState;
 
   const props = {
     initial: { opacity: 0 },
@@ -24,7 +20,7 @@ const Winner: React.FC<TableProps> = ({ gameState }) => {
 
   return (
     <div className="winners merriweather9black">
-      <motion.span {...props}>{winner !== 0 && <span>{winnerText}</span>}</motion.span>
+      <motion.span {...props}><span>{states[round_result.winner]}</span></motion.span>
     </div>
   );
 };

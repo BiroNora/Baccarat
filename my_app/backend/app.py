@@ -7,7 +7,7 @@ from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 from my_app.backend.bet_type import BetType
-from my_app.backend.road_map_unit import RoadMapUnit
+from my_app.backend.history import HistoryUnit
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -527,12 +527,13 @@ def shoe_cut(user, game):
 @with_game_state
 def start_game(user, game):
     game.initialize_new_round()
+    print("530 round res: ", game.round_result)
 
-    if hasattr(game, "last_round_results") and game.last_round_results:
-        res = game.last_round_results
+    if hasattr(game, "round_result") and game.round_result:
+        res = game.round_result
         round_key = str(len(user.history))
 
-        unit = RoadMapUnit(
+        unit = HistoryUnit(
             winner=res.get("winner"),
             is_natural=res.get("is_natural", False),
             is_dragon=res.get("is_dragon", False),
@@ -541,7 +542,7 @@ def start_game(user, game):
             is_b_pair=res.get("is_b_pair", False),
             is_p_pair=res.get("is_p_pair", False),
         )
-
+        print("historyUnit: ", unit)
         user.history[round_key] = unit.to_frontend_dict()
 
     return (
