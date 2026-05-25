@@ -55,7 +55,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     [dispatch],
   );
 
-  const savePreActionState = useCallback(() => {
+  /*const savePreActionState = useCallback(() => {
     // A 'state' a useReducer-ből jön, ez mindig a legfrissebb adatokat tartalmazza
     const currentData = state.gameState;
 
@@ -70,7 +70,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         },
       });
     }
-  }, [state.gameState, dispatch]);
+  }, [state.gameState, dispatch]); */
 
   const resetGameVariables = useCallback(() => {
     dispatch({ type: "RESET_TURN_VARIABLES" });
@@ -483,14 +483,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     )
       return;
 
-    /* isProcessingRef.current = true;
+    isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
 
     timeoutIdRef.current = window.setTimeout(() => {
       if (isMountedRef.current) {
         isProcessingRef.current = false;
         transitionToState(
-          state.gameState.pre_phase as GameState,
+          state.gameState.final_phase as GameState,
           state.gameState,
         );
       }
@@ -498,7 +498,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    }; */
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,
     state.gameState.pre_phase,
@@ -512,32 +513,27 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       isProcessingRef.current
     )
       return;
-    /* isProcessingRef.current = true;
+    isProcessingRef.current = true;
     //console.log("--- MAIN_STAND_NATURAL INDUL ---");
 
-    const MainStandNatural = async () => {
-      try {
-        savePreActionState();
-        const data = await handleApiAction(handleStandAndRewards);
-        const response = extractGameStateData(data);
-
-        if (!response || !isMountedRef.current) {
-          isProcessingRef.current = false;
-          return;
-        }
-
-        transitionToState(response?.target_phase as GameState, response);
-      } catch (error) {
-        console.error("Transit Error:", error);
+    timeoutIdRef.current = window.setTimeout(() => {
+      if (isMountedRef.current) {
         isProcessingRef.current = false;
+        transitionToState(
+          state.gameState.final_phase as GameState,
+          state.gameState,
+        );
       }
+    }, 4000);
+
+    return () => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
-    MainStandNatural(); */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,
-    handleApiAction,
+    state.gameState.pre_phase,
     transitionToState,
-    savePreActionState,
   ]);
 
   // --- OUT_OF_TOKENS ---

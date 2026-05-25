@@ -18,12 +18,12 @@ ROUND_RESULTS = [
     "is_b_pair",
 ]
 
+NUM_DECKS = 8
+CARDS_IN_DECK = 52
+TOTAL_INITIAL_CARDS = NUM_DECKS * CARDS_IN_DECK
 
 class Game:
     NONE = 0
-    NUM_DECKS = 8
-    CARDS_IN_DECK = 52
-    TOTAL_INITIAL_CARDS = NUM_DECKS * CARDS_IN_DECK
     CARD_VALUES = {
         rank: (0 if rank in ["0", "J", "Q", "K"] else (1 if rank == "A" else int(rank)))
         for rank in ["A", "2", "3", "4", "5", "6", "7", "8", "9", "0", "J", "Q", "K"]
@@ -42,7 +42,7 @@ class Game:
         self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         # self.ranks = ["A", "K", "K", "K", "9", "10"]
         self.deck = []
-        self.deck_len_init = Game.TOTAL_INITIAL_CARDS
+        self.deck_len_init = TOTAL_INITIAL_CARDS
         self.bet: int = 0
         self.bets = {key: 0 for key in VALID_BET_TYPES}
         self.clean_profit = 0
@@ -60,14 +60,14 @@ class Game:
         self.is_banker_third_card = False
 
     def get_cut_card_position(self):
-        total_cards = Game.TOTAL_INITIAL_CARDS
+        total_cards = TOTAL_INITIAL_CARDS
 
         cut_offset = random.randint(60, 90)  # A pakli 78% - 85% közötti része
         return total_cards - cut_offset
 
     def create_deck(self):
         single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
-        self.deck = single_deck * Game.NUM_DECKS
+        self.deck = single_deck * NUM_DECKS
         random.shuffle(self.deck)
 
         self.target_phase = PhaseState.CUTSLIDER
@@ -88,8 +88,8 @@ class Game:
         return self.deck
 
     def deck_penetration(self):
-        lower_limit = int(Game.TOTAL_INITIAL_CARDS * 0.10)
-        upper_limit = int(Game.TOTAL_INITIAL_CARDS * 0.25)
+        lower_limit = int(TOTAL_INITIAL_CARDS * 0.10)
+        upper_limit = int(TOTAL_INITIAL_CARDS * 0.25)
 
         return random.randint(lower_limit, upper_limit)
 
@@ -104,6 +104,7 @@ class Game:
     def initialize_new_round(self):
         self.clear_up()
         self.is_round_active = True
+        self.is_session_init = False
 
         print("98 bets: ", self.bets)
 
@@ -130,6 +131,8 @@ class Game:
             self.process_rewards()
 
             self.target_phase = PhaseState.MAIN_STAND
+
+        self.final_phase = PhaseState.BETTING
 
     def sum(self, hand):
         ranks = self.hand_to_ranks(hand)
@@ -330,8 +333,6 @@ class Game:
             self.bets[key] = local_payouts[key]
 
         self.bets["TOTAL"] = sum(self.bets[key] for key in VALID_BET_TYPES)
-        print("334 process_rewards bets: ", self.bets)
-        print("335 TOTAL: ", self.bets["TOTAL"])
 
         self.is_round_active = False
 
@@ -346,6 +347,7 @@ class Game:
                 self.bets[bet_type_name] = 0
                 self.bets["TOTAL"] -= removed_amount
                 print(f"Tét sikeresen visszavéve: {removed_amount} <- {bet_type_name}")
+
                 return removed_amount
             else:
                 print(f"Nincs levehető tét a(z) {bet_type_name} mezőn.")

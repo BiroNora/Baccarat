@@ -1,10 +1,12 @@
 import unittest
-from my_app.backend.road_map_manager import RoadMapManager
+
+from my_app.backend.history_manager import HistoryManager
+
 
 class TestBaccaratRoadmap(unittest.TestCase):
     def setUp(self):
-        """Minden teszt előtt egy friss RoadMapManager példányt hozunk létre."""
-        self.manager = RoadMapManager()
+        """Minden teszt előtt egy friss HistoryManager példányt hozunk létre."""
+        self.manager = HistoryManager()
 
     def test_empty_history(self):
         """1. Határeset: Üres játékmenet esetén üres szótárat kell visszaadnia."""
@@ -15,7 +17,7 @@ class TestBaccaratRoadmap(unittest.TestCase):
         history = [
             {"winner": 1},  # Player -> (0, 0)
             {"winner": 3},  # Banker -> (0, 1)
-            {"winner": 1}   # Player -> (0, 2)
+            {"winner": 1},  # Player -> (0, 2)
         ]
         result = self.manager.build_roadmap(history)
 
@@ -31,7 +33,7 @@ class TestBaccaratRoadmap(unittest.TestCase):
         history = [
             {"winner": 1},  # Player -> (0, 0)
             {"winner": 1},  # Player -> (1, 0)
-            {"winner": 1}   # Player -> (2, 0)
+            {"winner": 1},  # Player -> (2, 0)
         ]
         result = self.manager.build_roadmap(history)
 
@@ -69,7 +71,7 @@ class TestBaccaratRoadmap(unittest.TestCase):
             {"winner": 1},  # Player -> (0, 0)
             {"winner": 5},  # Tie -> marad a (0, 0)-n, t=1
             {"winner": 5},  # Újabb Tie -> marad a (0, 0)-n, t=2
-            {"winner": 1}   # Player -> (1, 0)
+            {"winner": 1},  # Player -> (1, 0)
         ]
         result = self.manager.build_roadmap(history)
 
@@ -81,5 +83,6 @@ class TestBaccaratRoadmap(unittest.TestCase):
         self.assertEqual(result["1-0"]["w"], 0)
         self.assertEqual(result["1-0"]["t"], 0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

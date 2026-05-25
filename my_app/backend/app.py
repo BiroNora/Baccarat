@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
-from my_app.backend.game import Game
+from my_app.backend.game import TOTAL_INITIAL_CARDS, Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
 
@@ -125,7 +125,6 @@ def login_required(f):
 def with_game_state(f):
     @wraps(f)
     def decorated_function(user, *args, **kwargs):
-        print("DEBUG: with_game_state elindult")
         # 1. Alapvető ellenőrzés
         if not user.current_game_state:
             return (
@@ -143,11 +142,9 @@ def with_game_state(f):
         data = request.get_json(silent=True) or {}
         ikey = data.get("idempotency_key")
 
-        print(">>>>>>> 141 app.py IKEY: ", ikey)
-
         # Deszerializálunk (szükség van rá az idempotens válaszhoz is)
         game = Game.deserialize(user.current_game_state)
-        print(f"145 app.py DEBUG: Path keresése: {request.path}")
+
         if ikey and user.idempotency_key == ikey:
             # Ha a kulcs egyezik, nem futtatjuk le a függvényt (f),
             # csak visszaadjuk az aktuális állapotot.
@@ -334,7 +331,7 @@ def initialize_session():
     db.session.commit()
 
     custom_game_state = {
-        "deck_len": game_instance.deck_len_init,
+        "deck_len": TOTAL_INITIAL_CARDS,
         "bets": game_instance.bets,
         "target_phase": (
             game_instance.target_phase.value
@@ -356,9 +353,9 @@ def initialize_session():
                 "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
-                "history": {},
+                "history": [],
                 "game_state_hint": "USER_SESSION_INITIALIZED",
-                "total_initial_cards": Game.TOTAL_INITIAL_CARDS,
+                "total_initial_cards": TOTAL_INITIAL_CARDS,
             }
         ),
         200,
@@ -497,7 +494,7 @@ def shoe_cut(user, game):
     data = request.get_json() or {}
     cut_index = data.get("cut")
 
-    initial_cards = Game.TOTAL_INITIAL_CARDS
+    initial_cards = TOTAL_INITIAL_CARDS
 
     if not isinstance(cut_index, int):
         raise ValueError("Cut index must be an integer.")

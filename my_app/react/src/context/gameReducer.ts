@@ -77,18 +77,19 @@ export function gameReducer(
   action: GameAction,
 ): GameDataState {
   switch (action.type) {
-    case "SYNC_SERVER_DATA":
+    case "SYNC_SERVER_DATA": {
+      const { history, ...gameStatePayload } = action.payload;
+
       return {
         ...state,
         gameState: {
           ...state.gameState, // 1. Alapból megtartja a régi dolgokat, ha valami hiányozna
-          ...action.payload, // 2. Rámásolja a szerver friss adatait
+          ...gameStatePayload, // 2. Rámásolja a szerver friss adatait
 
           // 3. MÉLY MÁSOLÁS (Deep copy) a kritikus objektumokra, hogy a React garantáltan újrarendereljen:
           bets: action.payload.bets
             ? { ...action.payload.bets }
-            : state.gameState.bets, // Ez lemásolja a PLAYER, BANKER, TIE, PANDA stb. összes mezőt egyszerre!
-
+            : state.gameState.bets,
           player: action.payload.player
             ? {
                 ...action.payload.player,
@@ -97,7 +98,6 @@ export function gameReducer(
                   : [],
               }
             : state.gameState.player,
-
           banker: action.payload.banker
             ? {
                 ...action.payload.banker,
@@ -106,12 +106,13 @@ export function gameReducer(
                   : [],
               }
             : state.gameState.banker,
-
-          history: action.payload.history
-            ? [...action.payload.history]
-            : state.gameState.history,
+          round_result: action.payload.round_result
+            ? { ...action.payload.round_result }
+            : state.gameState.round_result,
         },
+        history: history ? [...history] : state.history,
       };
+    }
     case "SET_UI_PHASE":
       return {
         ...state,
