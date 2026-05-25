@@ -7,6 +7,7 @@ from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 from my_app.backend.bet_type import BetType
+from my_app.backend.road_map_unit import RoadMapUnit
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -15,7 +16,7 @@ from my_app.backend.game import Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
 
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.ext.mutable import MutableList
 
 load_dotenv()
 
@@ -67,8 +68,8 @@ class User(db.Model):
     )
     tokens = db.Column(db.Integer, default=1000)
     current_game_state = db.Column(JSONB, nullable=True)
-    road_map = db.Column(
-        MutableDict.as_mutable(JSONB), nullable=False, server_default="{}", default=dict
+    history = db.Column(
+        MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
     )
     idempotency_key = db.Column(db.String(36), nullable=True)
     last_activity = db.Column(
@@ -159,7 +160,7 @@ def with_game_state(f):
                         "game_state": GameSerializer.serialize_by_context(
                             game, request.path
                         ),
-                        "road_map": user.road_map,
+                        "history": user.history,
                     }
                 ),
                 200,
@@ -307,12 +308,13 @@ def initialize_session():
     game_instance.is_session_init = True
 
     try:
-        game_instance.road_map = {}
+        game_instance.history = {}
     except AttributeError:
         pass
 
     actual_total = sum(
-        value for key, value in game_instance.bets.items()
+        value
+        for key, value in game_instance.bets.items()
         if key != "TOTAL" and isinstance(value, (int, float))
     )
 
@@ -331,12 +333,19 @@ def initialize_session():
     user.current_game_state = game_instance.serialize()
     db.session.commit()
 
-
     custom_game_state = {
         "deck_len": game_instance.deck_len_init,
         "bets": game_instance.bets,
-        "target_phase": game_instance.target_phase.value if hasattr(game_instance.target_phase, 'value') else game_instance.target_phase,
-        "pre_phase": game_instance.pre_phase.value if hasattr(game_instance.pre_phase, 'value') else game_instance.pre_phase,
+        "target_phase": (
+            game_instance.target_phase.value
+            if hasattr(game_instance.target_phase, "value")
+            else game_instance.target_phase
+        ),
+        "pre_phase": (
+            game_instance.pre_phase.value
+            if hasattr(game_instance.pre_phase, "value")
+            else game_instance.pre_phase
+        ),
     }
 
     return (
@@ -347,7 +356,7 @@ def initialize_session():
                 "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
-                "road_map": {},
+                "history": {},
                 "game_state_hint": "USER_SESSION_INITIALIZED",
                 "total_initial_cards": Game.TOTAL_INITIAL_CARDS,
             }
@@ -397,20 +406,19 @@ def bet(user, game):
 
             # HA MINDEN LÉPÉS SIKERES, CSAK AKKOR HAJTJUK VÉGRE A FOGADÁST
             else:
-                game.set_bet(bet_amount, bet_type)  # Elmentjük (ha a set_bet is fel van készítve az ID-ra vagy az enum_type-ra!)
+                game.set_bet(bet_amount, bet_type)
                 user.tokens -= bet_amount
 
     except (ValueError, TypeError):
         hint = "INVALID_BET_TYPE"
 
-    # EGYETLEN KÖZÖS VISSZATÉRÉSI PONT – Bármi hibázik, a felület sértetlen marad!
     return (
         jsonify(
             {
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": user.road_map,
+                "history": user.history,
                 "game_state_hint": hint,
             }
         ),
@@ -451,7 +459,7 @@ def retake_bet(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": user.road_map,
+                "history": user.history,
                 "game_state_hint": hint,
             }
         ),
@@ -466,8 +474,6 @@ def retake_bet(user, game):
 @with_game_state
 def create_deck(user, game):
     game.create_deck()
-
-    user.road_map = []
 
     return (
         jsonify(
@@ -522,7 +528,21 @@ def shoe_cut(user, game):
 def start_game(user, game):
     game.initialize_new_round()
 
-    user.road_map.append(game.road_map_unit)
+    if hasattr(game, "last_round_results") and game.last_round_results:
+        res = game.last_round_results
+        round_key = str(len(user.history))
+
+        unit = RoadMapUnit(
+            winner=res.get("winner"),
+            is_natural=res.get("is_natural", False),
+            is_dragon=res.get("is_dragon", False),
+            is_panda=res.get("is_panda", False),
+            tie_count=res.get("tie_count", 0),
+            is_b_pair=res.get("is_b_pair", False),
+            is_p_pair=res.get("is_p_pair", False),
+        )
+
+        user.history[round_key] = unit.to_frontend_dict()
 
     return (
         jsonify(
@@ -531,7 +551,7 @@ def start_game(user, game):
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "road_map": user.road_map,
+                "history": user.history,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }
         ),
@@ -568,8 +588,6 @@ def stand_and_rewards(user, game):
         ),
         200,
     )
-
-
 
 
 # 16
@@ -624,7 +642,7 @@ def force_restart_by_client_id(user):
     user.idempotency_key = None
 
     db.session.commit()
-    
+
     return (
         jsonify(
             {

@@ -28,7 +28,7 @@ export interface GameStateData {
   pre_phase: GameState | null;
   final_phase: GameState | null;
   first_card: string | null;
-  road_map?: RoadMapUnit[];
+  road_map?: RoadMapData;
 }
 
 export interface PlayerData {
@@ -58,6 +58,10 @@ export interface RoadMapUnit {
   t: number;       // tie_count (döntetlenek száma)
   bp: boolean;     // is_b_pair (Banker Pair)
   pp: boolean;     // is_p_pair (Player Pair)
+}
+
+export interface RoadMapData {
+  [key: string]: RoadMapUnit;
 }
 
 export type GameStateForClient = {

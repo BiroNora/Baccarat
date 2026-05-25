@@ -1,4 +1,8 @@
-import type { GameState, GameStateData, RoadMapUnit } from "../types/game-types";
+import type {
+  GameState,
+  GameStateData,
+  RoadMapUnit,
+} from "../types/game-types";
 
 export interface GameDataState {
   gameState: GameStateData; // Ez tartja a szerver adatait
@@ -68,7 +72,7 @@ export function gameReducer(
         ...state,
         gameState: {
           ...state.gameState, // 1. Alapból megtartja a régi dolgokat, ha valami hiányozna
-          ...action.payload,   // 2. Rámásolja a szerver friss adatait
+          ...action.payload, // 2. Rámásolja a szerver friss adatait
 
           // 3. MÉLY MÁSOLÁS (Deep copy) a kritikus objektumokra, hogy a React garantáltan újrarendereljen:
           bets: action.payload.bets
@@ -78,16 +82,24 @@ export function gameReducer(
           player: action.payload.player
             ? {
                 ...action.payload.player,
-                hand: action.payload.player.hand ? [...action.payload.player.hand] : []
+                hand: action.payload.player.hand
+                  ? [...action.payload.player.hand]
+                  : [],
               }
             : state.gameState.player,
 
           banker: action.payload.banker
             ? {
                 ...action.payload.banker,
-                hand: action.payload.banker.hand ? [...action.payload.banker.hand] : []
+                hand: action.payload.banker.hand
+                  ? [...action.payload.banker.hand]
+                  : [],
               }
             : state.gameState.banker,
+
+          road_map: action.payload.road_map
+            ? { ...action.payload.road_map } // Ez létrehoz egy új objektum referenciát
+            : state.gameState.road_map,
         },
       };
     case "SET_UI_PHASE":

@@ -132,7 +132,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const currentTokens = state.gameState.tokens;
       const currentBets = state.gameState.bets;
 
-      console.log("currentBets: on bet", currentBets)
+      console.log("currentBets: on bet", currentBets);
 
       const betKey = Object.keys(BetTypes).find(
         (key) => BetTypes[key as keyof typeof BetTypes] === selectedBetType,
@@ -151,7 +151,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const response = extractGameStateData(data);
         if (!response) return;
 
-        console.log("response: on bet", response)
+        console.log("response: on bet", response);
 
         transitionToState(response?.target_phase as GameState, response);
       });
@@ -168,8 +168,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const handleRetakeBet = useCallback(
     async (selectedBetType: BetTypeValue) => {
       const currentBets = state.gameState.bets;
-
-
 
       const betKey = Object.keys(BetTypes).find(
         (key) => BetTypes[key as keyof typeof BetTypes] === selectedBetType,
@@ -190,7 +188,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const response = extractGameStateData(data);
         if (!response) return;
 
-        console.log("response: on retake bet", response)
+        console.log("response: on retake bet", response);
 
         transitionToState(response?.target_phase as GameState, response);
       });

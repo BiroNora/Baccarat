@@ -1,8 +1,8 @@
-import type { GameStateData, RoadMapUnit } from "../types/game-types";
+import type { ApiResponse, GameStateData, RoadMapData } from "../types/game-types";
 
 export function extractGameStateData(
   apiResponse: unknown,
-): GameStateData | undefined {
+): Partial<GameStateData> | undefined {
   if (
     typeof apiResponse !== "object" ||
     apiResponse === null ||
@@ -16,18 +16,16 @@ export function extractGameStateData(
     return undefined;
   }
 
-  const token: number = apiResponse.current_tokens as number;
+  //const token: number = apiResponse.current_tokens as number;
+  const typedResponse = apiResponse as ApiResponse;
   const rawGameState = (apiResponse as { game_state: GameStateData }).game_state;
 
-  const roadMapData: RoadMapUnit[] =
-    "road_map" in apiResponse && Array.isArray((apiResponse as { road_map: unknown }).road_map)
-      ? ((apiResponse as { road_map: RoadMapUnit[] }).road_map as RoadMapUnit[])
-      : [];
+  const roadMapData: RoadMapData = typedResponse.road_map || {};
 
   try {
-    const processedData: GameStateData = {
+    const processedData: Partial<GameStateData> = {
       ...rawGameState,
-      tokens: token,
+      tokens: typedResponse.current_tokens,
       road_map: roadMapData,
       bets: rawGameState.bets
         ? { ...rawGameState.bets }

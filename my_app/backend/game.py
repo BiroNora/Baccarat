@@ -1,6 +1,6 @@
 import random
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from my_app.backend.bet_type import BetType
 from my_app.backend.phase_state import PhaseState
@@ -146,7 +146,6 @@ class Game:
         ranks = self.hand_to_ranks(first_two) # Pl: "00", "AK", "72"
 
         return len(ranks) >= 2 and ranks[0] == ranks[1]
-
 
     def check_third_card_rules(self):
         p_score = self.player["sum"]
@@ -335,136 +334,6 @@ class Game:
         print("335 TOTAL: ", self.bets["TOTAL"])
 
         self.is_round_active = False
-
-    def calculate_baccarat_roadmap(self, history_list):
-        """
-        Kiszámolja a Baccarat Big Road / Dragon Tail koordinátáit.
-        A váltáskor induló új oszlopok kihasználhatják a sárkányfarok feletti üres helyeket!
-        """
-        if not history_list:
-            return {}
-
-        roadmap_dict = {}
-
-        # Foglalt cellák térképe az ütközésekhez: {(row, col): True}
-        occupied_cells = {}
-
-        current_col = 0
-        current_row = 0
-
-        def get_base_winner(winner_value):
-            # 1, 2 = Player | 3, 4 = Banker | minden más = Tie
-            if winner_value in [1, 2]: return 0
-            if winner_value in [3, 4]: return 1
-            return 2
-
-        # Első nem-döntetlen megkeresése
-        first_valid_winner = None
-        for item in history_list:
-            base_w = get_base_winner(item['winner'])
-            if base_w != 2:
-                first_valid_winner = base_w
-                break
-
-        if first_valid_winner is not None:
-            last_real_winner = first_valid_winner
-        else:
-            last_real_winner = 2
-
-        # Első elem elhelyezése
-        first_item = history_list[0]
-        first_w = get_base_winner(first_item['winner'])
-
-        matrix_key = f"{current_row}-{current_col}"
-        roadmap_dict[matrix_key] = {
-            "w": first_w,
-            "n": first_item.get("is_natural", False),
-            "d": first_item.get("is_dragon", False),
-            "p": first_item.get("is_panda", False),
-            "t": 1 if first_w == 2 else 0,
-            "bp": first_item.get("is_b_pair", False),
-            "pp": first_item.get("is_p_pair", False)
-        }
-
-        occupied_cells[(current_row, current_col)] = True
-
-        # Ciklus a többi körre
-        for index in range(1, len(history_list)):
-            item = history_list[index]
-            current_w = get_base_winner(item['winner'])
-
-            # --- DÖNTETLEN KEZELÉSE (marad a helyén) ---
-            if current_w == 2:
-                current_key = f"{current_row}-{current_col}"
-                if current_key in roadmap_dict:
-                    roadmap_dict[current_key]["t"] += 1
-                    if item.get("is_b_pair"): roadmap_dict[current_key]["bp"] = True
-                    if item.get("is_p_pair"): roadmap_dict[current_key]["pp"] = True
-                continue
-
-            # --- VÁLTÁS (Új széria kezdődik) ---
-            if last_real_winner != 2 and current_w != last_real_winner:
-                current_col += 1
-
-                # Csak azt nézzük, hogy a legfelső (0.) sor foglalt-e!
-                while (0, current_col) in occupied_cells:
-                    current_col += 1
-
-                current_row = 0
-                last_real_winner = current_w
-
-                # Itt azonnal elmentjük és regisztráljuk a cellát,
-                # így a lenti Sárkányfarok-csúsztató logika ezt a kört már NEM fogja bántani!
-                matrix_key = f"{current_row}-{current_col}"
-                roadmap_dict[matrix_key] = {
-                    "w": current_w,
-                    "n": item.get("is_natural", False),
-                    "d": item.get("is_dragon", False),
-                    "p": item.get("is_panda", False),
-                    "t": 0,
-                    "bp": item.get("is_b_pair", False),
-                    "pp": item.get("is_p_pair", False)
-                }
-
-                occupied_cells[(current_row, current_col)] = True
-                continue # Átugorjuk a lenti alapértelmezett mentést, megyünk a következő körre!
-
-            # --- UGYANAZ A SZÉRIA FOLYTATÓDIK ---
-            else:
-                if last_real_winner == 2:
-                    last_real_winner = current_w
-                else:
-                    next_row = current_row + 1
-                    next_col = current_col
-
-                    # SÁRKÁNY LOGIKA (Ha eléri az alját VAGY az alatta lévő cella foglalt)
-                    if next_row >= 6 or (next_row, next_col) in occupied_cells:
-                        next_row = current_row
-                        next_col = current_col + 1
-
-                        # Ha kanyarodás közben is akadályba ütközik, csúszik tovább jobbra
-                        while (next_row, next_col) in occupied_cells:
-                            next_col += 1
-
-                    current_row = next_row
-                    current_col = next_col
-
-            # Mentés az új koordinátára
-            matrix_key = f"{current_row}-{current_col}"
-            roadmap_dict[matrix_key] = {
-                "w": current_w,
-                "n": item.get("is_natural", False),
-                "d": item.get("is_dragon", False),
-                "p": item.get("is_panda", False),
-                "t": 0,
-                "bp": item.get("is_b_pair", False),
-                "pp": item.get("is_p_pair", False)
-            }
-
-            # Regisztráljuk a cellát foglaltként
-            occupied_cells[(current_row, current_col)] = True
-
-        return roadmap_dict
 
     def clear_bet_by_type(self, bet_type):
         try:
