@@ -41,5 +41,5 @@ class GameService:
         újraindulás vagy keverés esetén.
         """
         user.history = []
-        user.roadmap_matrix = {}
+        user.roadmap_matrix = []
         user.last_coords = {}

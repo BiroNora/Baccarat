@@ -52,9 +52,9 @@ class GameSerializer:
             if (not game.is_round_active and game.is_session_init)
             else game.get_deck_len()
         )
-        print("53 d_len: ", d_len)
-        is_betting = game.bets["TOTAL"] == 0
-
+        print("55 d_len: ", d_len)
+        is_betting = game.bets.get("TOTAL", 0) == 0
+        print("75 d_len: ", d_len)
         calc_phase = (
             PhaseState.BETTING if is_betting
             else (

@@ -325,8 +325,8 @@ def initialize_session():
     )
 
     game_instance.bets["TOTAL"] = actual_total
-
-    if game_instance.bets["TOTAL"] > 0:
+    
+    if actual_total > 0:
         game_instance.pre_phase = PhaseState.SHUFFLING
     else:
         game_instance.pre_phase = PhaseState.NONE
