@@ -3,6 +3,7 @@ import random
 from typing import Any, Dict
 
 from my_app.backend.bet_type import BetType
+from my_app.backend.matrix_manager import MatrixManager
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 

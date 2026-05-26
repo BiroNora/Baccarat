@@ -1,4 +1,5 @@
 import os
+import traceback
 import uuid
 import logging
 from functools import wraps
@@ -8,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 from my_app.backend.bet_type import BetType
 from my_app.backend.history import HistoryUnit
+from my_app.backend.services.game_service import GameService
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -16,7 +18,7 @@ from my_app.backend.game import TOTAL_INITIAL_CARDS, Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
 
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 load_dotenv()
 
@@ -70,6 +72,15 @@ class User(db.Model):
     current_game_state = db.Column(JSONB, nullable=True)
     history = db.Column(
         MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
+    )
+    roadmap_matrix = db.Column(
+        MutableList.as_mutable(JSONB),
+        nullable=False,
+        server_default="[]",
+        default=list,
+    )
+    last_coords = db.Column(
+        MutableDict.as_mutable(JSONB), nullable=False, server_default="{}", default=dict
     )
     idempotency_key = db.Column(db.String(36), nullable=True)
     last_activity = db.Column(
@@ -219,6 +230,9 @@ def api_error_handler(f):
         except Exception as e:
             db.session.rollback()
             print(f"Váratlan szerver hiba az API végponton: {e}")
+            print("--- RÉSZLETES HIBAÜZENET ---")
+            traceback.print_exc()
+            print("----------------------------")
             return (
                 jsonify(
                     {
@@ -304,11 +318,6 @@ def initialize_session():
 
     game_instance.is_session_init = True
 
-    try:
-        game_instance.history = {}
-    except AttributeError:
-        pass
-
     actual_total = sum(
         value
         for key, value in game_instance.bets.items()
@@ -326,6 +335,9 @@ def initialize_session():
         game_instance.target_phase = PhaseState.OUT_OF_TOKENS
     else:
         game_instance.target_phase = PhaseState.BETTING
+
+    service = GameService(db.session)
+    service.reset_game_data(user)
 
     user.current_game_state = game_instance.serialize()
     db.session.commit()
@@ -472,6 +484,9 @@ def retake_bet(user, game):
 def create_deck(user, game):
     game.create_deck()
 
+    service = GameService(db.session)
+    service.reset_game_data(user)
+
     return (
         jsonify(
             {
@@ -523,24 +538,8 @@ def shoe_cut(user, game):
 @login_required
 @with_game_state
 def start_game(user, game):
-    game.initialize_new_round()
-    print("530 round res: ", game.round_result)
-
-    if hasattr(game, "round_result") and game.round_result:
-        res = game.round_result
-        round_key = str(len(user.history))
-
-        unit = HistoryUnit(
-            winner=res.get("winner"),
-            is_natural=res.get("is_natural", False),
-            is_dragon=res.get("is_dragon", False),
-            is_panda=res.get("is_panda", False),
-            tie_count=res.get("tie_count", 0),
-            is_b_pair=res.get("is_b_pair", False),
-            is_p_pair=res.get("is_p_pair", False),
-        )
-        print("historyUnit: ", unit)
-        user.history[round_key] = unit.to_frontend_dict()
+    service = GameService(db.session)
+    service.play_round(user, game)
 
     return (
         jsonify(

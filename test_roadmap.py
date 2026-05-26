@@ -1,6 +1,6 @@
 import unittest
 
-from my_app.backend.history_manager import HistoryManager
+from my_app.backend.matrix_manager import HistoryManager
 
 
 class TestBaccaratRoadmap(unittest.TestCase):
