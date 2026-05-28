@@ -6,16 +6,13 @@ class GameService:
         self.db = db_session
         self.matrix_manager = MatrixManager()
 
-    def play_round(self, user, game):
-        # 1. Játéklogika, csak a kártyákkal foglalkozik
-        game.initialize_new_round()
-
-        # 2. Mátrix frissítése: a manager elvégzi a "piszkos munkát"
-        # Mivel a MatrixManager csak a mátrixot és a nyertest látja, ez tiszta marad
-        coords = self.matrix_manager.process_new_round(user, game.winner)
+    def play_round(self, user, game, current_winner):
+        # 1. Mátrix frissítése
+        coords = self.matrix_manager.process_new_round(user, current_winner)
         coord_str = f"{coords['row']}:{coords['col']}"
+        print("13 service coord: ", coord_str)
 
-        # 3. History felépítése: az API helyett itt történik a koordináták hozzáadása
+        # 2. History frissítése
         res = game.round_result
         unit = HistoryUnit(
             coord=coord_str,
@@ -27,12 +24,16 @@ class GameService:
             is_b_pair=res.get("is_b_pair", False),
             is_p_pair=res.get("is_p_pair", False),
         )
-        print("srevice 28 historyUnit: ", unit)
-        user.history[str(len(user.history))] = unit.to_frontend_dict()
+        print("srevice 27 historyUnit: ", unit)
+
+        if user.history is None:
+            user.history = []
+        user.history.append(unit.to_frontend_dict())
+
 
         # 4. Véglegesítés: itt mentjük el a változásokat
-        self.db.session.add(user) # A user frissült a mátrixszal és history-val
-        self.db.session.commit()
+        self.db.add(user) # A user frissült a mátrixszal és history-val
+
         return user, game
 
     def reset_game_data(self, user):

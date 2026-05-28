@@ -37,3 +37,15 @@ class HistoryUnit:
             "bp": self.bp,
             "pp": self.pp,
         }
+
+    def __repr__(self):
+        return (
+            f"<HistoryUnit coord={self.coord}, "
+            f"winner={self.w}, "
+            f"natural={self.n}, "
+            f"dragon={self.d}, "
+            f"panda={self.p}, "
+            f"ties={self.t}, "
+            f"b_pair={self.bp}, "
+            f"p_pair={self.pp}>"
+        )

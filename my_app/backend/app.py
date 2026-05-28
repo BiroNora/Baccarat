@@ -198,6 +198,20 @@ def with_game_state(f):
 
     return decorated_function
 
+def with_game_service(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Feltételezzük, hogy a 'game' már ott van a kwargs-ban
+        # (amit az előző dekorátor betett)
+        db_session = db.session
+        service = GameService(db_session)
+
+        # Hozzáadjuk a service-t a paraméterekhez
+        kwargs["service"] = service
+
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 def api_error_handler(f):
     @wraps(f)
@@ -325,7 +339,7 @@ def initialize_session():
     )
 
     game_instance.bets["TOTAL"] = actual_total
-    
+
     if actual_total > 0:
         game_instance.pre_phase = PhaseState.SHUFFLING
     else:
@@ -537,9 +551,11 @@ def shoe_cut(user, game):
 @api_error_handler
 @login_required
 @with_game_state
-def start_game(user, game):
-    service = GameService(db.session)
-    service.play_round(user, game)
+@with_game_service
+def start_game(user, game, service):
+    winner = game.initialize_new_round()
+
+    service.play_round(user, game, winner)
 
     return (
         jsonify(

@@ -17,6 +17,7 @@ ROUND_RESULTS = [
     "is_panda",
     "is_p_pair",
     "is_b_pair",
+    "tie_count",
 ]
 
 NUM_DECKS = 8
@@ -48,6 +49,7 @@ class Game:
         self.bets = {key: 0 for key in VALID_BET_TYPES}
         self.clean_profit = 0
         self.winner = WinnerState.NONE
+        self.tie_counter = 0
         self.side_winners = []
         self.round_result = {key: 0 for key in ROUND_RESULTS}
         self.is_round_active = False
@@ -134,6 +136,8 @@ class Game:
             self.target_phase = PhaseState.MAIN_STAND
 
         self.final_phase = PhaseState.BETTING
+        print("137 >>>>>>>>> self.winner: ", self.winner)
+        return self.winner
 
     def sum(self, hand):
         ranks = self.hand_to_ranks(hand)
@@ -210,6 +214,7 @@ class Game:
         )
 
         if p_s > b_s:
+            self.tie_counter = 0
             self.winner = (
                 WinnerState.NATURAL_PLAYER_WON.value
                 if is_natural
@@ -217,6 +222,7 @@ class Game:
             )
 
         elif b_s > p_s:
+            self.tie_counter = 0
             self.winner = (
                 WinnerState.NATURAL_BANKER_WON.value
                 if is_natural
@@ -224,6 +230,7 @@ class Game:
             )
 
         else:
+            self.tie_counter += 1
             self.winner = (
                 WinnerState.NATURAL_TIE.value if is_natural else WinnerState.TIE.value
             )
@@ -264,6 +271,7 @@ class Game:
             "is_panda": BetType.PANDA.value in self.side_winners,
             "is_p_pair": self.check_initial_pairs(self.player["hand"]),
             "is_b_pair": self.check_initial_pairs(self.banker["hand"]),
+            "tie_count": self.tie_counter,
         }
 
     def process_rewards(self):
@@ -443,6 +451,7 @@ class Game:
             "player": self.player,
             "banker": self.banker,
             "winner": self.winner,
+            "tie_counter": self.tie_counter,
             "is_player_third_card": self.is_player_third_card,
             "is_banker_third_card": self.is_banker_third_card,
             "deck_len": self.get_deck_len(),
@@ -464,6 +473,7 @@ class Game:
         game.player = data["player"]
         game.banker = data["banker"]
         game.winner = data["winner"]
+        game.tie_counter = data["tie_counter"]
         game.is_player_third_card = data["is_player_third_card"]
         game.is_banker_third_card = data["is_banker_third_card"]
         game.deck_len = data["deck_len"]
