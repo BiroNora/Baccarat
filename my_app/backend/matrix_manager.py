@@ -36,36 +36,39 @@ class MatrixManager:
         if not last_coords:
             return (0, 0)
 
+        r, c = last_coords['r'], last_coords['c']
         curr_val = WINNER_MAP.get(current_winner, current_winner)
         last_val = WINNER_MAP.get(last_coords['w'], last_coords['w'])
-
-        r, c = last_coords['r'], last_coords['c']
 
         if curr_val == 3:
             return (r, c)
 
         if curr_val != last_val:
-            new_col = c + 1
-            new_row = 0
-            while new_col < len(matrix[0]) and matrix[0][new_col] != 0:
-                new_col += 1
-            return (new_row, new_col)
+            new_col = None
+
+            for col in range(c, -1, -1):
+                if matrix[0][col] != 0:
+                    new_col = col + 1
+                    break
+
+            if new_col is None:
+                new_col = c + 1
+                while new_col < len(matrix[0]) and matrix[0][new_col] != 0:
+                    new_col += 1
+
+            return (0, new_col)
         else:
             if r + 1 < 6 and matrix[r + 1][c] == 0:
                 return (r + 1, c)
             else:
                 new_col = c + 1
-                new_row = 0
-                while new_col < len(matrix[0]) and matrix[0][new_col] != 0:
-                    new_col += 1
+                new_row = r
                 return (new_row, new_col)
 
     def process_new_round(self, user, winner_type):
         # 1. Betöltés
         matrix = copy.deepcopy(user.roadmap_matrix) if (user.roadmap_matrix and len(user.roadmap_matrix) > 0) else [[0] for _ in range(6)]
         last_c = user.last_coords # pl. {"r": 1, "c": 3}
-
-        print(f"69 DEBUG - Matrix before: {matrix}")
 
         norm_winner = WINNER_MAP.get(winner_type, winner_type)
 
@@ -84,7 +87,6 @@ class MatrixManager:
         user.roadmap_matrix = updated_matrix
         user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner}
 
-        print("++++ 81 DEBUG - Updated Matrix (rows):")
         for i, row in enumerate(matrix):
             print(f"Row {i}: {row}")
 
