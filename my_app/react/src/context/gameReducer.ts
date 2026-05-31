@@ -109,8 +109,8 @@ export function gameReducer(
           round_result: action.payload.round_result
             ? { ...action.payload.round_result }
             : state.gameState.round_result,
+          history: history ? [...history] : state.history,
         },
-        history: history ? [...history] : state.history,
       };
     }
     case "SET_UI_PHASE":

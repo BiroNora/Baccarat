@@ -1,34 +1,36 @@
 .roadmap-grid {
   display: grid;
-  /* 6 sor fixen, egyforma magasak */
-  grid-template-rows: repeat(6, minmax(1.8rem, 1fr));
-  /* Automatikus oszlopok, amik kitöltik a rendelkezésre álló helyet */
+  grid-template-rows: repeat(6, 1.8rem);
+
+  grid-auto-columns: 1.8rem;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(1.8rem, 1fr);
-  gap: 2px; /* Halvány elválasztó vonalak a cellák között */
+
+  width: max-content;
+  max-width: 100%;
+
+  gap: 2px;
+  padding: 4px;
   border-radius: 0.4rem;
-  overflow-x: auto; /* Ha a sárkány nagyon hosszú, oldalra görgethető legyen */
-  width: 100%;
+  overflow-x: auto;
+  align-items: center;
 }
 
-/* Az egyes kis cellák, ahova a gömbök pottyannak */
 .roadmap-cell {
-  background-color: rgba(20, 0, 0, 0.4); /* Sötét kaszinó-stílusú cellaháttér */
-  border-radius: 50%; /* Finom kerekítés, hogy a gömbök fészke legyen */
+  /* Ez biztosítja, hogy az üres cellák fészkei látszódjanak */
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
-/* ==========================================================================
-   A LEENDŐ GÖMBÖK ALAP STÍLUSAI (Ízelítő a következő lépéshez)
-   ========================================================================== */
 .bead {
   width: 85%;
   height: 85%;
   border-radius: 50%;
   box-shadow: inset -2px -2px 6px rgba(0,0,0,0.4), 1px 1px 3px rgba(0,0,0,0.3);
 }
-.bead.player { background-color: #0066cc; } /* Kék Player */
-.bead.banker { background-color: #cc0000; } /* Piros Banker */
+.bead.player { background-color: #0066cc; }
+.bead.banker { background-color: #cc0000; }

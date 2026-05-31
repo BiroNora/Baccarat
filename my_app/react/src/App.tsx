@@ -107,7 +107,7 @@ function App() {
                 <div className="game-container-fullscreen">
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="game-layout-wrapper">
-                    <RoadMap gameState={gameState} />
+                    <RoadMap history={gameState.history} />
                   </div>
                   <div className="game-layout-wrapper">
                     <Betting

@@ -441,7 +441,6 @@ def bet(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "history": user.history,
                 "game_state_hint": hint,
             }
         ),
@@ -482,7 +481,6 @@ def retake_bet(user, game):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "history": user.history,
                 "game_state_hint": hint,
             }
         ),
