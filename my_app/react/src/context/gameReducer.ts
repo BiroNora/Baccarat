@@ -1,5 +1,4 @@
 import type {
-  GameState,
   GameStateData,
   HistoryUnit,
 } from "../types/game-types";
@@ -7,8 +6,6 @@ import type {
 export interface GameDataState {
   gameState: GameStateData; // Ez tartja a szerver adatait
   history?: HistoryUnit[];
-  preRewardBet: number | null;
-  preRewardTokens: number | null;
   initDeckLen: number | null; // Animációhoz
   totalInitialCards: number | null;
   selectedBetType: number;
@@ -22,11 +19,7 @@ export interface BetMap {
 // Definiáljuk az akciókat, ha még nincsenek a types-ban
 export type GameAction =
   | { type: "SYNC_SERVER_DATA"; payload: GameStateData }
-  | { type: "SET_UI_PHASE"; payload: GameState }
-  | { type: "SET_CONFIG"; payload: { totalInitialCards: number } }
   | { type: "SET_DECK_LEN"; payload: number | null }
-  | { type: "SET_BET_SNAPSHOTS"; payload: { bets: BetMap; tokens: number } }
-  | { type: "SET_SELECTED_BET_TYPE"; payload: number }
   | { type: "RESET_TURN_VARIABLES" };
 
 export const initialGameDataState: GameDataState = {
@@ -65,8 +58,6 @@ export const initialGameDataState: GameDataState = {
     first_card: null,
   } as GameStateData,
   history: [],
-  preRewardBet: null,
-  preRewardTokens: null,
   initDeckLen: null,
   totalInitialCards: null,
   selectedBetType: 0,
@@ -113,44 +104,12 @@ export function gameReducer(
         },
       };
     }
-    case "SET_UI_PHASE":
-      return {
-        ...state,
-        gameState: { ...state.gameState, currentGameState: action.payload },
-      };
-    case "SET_CONFIG":
-      return {
-        ...state,
-        totalInitialCards: action.payload.totalInitialCards,
-        initDeckLen:
-          state.initDeckLen === null || state.initDeckLen === 0
-            ? action.payload.totalInitialCards
-            : state.initDeckLen,
-        gameState: {
-          ...state.gameState,
-        },
-      };
     case "SET_DECK_LEN":
       return { ...state, initDeckLen: action.payload };
-    case "SET_BET_SNAPSHOTS":
-      return {
-        ...state,
-        preRewardBet: action.payload.bets.TOTAL,
-        preRewardTokens: action.payload.tokens,
-      };
-    case "SET_SELECTED_BET_TYPE":
-      return {
-        ...state,
-        gameState: {
-          ...state.gameState,
-        },
-      };
     case "RESET_TURN_VARIABLES":
       return {
         ...state,
         initDeckLen: state.gameState.deck_len,
-        preRewardBet: null, // Nincs többé régi tét
-        preRewardTokens: null, // Nincs többé régi zsetonérték
       };
     default:
       return state;

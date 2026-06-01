@@ -8,7 +8,6 @@ import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import { AnimatePresence, motion } from "motion/react";
 import { Reloading } from "./components/Reloading";
-import UniqueBetBank from "./components/UniqueBetBank";
 import CutSlider from "./components/CutSlider";
 import { Shifting } from "./components/Shifting";
 import BurningCards from "./components/BurningCards";
@@ -25,8 +24,6 @@ function App() {
     handleShoeCut,
     handleShiftingFirstPhaseEnd,
     handleStartGame,
-    preRewardBet,
-    preRewardTokens,
     initDeckLen,
     isWFSR,
   } = useGameStateMachine();
@@ -130,12 +127,6 @@ function App() {
                   <div className="game-action-area-wrapper">
                     <Winner gameState={gameState} />
                   </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={true}
-                  />
                 </div>
               );
             case "MAIN_STAND_NATURAL":
@@ -148,12 +139,6 @@ function App() {
                   <div className="game-action-area-wrapper">
                     <Winner gameState={gameState} />
                   </div>
-                  <UniqueBetBank
-                    gameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    preRewardBet={preRewardBet}
-                    preRewardTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                    isResultPhase={true}
-                  />
                 </div>
               );
             case "OUT_OF_TOKENS":

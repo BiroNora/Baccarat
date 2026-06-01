@@ -20,6 +20,8 @@ export const RoadMap: React.FC<RoadMapProps> = ({ history = [] }) => {
 
   console.log("Kibányászott history:", history);
   // Egyelőre létrehozunk egy üres 6 soros x 18 oszlopos rácsot teszteléshez
+  const PLAYER_WINS = new Set([1, 4]);
+  const BANKER_WINS = new Set([2, 5]);
   const ROWS = 6;
   const COLS = Math.max(
     33,
@@ -53,8 +55,8 @@ export const RoadMap: React.FC<RoadMapProps> = ({ history = [] }) => {
             // 2. A cella (fészek) MINDIG kirajzolódik
             <div key={cell.id} className="roadmap-cell">
               {/* 3. A golyó csak akkor jelenik meg, ha van 'item' */}
-              {item && (
-                <div className={`bead ${item.w === 1 ? "player" : "banker"}`}>
+              {item && (PLAYER_WINS.has(item.w) || BANKER_WINS.has(item.w)) && (
+                <div className={`bead ${PLAYER_WINS.has(item.w) ? "player" : "banker"}`}>
                   {/* Ide jöhet a szám vagy ikon, ha szükséges */}
                 </div>
               )}

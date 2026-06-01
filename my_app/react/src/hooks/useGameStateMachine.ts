@@ -55,23 +55,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     [dispatch],
   );
 
-  /*const savePreActionState = useCallback(() => {
-    // A 'state' a useReducer-ből jön, ez mindig a legfrissebb adatokat tartalmazza
-    const currentData = state.gameState;
-
-    if (currentData) {
-      dispatch({
-        type: "SET_BET_SNAPSHOTS",
-        payload: {
-          bets: {
-            TOTAL: currentData.bets.TOTAL || 0,
-          },
-          tokens: currentData.tokens,
-        },
-      });
-    }
-  }, [state.gameState, dispatch]); */
-
   const resetGameVariables = useCallback(() => {
     dispatch({ type: "RESET_TURN_VARIABLES" });
     setIsWFSR(false);
@@ -302,13 +285,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         if (!isMountedRef.current) return;
 
-        const { tokens, game_state, total_initial_cards } =
+        const { tokens, game_state } =
           initData as SessionInitResponse;
         const nextPhase = game_state.target_phase as GameState;
-        dispatch({
-          type: "SET_CONFIG",
-          payload: { totalInitialCards: total_initial_cards },
-        });
 
         dispatch({
           type: "SET_DECK_LEN",
@@ -351,10 +330,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           // A setTimeout ID-t elmentjük, hogy törölhessük ha kell
           timeoutIdRef.current = window.setTimeout(() => {
             if (isMountedRef.current) {
-              const currentDeckLen =
-                response.deck_len ?? state.totalInitialCards;
-
-              dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
               transitionToState(response.target_phase as GameState, response);
               isProcessingRef.current = false;
             }
@@ -411,6 +386,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     const target = state.gameState.final_phase as GameState;
     const data = state.gameState;
+    
+    const currentDeckLen = state.gameState.deck_len;
+    dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
     const timer = setTimeout(() => {
       console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
@@ -669,8 +647,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleRetakeBet,
     handleShoeCut,
     handleShiftingFirstPhaseEnd,
-    preRewardBet: state.preRewardBet,
-    preRewardTokens: state.preRewardTokens,
     initDeckLen: state.initDeckLen,
     isWFSR,
   };

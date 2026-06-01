@@ -108,8 +108,6 @@ export type GameStateMachineHookResult = {
   handleShoeCut: (amount: number) => Promise<void>;
   handleShiftingFirstPhaseEnd: () => void;
   handleStartGame: () => Promise<void>;
-  preRewardBet: number | null;
-  preRewardTokens: number | null;
   initDeckLen: number | null;
   isWFSR: boolean;
 };
