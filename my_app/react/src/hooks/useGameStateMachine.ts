@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useReducer } from "react";
+import { useState, useEffect, useCallback, useRef, useReducer, useMemo } from "react";
 import {
   initializeSessionAPI,
   setBet,
@@ -6,7 +6,6 @@ import {
   getShuffling,
   setShoeCut,
   startGame,
-  //handleStandAndRewards,
   setRestart,
   forceRestart,
   type HttpError,
@@ -18,6 +17,7 @@ import {
   type GameState,
   type GameStateData,
   type GameStateMachineHookResult,
+  type HistoryUnit,
   type SessionInitResponse,
 } from "../types/game-types";
 import { extractGameStateData } from "../utilities/utils";
@@ -35,6 +35,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   // Ez a védelmi zár (lock) az ismételt hívások ellen
   const isProcessingRef = useRef(false);
   const isAppInitializedRef = useRef(false);
+
+  const roadmapMap = useMemo(() => {
+    if (!state.history) return {};
+    return state.history.reduce(
+      (acc, unit) => {
+        acc[unit.coord] = unit;
+        console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, { ...acc });
+        return acc;
+      },
+      {} as Record<string, HistoryUnit>,
+    );
+  }, [state.history]);
 
   // Állapotváltó funkció a logolással és Reducer szinkronizációval
   const transitionToState = useCallback(
@@ -285,8 +297,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         if (!isMountedRef.current) return;
 
-        const { tokens, game_state } =
-          initData as SessionInitResponse;
+        const { tokens, game_state } = initData as SessionInitResponse;
         const nextPhase = game_state.target_phase as GameState;
 
         dispatch({
@@ -391,7 +402,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
       const currentDeckLen = data.deck_len;
       dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
-      
+
       transitionToState(target, data);
 
       isProcessingRef.current = false;
@@ -641,6 +652,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   return {
     gameState: state.gameState,
     currentGameState: state.gameState.currentGameState,
+    roadmapMap,
     transitionToState,
     handleStartGame,
     handlePlaceBet,

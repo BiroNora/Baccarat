@@ -19,6 +19,7 @@ import RoadMap from "./components/RoadMap";
 function App() {
   const {
     gameState,
+    roadmapMap,
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -104,7 +105,7 @@ function App() {
                 <div className="game-container-fullscreen">
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="game-layout-wrapper">
-                    <RoadMap history={gameState.history} />
+                    <RoadMap roadmapMap={roadmapMap} />
                   </div>
                   <div className="game-layout-wrapper">
                     <Betting

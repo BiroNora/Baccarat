@@ -1,7 +1,4 @@
-import type {
-  GameStateData,
-  HistoryUnit,
-} from "../types/game-types";
+import type { GameStateData, HistoryUnit } from "../types/game-types";
 
 export interface GameDataState {
   gameState: GameStateData; // Ez tartja a szerver adatait
@@ -100,8 +97,8 @@ export function gameReducer(
           round_result: action.payload.round_result
             ? { ...action.payload.round_result }
             : state.gameState.round_result,
-          history: history ? [...history] : state.history,
         },
+        history: history ? [...history] : state.history,
       };
     }
     case "SET_DECK_LEN":

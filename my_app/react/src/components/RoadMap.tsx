@@ -3,22 +3,13 @@ import "../styles/roadmap.css";
 import type { HistoryUnit } from "../types/game-types";
 
 interface RoadMapProps {
-  history: HistoryUnit[] | undefined;
+  roadmapMap: Record<string, HistoryUnit>;
 }
 
-export const RoadMap: React.FC<RoadMapProps> = ({ history = [] }) => {
-  const historyMap = useMemo(() => {
-    return history.reduce(
-      (acc, item) => {
-        const [row, col] = item.coord.split(":").map(Number);
-        acc[`${row}-${col}`] = item; // Kulcs: "0-0", Érték: maga a lépés objektum
-        return acc;
-      },
-      {} as Record<string, HistoryUnit>,
-    );
-  }, [history]);
+export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
+  const historyMap = roadmapMap;
 
-  console.log("Kibányászott history:", history);
+  console.log("Kibányászott history:", historyMap);
   // Egyelőre létrehozunk egy üres 6 soros x 18 oszlopos rácsot teszteléshez
   const PLAYER_WINS = new Set([1, 4]);
   const BANKER_WINS = new Set([2, 5]);
@@ -26,7 +17,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ history = [] }) => {
   const COLS = Math.max(
     33,
     Math.max(
-      ...(history?.map((h) => parseInt(h.coord.split(":")[1])) ?? []),
+      ...Object.keys(roadmapMap).map((key) => parseInt(key.split(":")[1])),
       0,
     ) + 5,
   );
@@ -36,7 +27,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ history = [] }) => {
     const cells = [];
     for (let col = 0; col < COLS; col++) {
       for (let row = 0; row < ROWS; row++) {
-        cells.push({ row, col, id: `${row}-${col}` });
+        cells.push({ row, col, id: `${row}:${col}` });
       }
     }
     return cells;
