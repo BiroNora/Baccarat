@@ -386,12 +386,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     const target = state.gameState.final_phase as GameState;
     const data = state.gameState;
-    
-    const currentDeckLen = state.gameState.deck_len;
-    dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
     const timer = setTimeout(() => {
       console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
+      const currentDeckLen = data.deck_len;
+      dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
+      
       transitionToState(target, data);
 
       isProcessingRef.current = false;
