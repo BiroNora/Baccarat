@@ -246,7 +246,7 @@ button:disabled {
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
-  min-height: 5rem;
+  min-height: 2rem;
 }
 
 .players-area-wrapper {

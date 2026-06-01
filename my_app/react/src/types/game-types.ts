@@ -99,7 +99,7 @@ export type ErrorResponse = {
 export type GameStateMachineHookResult = {
   gameState: GameStateData;
   currentGameState: GameState;
-  roadmapMap: Record<string, HistoryUnit>;
+  roadmapMap: Record<string, HistoryUnit[]>;
   transitionToState: (
     newState: GameState,
     newData?: Partial<GameStateData>,

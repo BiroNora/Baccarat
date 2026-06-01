@@ -122,11 +122,11 @@ function App() {
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <StandardGame gameState={gameState} />
-                  </div>
                   <div className="game-action-area-wrapper">
                     <Winner gameState={gameState} />
+                  </div>
+                  <div className="player-dealer-area-wrapper">
+                    <StandardGame gameState={gameState} />
                   </div>
                 </div>
               );
@@ -134,11 +134,11 @@ function App() {
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="player-dealer-area-wrapper">
-                    <StandardGame gameState={gameState} />
-                  </div>
                   <div className="game-action-area-wrapper">
                     <Winner gameState={gameState} />
+                  </div>
+                  <div className="player-dealer-area-wrapper">
+                    <StandardGame gameState={gameState} />
                   </div>
                 </div>
               );

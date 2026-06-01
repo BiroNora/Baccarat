@@ -87,7 +87,7 @@ class Game:
             self.target_phase = PhaseState.SHIFTING_THE_STACKS
             self.pre_phase = PhaseState.BURNING_CARDS
             self.final_phase = PhaseState.INIT_GAME
-        print("85 shoe_cut bets: ", self.bets)
+
         return self.deck
 
     def deck_penetration(self):
@@ -101,7 +101,7 @@ class Game:
         rank = self.first_card[-1]
         burn_count = 10 if rank in "KQJ0" else (1 if rank == "A" else int(rank))
         self.deck = self.deck[burn_count:]
-        print("92 bets: ", self.bets)
+
         return self.first_card
 
     def initialize_new_round(self):
@@ -109,7 +109,7 @@ class Game:
         self.is_round_active = True
         self.is_session_init = False
 
-        print("98 bets: ", self.bets)
+        print("112 init bets: ", self.bets)
 
         card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
         p_hand, b_hand = [card1, card3], [card2, card4]
@@ -355,15 +355,15 @@ class Game:
             if removed_amount > 0:
                 self.bets[bet_type_name] = 0
                 self.bets["TOTAL"] -= removed_amount
-                print(f"Tét sikeresen visszavéve: {removed_amount} <- {bet_type_name}")
+                #print(f"Tét sikeresen visszavéve: {removed_amount} <- {bet_type_name}")
 
                 return removed_amount
             else:
-                print(f"Nincs levehető tét a(z) {bet_type_name} mezőn.")
+                #print(f"Nincs levehető tét a(z) {bet_type_name} mezőn.")
                 return 0
 
         except ValueError:
-            print(f"Hiba: A visszavételhez kapott bet_type ({bet_type}) nem érvényes IntEnum szám!")
+            #print(f"Hiba: A visszavételhez kapott bet_type ({bet_type}) nem érvényes IntEnum szám!")
             return 0
 
     def clear_up(self):
@@ -409,7 +409,7 @@ class Game:
             if bet_type_name in self.bets and enum_type != BetType.NONE:
                 self.bets[bet_type_name] += amount
                 self.bets["TOTAL"] += amount
-                print(f"Sikeres tét: {amount} -> {bet_type_name}")
+                #print(f"Sikeres tét: {amount} -> {bet_type_name}")
             else:
                 print(f"Hiba: {bet_type_name} nem érvényes fogadási mező a játékban!")
 
@@ -477,9 +477,9 @@ class Game:
         game.is_player_third_card = data["is_player_third_card"]
         game.is_banker_third_card = data["is_banker_third_card"]
         game.deck_len = data["deck_len"]
-        game.set_bets_to_null()
-        raw_bets = data.get("bets", {})
-        game.bets.update(raw_bets)
+        raw_bets = data.get("bets")
+        if raw_bets is not None:
+            game.bets.update(raw_bets)
         game.side_winners = data["side_winners"]
         raw_unit = data.get("round_result")
         game.round_result = raw_unit if raw_unit else {key: 0 for key in ROUND_RESULTS}

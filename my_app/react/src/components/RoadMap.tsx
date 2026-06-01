@@ -3,7 +3,7 @@ import "../styles/roadmap.css";
 import type { HistoryUnit } from "../types/game-types";
 
 interface RoadMapProps {
-  roadmapMap: Record<string, HistoryUnit>;
+  roadmapMap: Record<string, HistoryUnit[]>;
 }
 
 export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
@@ -12,7 +12,6 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
   console.log("Kibányászott history:", historyMap);
   // Egyelőre létrehozunk egy üres 6 soros x 18 oszlopos rácsot teszteléshez
   const PLAYER_WINS = new Set([1, 4]);
-  const BANKER_WINS = new Set([2, 5]);
   const ROWS = 6;
   const COLS = Math.max(
     33,
@@ -40,17 +39,21 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
       <div className="roadmap-grid">
         {gridCells.map((cell) => {
           // 1. Kikeressük az adatot (ha van)
-          const item = historyMap[cell.id];
+          const items = historyMap[cell.id] || [];
 
           return (
             // 2. A cella (fészek) MINDIG kirajzolódik
             <div key={cell.id} className="roadmap-cell">
               {/* 3. A golyó csak akkor jelenik meg, ha van 'item' */}
-              {item && (PLAYER_WINS.has(item.w) || BANKER_WINS.has(item.w)) && (
-                <div className={`bead ${PLAYER_WINS.has(item.w) ? "player" : "banker"}`}>
-                  {/* Ide jöhet a szám vagy ikon, ha szükséges */}
+              {items.map((item, index) => (
+                <div
+                  key={index}
+                  className={`bead ${PLAYER_WINS.has(item.w) ? "player" : "banker"} ${item.w === 3 || item.w === 6 ? "tie" : ""}`}
+                >
+                  {/* Opcionális: jelezd a döntetlent egy szöveggel vagy ikonnal */}
+                  {item.w === 3 && <span className="tie-label">T</span>}
                 </div>
-              )}
+              ))}
             </div>
           );
         })}

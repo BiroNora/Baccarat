@@ -40,11 +40,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (!state.history) return {};
     return state.history.reduce(
       (acc, unit) => {
-        acc[unit.coord] = unit;
+        if (!acc[unit.coord]) {
+          acc[unit.coord] = [];
+        }
+        acc[unit.coord].push(unit);
         console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, { ...acc });
         return acc;
       },
-      {} as Record<string, HistoryUnit>,
+      {} as Record<string, HistoryUnit[]>,
     );
   }, [state.history]);
 
