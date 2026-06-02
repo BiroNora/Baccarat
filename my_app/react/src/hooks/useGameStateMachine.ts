@@ -289,7 +289,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const initializeApplicationOnLoad = async () => {
       try {
         const minLoadingTimePromise = new Promise((resolve) =>
-          setTimeout(resolve, 6000),
+          setTimeout(resolve, 600),
         );
         const initializationPromise = handleApiAction(initializeSessionAPI);
 

@@ -35,7 +35,10 @@ class MatrixManager:
         """Kiszámolja a következő pozíciót a mátrix és last_coords alapján."""
         # TIE kezelése
         if current_winner in [3, 6]:
-            return last_coords['r'], last_coords['c'] if last_coords else (0, 0)
+            if last_coords:
+                return last_coords['r'], last_coords['c']
+            else:
+                return 0, 0
 
         if not last_coords:
             return 0, 0
@@ -85,7 +88,7 @@ class MatrixManager:
         # 2. Számolás
         coords = self.calculate_next_coords(matrix, last_c, winner_type)
         if coords is None:
-            return {"row": None, "col": None}
+            return {"row": 0, "col": 0}
 
         new_r, new_c = coords
         updated_matrix = self.update_existing_matrix(matrix, new_r, new_c, winner_type)
