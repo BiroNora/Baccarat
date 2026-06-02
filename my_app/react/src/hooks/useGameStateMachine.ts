@@ -486,7 +486,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           state.gameState,
         );
       }
-    }, 4000);
+    }, 20000);
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
@@ -516,7 +516,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           state.gameState,
         );
       }
-    }, 4000);
+    }, 20000);
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);

@@ -26,17 +26,21 @@ class HistoryUnit:
         self.pp = is_p_pair
 
     def to_frontend_dict(self):
-        # Ez a kulcsfontosságú: a dict kulcsai pontosan egyezzenek a TS interfész neveivel!
-        return {
+        # 1. Alapvető adatok, amik mindig kellenek (coord és winner)
+        data = {
             "coord": self.coord,
             "w": self.w,
-            "n": self.n,
-            "d": self.d,
-            "p": self.p,
-            "t": self.t,
-            "bp": self.bp,
-            "pp": self.pp,
         }
+
+        # 2. Csak azokat adjuk hozzá, amelyek "igazak" vagy értéket hordoznak
+        if self.n: data["n"] = True
+        if self.d: data["d"] = True
+        if self.p: data["p"] = True
+        if self.t > 0: data["t"] = self.t
+        if self.bp: data["bp"] = True
+        if self.pp: data["pp"] = True
+
+        return data
 
     def __repr__(self):
         return (
