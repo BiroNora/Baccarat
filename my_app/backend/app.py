@@ -555,7 +555,8 @@ def shoe_cut(user, game):
 def start_game(user, game, service):
     winner = game.initialize_new_round()
 
-    service.play_round(user, game, winner)
+    #service.play_round(user, game, winner)
+    fake_tie = {"coord": "0:0", "n": True, "t": 1, "w": 3}
 
     return (
         jsonify(
@@ -564,7 +565,7 @@ def start_game(user, game, service):
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "history": user.history,
+                "history": [fake_tie],
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }
         ),
