@@ -21,7 +21,7 @@ class TestRunner:
         for step in sequence:
             winner = self.mapping[step]
             self.manager.process_new_round(user, winner)
-            # print(f"Kör vége: {step}, Utolsó koordináta: {user.last_coords}")
+            print(f"Kör vége: {step}, Utolsó koordináta: {user.last_coords}")
 
         db_storage_simulation = json.dumps(user.roadmap_matrix)
 
@@ -58,6 +58,7 @@ if __name__ == "__main__":
     seq3 = ['B'] * 15
     runner.run_scenario("Hosszú Sárkány (Kanyarodás teszt)", seq3)
 
+    # 4. Teszteset TIE
     seq4 = (
         ['T'] * 2 + ['P'] * 8 + ['B'] * 2 + ['T'] * 1 +
         ['P'] * 6 + ['B'] * 9 + ['B'] * 1 + ['P'] * 4 + ['T'] * 1

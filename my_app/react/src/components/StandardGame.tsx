@@ -59,7 +59,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
           <div>
             Round — Winner: {states[round_result.winner]} | Dragon:{" "}
-            {round_result.is_dragon ? "Yes" : "No"} | Panda:{" "}
+            {round_result.is_dragon ? "DRAGON YES" : "No"} | Panda:{" "}
             {round_result.is_panda ? "Yes" : "No"} | Natural:{" "}
             {round_result.is_natural ? "Yes" : "No"} | Pairs:{" "}
             {round_result.is_p_pair ? "P-Pair" : "No p_pair"}{" "}

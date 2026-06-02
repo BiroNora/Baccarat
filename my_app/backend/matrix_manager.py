@@ -33,17 +33,22 @@ class MatrixManager:
 
     def calculate_next_coords(self, matrix, last_coords, current_winner):
         """Kiszámolja a következő pozíciót a mátrix és last_coords alapján."""
+        # TIE kezelése
+        if current_winner in [3, 6]:
+            return last_coords['r'], last_coords['c'] if last_coords else (0, 0)
+
         if not last_coords:
-            return (0, 0)
+            return 0, 0
 
         r, c = last_coords['r'], last_coords['c']
         curr_val = WINNER_MAP.get(current_winner, current_winner)
         last_val = WINNER_MAP.get(last_coords['w'], last_coords['w'])
+        prev_val = WINNER_MAP.get(last_coords['prev_w'], last_coords['prev_w'])
 
-        if curr_val == 3:
-            return (r, c)
+        # Ha az utolsó győztes TIE volt, akkor a prev_val-hoz hasonlítunk.
+        compare_val = prev_val if last_val in [3, 6] else last_val
 
-        if curr_val != last_val:
+        if curr_val!= compare_val :
             new_col = None
 
             for col in range(c, -1, -1):
@@ -68,7 +73,9 @@ class MatrixManager:
     def process_new_round(self, user, winner_type):
         # 1. Betöltés
         matrix = copy.deepcopy(user.roadmap_matrix) if (user.roadmap_matrix and len(user.roadmap_matrix) > 0) else [[0] for _ in range(6)]
-        last_c = user.last_coords # pl. {"r": 1, "c": 3}
+        last_c = user.last_coords or {} # pl. {"r": 1, "c": 3}
+        curr_w = last_c.get("w")
+        prev_w = curr_w if curr_w not in [WinnerState.TIE, WinnerState.NATURAL_TIE] else user.last_coords.get("prev_w")
 
         norm_winner = WINNER_MAP.get(winner_type, winner_type)
 
@@ -85,7 +92,7 @@ class MatrixManager:
 
         # 4. Mentés
         user.roadmap_matrix = updated_matrix
-        user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner}
+        user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner, "prev_w": prev_w}
 
         for i, row in enumerate(matrix):
             print(f"Row {i}: {row}")
