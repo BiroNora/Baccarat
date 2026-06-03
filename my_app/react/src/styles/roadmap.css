@@ -69,6 +69,7 @@
 }
 .bead.player { color: #114f8e; }
 .bead.banker { color: #8a0404; }
+.bead.first-cell-tie { border: none !important; }
 
 /* A zöld vonal, ami CSAK akkor jelenik meg, ha a golyó megkapja a .with-tie-line osztályt */
 .bead.with-tie-line::after {
@@ -84,9 +85,39 @@
     to bottom right,
     transparent 48%,
     #00ff00 48%,
-    #00ff00 52%,
-    transparent 52%
+    #00ff00 54%,
+    transparent 54%
   );
   pointer-events: none; /* A kattintás átmegy rajta a golyóra */
   z-index: 10; /* Biztosítja, hogy a golyó felett legyen */
+}
+
+.tie-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Ez tolja pontosan középre */
+  font-size: 1.2rem;
+  pointer-events: none; /* Ne akadályozza a kattintást, ha kell */
+  color: #000;
+}
+
+.overlay-pair-banker, .overlay-pair-player {
+  position: absolute;
+  width: 30%;     /* A pötty mérete a golyóhoz képest */
+  height: 30%;
+  border-radius: 50%;
+  z-index: 10;    /* Hogy a golyó felett legyen */
+}
+
+.overlay-pair-banker {
+  background-color: #8a0404;
+  top: -5%;
+  left: -5%;
+}
+
+.overlay-pair-player {
+  background-color: #114f8e;
+  bottom: -5%;
+  right: -5%;
 }

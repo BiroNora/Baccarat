@@ -12,6 +12,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
   console.log("Kibányászott history:", historyMap);
   // Egyelőre létrehozunk egy üres 6 soros x 18 oszlopos rácsot teszteléshez
   const PLAYER_WINS = new Set([1, 4]);
+  const BANKER_WINS = new Set([2, 5]);
   const ROWS = 6;
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -73,29 +74,38 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
             <div key={cell.id} className="roadmap-cell">
               {/* 3. A golyó csak akkor jelenik meg, ha van 'item' */}
               {items.map((item, index) => {
+                const isBankerPair = items.some(i => i.bp);
+                const isPlayerPair = items.some(i => i.pp);
+
                 if (index > 0) return null;
 
-                const tieEvents = items.filter(i => i.w === 3 || i.w === 6);
-                const lastTieItem = tieEvents.length > 0 ? tieEvents[tieEvents.length - 1] : null;
+                const tieEvents = items.filter((i) => i.w === 3 || i.w === 6);
+                const lastTieItem =
+                  tieEvents.length > 0 ? tieEvents[tieEvents.length - 1] : null;
                 const hasTie = !!lastTieItem;
 
                 const num = lastTieItem ? lastTieItem.t : 0;
-                console.log("NUM item.t: ", num)
+                console.log("NUM item.t: ", num);
 
-                const winnerItem = items.find(i => i.w === 1 || i.w === 4) || item;
-
-                if ((item.w === 3 || item.w === 6) && items.length === 1) {
-                  return null;
-                }
+                const winnerItem =
+                  items.find((i) => i.w === 1 || i.w === 4) || item;
 
                 return (
                   <div
                     key={index}
-                    className={`bead ${PLAYER_WINS.has(winnerItem.w) ? "player" : "banker"} ${hasTie ? "with-tie-line" : ""}`}
+                    className={`bead
+                      ${
+                        PLAYER_WINS.has(winnerItem.w)
+                          ? "player"
+                          : BANKER_WINS.has(winnerItem.w)
+                            ? "banker"
+                            : "first-cell-tie"
+                      } ${hasTie ? "with-tie-line" : ""}`}
                   >
                     {/* Opcionális: jelezd a döntetlent egy szöveggel vagy ikonnal */}
                     {hasTie && <span className="tie-label">{num}</span>}
-                    {item.bp && <div className="overlay-pair-banker" />}
+                    {isBankerPair && <div className="overlay-pair-banker" />}
+                    {isPlayerPair && <div className="overlay-pair-player" />}
                   </div>
                 );
               })}

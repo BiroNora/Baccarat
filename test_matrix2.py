@@ -64,3 +64,15 @@ if __name__ == "__main__":
         ['P'] * 6 + ['B'] * 9 + ['B'] * 1 + ['P'] * 4 + ['T'] * 1
     )
     runner.run_scenario("Tie komplex Szekvencia", seq4)
+
+    # 5. Teszteset TIE
+    seq5 = (
+        ['T'] * 1 + ['P'] * 2
+    )
+    runner.run_scenario("Tie teszt: 5", seq5)
+
+    # 6. Teszteset TIE
+    seq6 = (
+        ['T'] * 3 + ['B'] * 1 + ['P'] * 1
+    )
+    runner.run_scenario("Tie teszt: 6", seq6)

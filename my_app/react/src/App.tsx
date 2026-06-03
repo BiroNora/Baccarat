@@ -15,6 +15,7 @@ import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import Winner from "./components/Winner";
 import RoadMap from "./components/RoadMap";
+//import { mockRoadmapMap } from "./data/mockData";
 
 function App() {
   const {
@@ -106,6 +107,7 @@ function App() {
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <div className="game-layout-wrapper">
                     <RoadMap roadmapMap={roadmapMap} />
+                    {/* <RoadMap roadmapMap={mockRoadmapMap} /> */}
                   </div>
                   <div className="game-layout-wrapper">
                     <Betting

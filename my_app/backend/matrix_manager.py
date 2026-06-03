@@ -33,6 +33,10 @@ class MatrixManager:
 
     def calculate_next_coords(self, matrix, last_coords, current_winner):
         """Kiszámolja a következő pozíciót a mátrix és last_coords alapján."""
+        # Első tie(ok) kezelése
+        if last_coords and last_coords['r'] == 0 and last_coords['c'] == 0 and last_coords['w'] in [3, 6]:
+            return last_coords['r'], last_coords['c']
+
         # TIE kezelése
         if current_winner in [3, 6]:
             if last_coords:
