@@ -121,3 +121,16 @@
   bottom: -5%;
   right: -5%;
 }
+
+.overlay-panda {
+  position: absolute;
+  /* Pontosan középre: */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* Ne zavarja a kattintást */
+}

@@ -15,7 +15,13 @@ export const mockRoadmapMap: Record<string, HistoryUnit[]> = {
     { coord: '0:2', w: 1, t: 0, bp: true, pp: true } // Az 5. kör: Player piros/kék pöttyel
   ],
   "0:3": [
-    { coord: '0:3', w: 5, t: 0, bp: true, pp: true }, // A 6. kör: Player piros/kék pöttyel
+    { coord: '0:3', w: 5, t: 0, bp: true, pp: true }, // A 6. kör: Banker piros/kék pöttyel
     { coord: '0:3', w: 3, t: 1, bp: false }
-  ]
+  ],
+  "0:4": [
+    { coord: '0:4', w: 1, t: 0, p: true, bp: true } // Az 5. kör: Player piros/kék pöttyel
+  ],
+  "0:5": [
+    { coord: '0:5', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
+  ],
 };

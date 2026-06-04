@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import "../styles/roadmap.css";
 import type { HistoryUnit } from "../types/game-types";
+import PandaIcon from "./PandaIcon";
+import DragonIcon from "./DragonIcon";
 
 interface RoadMapProps {
   roadmapMap: Record<string, HistoryUnit[]>;
@@ -74,8 +76,10 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
             <div key={cell.id} className="roadmap-cell">
               {/* 3. A golyó csak akkor jelenik meg, ha van 'item' */}
               {items.map((item, index) => {
-                const isBankerPair = items.some(i => i.bp);
-                const isPlayerPair = items.some(i => i.pp);
+                const isBankerPair = items.some((i) => i.bp);
+                const isPlayerPair = items.some((i) => i.pp);
+                const isPanda = items.some((i) => i.p);
+                const isDragon = items.some((i) => i.d);
 
                 if (index > 0) return null;
 
@@ -106,6 +110,16 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                     {hasTie && <span className="tie-label">{num}</span>}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
+                    {isPanda && (
+                      <div className="overlay-panda">
+                        <PandaIcon width={20} />
+                      </div>
+                    )}
+                    {isDragon && (
+                      <div className="overlay-panda">
+                        <DragonIcon width={20} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
