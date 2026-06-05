@@ -107,7 +107,6 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                             : "first-cell-tie"
                       } ${hasTie ? "with-tie-line" : ""}`}
                   >
-                    {/* Opcionális: jelezd a döntetlent egy szöveggel vagy ikonnal */}
                     {hasTie && num > 1 && <span className="tie-label">{num}</span>}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
