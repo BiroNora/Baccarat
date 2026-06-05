@@ -80,6 +80,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                 const isPlayerPair = items.some((i) => i.pp);
                 const isPanda = items.some((i) => i.p);
                 const isDragon = items.some((i) => i.d);
+                const isNatural = items.some((i => i.n));
 
                 if (index > 0) return null;
 
@@ -88,7 +89,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                   tieEvents.length > 0 ? tieEvents[tieEvents.length - 1] : null;
                 const hasTie = !!lastTieItem;
 
-                const num = lastTieItem ? lastTieItem.t : 0;
+                const num = lastTieItem?.t ?? 0;
                 console.log("NUM item.t: ", num);
 
                 const winnerItem =
@@ -107,9 +108,10 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                       } ${hasTie ? "with-tie-line" : ""}`}
                   >
                     {/* Opcionális: jelezd a döntetlent egy szöveggel vagy ikonnal */}
-                    {hasTie && <span className="tie-label">{num}</span>}
+                    {hasTie && num > 1 && <span className="tie-label">{num}</span>}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
+                    {isNatural && <span className="tie-label nat">N</span>}
                     {isPanda && (
                       <div className="overlay-panda">
                         <PandaIcon width={20} />

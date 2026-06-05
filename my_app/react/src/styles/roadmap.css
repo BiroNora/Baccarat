@@ -102,6 +102,12 @@
   color: #000;
 }
 
+.nat {
+  font-size: 1rem;
+  color: #6b390a;
+  font-weight: bold;
+}
+
 .overlay-pair-banker, .overlay-pair-player {
   position: absolute;
   width: 30%;     /* A pötty mérete a golyóhoz képest */
