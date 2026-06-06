@@ -104,9 +104,10 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
                 const lastTieItem =
                   tieEvents.length > 0 ? tieEvents[tieEvents.length - 1] : null;
                 const hasTie = !!lastTieItem;
-
                 const num = lastTieItem?.t ?? 0;
-
+                const tieText = hasTie && num > 1 ? num.toString() : "";
+                const naturalText = isNatural ? "N" : "";
+                const displayLabel = naturalText + tieText;
                 const winnerItem =
                   items.find((i) => i.w === 1 || i.w === 4) || item;
 
@@ -122,12 +123,13 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
                             : "first-cell-tie"
                       } ${hasTie ? "with-tie-line" : ""}`}
                   >
-                    {hasTie && num > 1 && (
-                      <span className="tie-label">{num}</span>
+                    {displayLabel && (
+                      <span className={`tie-label ${isNatural ? "nat" : ""}`}>
+                        {displayLabel}
+                      </span>
                     )}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
-                    {isNatural && <span className="tie-label nat">N</span>}
                     {isPanda && (
                       <div className="overlay-panda">
                         <PandaIcon width={20} />
