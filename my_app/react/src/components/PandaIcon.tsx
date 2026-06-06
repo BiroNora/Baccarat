@@ -24,7 +24,7 @@ const PandaIcon = ({ width = 150, color = "#7a2aab" }) => {
   return (
     <svg
       ref={svgRef}
-      viewBox="0 0 500 500"
+      viewBox="-25 0 500 500"
       width={width}
       height={width}
       fill="none"
@@ -34,7 +34,7 @@ const PandaIcon = ({ width = 150, color = "#7a2aab" }) => {
       strokeLinejoin="round"
       className="animated-panda"
     >
-      <g transform="translate(40, 20)">
+
         <g className={isVisible ? "start-animation" : "hidden-lines"}>
           {/* A megadott útvonalak a csoporton belül */}
           <path
@@ -114,7 +114,7 @@ const PandaIcon = ({ width = 150, color = "#7a2aab" }) => {
           }}
           d="M 103.632 113.228 C 50.405 79.961 107.54 13.999 144.481 66.972"
         />
-      </g>
+
     </svg>
   );
 };

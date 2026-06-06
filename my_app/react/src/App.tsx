@@ -14,7 +14,7 @@ import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import Winner from "./components/Winner";
-import RoadMap from "./components/RoadMap";
+import { RoadMap } from "./components/RoadMap";
 //import { mockRoadmapMap } from "./data/mockData";
 
 function App() {

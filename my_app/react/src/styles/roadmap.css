@@ -83,10 +83,10 @@
   /* A zöld vonal rajzolása */
   background: linear-gradient(
     to bottom right,
-    transparent 48%,
-    #00ff00 48%,
-    #00ff00 54%,
-    transparent 54%
+    transparent 45%,
+    #3cf0a8b8 45%,
+    #3cf0a8b8 55%,
+    transparent 55%
   );
   pointer-events: none; /* A kattintás átmegy rajta a golyóra */
   z-index: 10; /* Biztosítja, hogy a golyó felett legyen */

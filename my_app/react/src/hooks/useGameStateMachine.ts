@@ -1,4 +1,11 @@
-import { useState, useEffect, useCallback, useRef, useReducer, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useReducer,
+  useMemo,
+} from "react";
 import {
   initializeSessionAPI,
   setBet,
@@ -36,20 +43,32 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const isProcessingRef = useRef(false);
   const isAppInitializedRef = useRef(false);
 
+  const [stableHistory, setStableHistory] = useState<HistoryUnit[]>([]);
+
+  useEffect(() => {
+    // Akkor frissítjük a stabil térkép-alapot, amikor véget ért a kör
+    // (vagy amikor a fázis épp 'BETTING' lett)
+    const curr_state = state.gameState.currentGameState
+    if ( curr_state === "MAIN_STAND" || curr_state === "MAIN_STAND_NATURAL") {
+      setStableHistory(state.history || []);
+    }
+  }, [state.gameState.currentGameState, state.history]);
+
   const roadmapMap = useMemo(() => {
-    if (!state.history) return {};
-    return state.history.reduce(
+    return stableHistory.reduce(
       (acc, unit) => {
         if (!acc[unit.coord]) {
           acc[unit.coord] = [];
         }
         acc[unit.coord].push(unit);
-        console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, { ...acc });
+        console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, {
+          ...acc,
+        });
         return acc;
       },
       {} as Record<string, HistoryUnit[]>,
     );
-  }, [state.history]);
+  }, [stableHistory]);
 
   // Állapotváltó funkció a logolással és Reducer szinkronizációval
   const transitionToState = useCallback(

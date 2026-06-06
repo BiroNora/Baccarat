@@ -8,7 +8,7 @@ interface RoadMapProps {
   roadmapMap: Record<string, HistoryUnit[]>;
 }
 
-export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
+const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
   const historyMap = roadmapMap;
 
   console.log("Kibányászott history:", historyMap);
@@ -47,18 +47,34 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
           ? Math.max(...keys.map((k) => parseInt(k.split(":")[1])))
           : 0;
 
-      const columnWidth = 28.8; // A CSS-edben beállított 1.8rem pixelben
+      // Ha még kevés az oszlop, maradj az elején
+      if (maxCol < 8) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        return;
+      }
 
-      // LOGIKA:
-      // Ha maxCol >= 8, akkor a görgetést úgy állítjuk be,
-      // hogy a 'maxCol - 2' pozícióra ugorjon.
-      // Így mindig marad 2 oszlopnyi "látómező" az utolsó golyó előtt.
-      const scrollTargetCol = maxCol >= 8 ? maxCol - 2 : 0;
+      // 1. Megkeressük a gridben azokat a cellákat, amik a cél oszlopban vannak.
+      // Mivel a grided flex/grid layout, keressünk egy példa cellát,
+      // ami az adott oszlopban van (pl. a 0. sor, target oszlop).
+      const targetCol = maxCol - 1;
 
-      scrollRef.current.scrollTo({
-        left: scrollTargetCol * columnWidth,
-        behavior: "smooth",
-      });
+      // A DOM-ból kérjük le az oszlop szélességét dinamikusan
+      const grid = scrollRef.current;
+      const firstCell = grid.querySelector(".roadmap-cell") as HTMLElement;
+
+      if (firstCell) {
+        // Az oszlop szélessége = cella szélessége + esetleges margin/gap
+        const style = window.getComputedStyle(firstCell);
+        const colWidth =
+          firstCell.offsetWidth +
+          parseFloat(style.marginRight || "0") +
+          parseFloat(style.marginLeft || "0");
+
+        grid.scrollTo({
+          left: targetCol * colWidth,
+          //behavior: "smooth",
+        });
+      }
     }
   }, [roadmapMap]);
 
@@ -80,7 +96,7 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                 const isPlayerPair = items.some((i) => i.pp);
                 const isPanda = items.some((i) => i.p);
                 const isDragon = items.some((i) => i.d);
-                const isNatural = items.some((i => i.n));
+                const isNatural = items.some((i) => i.n);
 
                 if (index > 0) return null;
 
@@ -90,7 +106,6 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                 const hasTie = !!lastTieItem;
 
                 const num = lastTieItem?.t ?? 0;
-                console.log("NUM item.t: ", num);
 
                 const winnerItem =
                   items.find((i) => i.w === 1 || i.w === 4) || item;
@@ -107,7 +122,9 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
                             : "first-cell-tie"
                       } ${hasTie ? "with-tie-line" : ""}`}
                   >
-                    {hasTie && num > 1 && <span className="tie-label">{num}</span>}
+                    {hasTie && num > 1 && (
+                      <span className="tie-label">{num}</span>
+                    )}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
                     {isNatural && <span className="tie-label nat">N</span>}
@@ -132,4 +149,4 @@ export const RoadMap: React.FC<RoadMapProps> = ({ roadmapMap }) => {
   );
 };
 
-export default RoadMap;
+export const RoadMap = React.memo(RoadMapComponent);
