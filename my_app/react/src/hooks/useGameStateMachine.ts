@@ -358,6 +358,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       try {
         const data = await handleApiAction(getShuffling);
         const response = extractGameStateData(data);
+        const currentDeckLen = response?.deck_len;
+        dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen! });
 
         if (response) {
           // A setTimeout ID-t elmentjük, hogy törölhessük ha kell

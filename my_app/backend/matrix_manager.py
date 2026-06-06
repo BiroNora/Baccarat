@@ -34,18 +34,13 @@ class MatrixManager:
     def calculate_next_coords(self, matrix, last_coords, current_winner):
         """Kiszámolja a következő pozíciót a mátrix és last_coords alapján."""
         # Első tie(ok) kezelése
-        if last_coords and last_coords['r'] == 0 and last_coords['c'] == 0 and last_coords['w'] in [3, 6]:
-            return last_coords['r'], last_coords['c']
+        if not last_coords or 'r' not in last_coords:
+            return 0, 0
 
         # TIE kezelése
         if current_winner in [3, 6]:
             if last_coords:
                 return last_coords['r'], last_coords['c']
-            else:
-                return 0, 0
-
-        if not last_coords:
-            return 0, 0
 
         r, c = last_coords['r'], last_coords['c']
         curr_val = WINNER_MAP.get(current_winner, current_winner)
@@ -53,7 +48,7 @@ class MatrixManager:
         prev_val = WINNER_MAP.get(last_coords['prev_w'], last_coords['prev_w'])
 
         # Ha az utolsó győztes TIE volt, akkor a prev_val-hoz hasonlítunk.
-        compare_val = prev_val if last_val in [3, 6] else last_val
+        compare_val = prev_val if last_coords and last_val in [3, 6] else last_val
 
         if curr_val!= compare_val :
             new_col = None
@@ -81,20 +76,21 @@ class MatrixManager:
         # 1. Betöltés
         matrix = copy.deepcopy(user.roadmap_matrix) if (user.roadmap_matrix and len(user.roadmap_matrix) > 0) else [[0] for _ in range(6)]
         last_c = user.last_coords or {} # pl. {"r": 1, "c": 3}
+
+        new_r = last_c.get('r', 0)
+        new_c = last_c.get('c', 0)
+
         curr_w = last_c.get("w")
         prev_w = curr_w if curr_w not in [WinnerState.TIE, WinnerState.NATURAL_TIE] else user.last_coords.get("prev_w")
-
         norm_winner = WINNER_MAP.get(winner_type, winner_type)
 
-        if winner_type in [WinnerState.TIE, WinnerState.NATURAL_TIE]:
-            return {"row": last_c.get('r') if last_c else None, "col": last_c.get('c') if last_c else None}
+        # 2. Számolás: Csak ha NEM TIE
+        if winner_type not in [WinnerState.TIE, WinnerState.NATURAL_TIE]:
+            coords = self.calculate_next_coords(matrix, last_c, winner_type)
+            if coords:
+                new_r, new_c = coords
 
-        # 2. Számolás
-        coords = self.calculate_next_coords(matrix, last_c, winner_type)
-        if coords is None:
-            return {"row": 0, "col": 0}
-
-        new_r, new_c = coords
+        # 3. Mátrix frissítése 
         updated_matrix = self.update_existing_matrix(matrix, new_r, new_c, winner_type)
 
         # 4. Mentés

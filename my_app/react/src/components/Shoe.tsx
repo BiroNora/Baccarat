@@ -10,7 +10,6 @@ const HighHeelIcon = ({ width = 150, color = "#e3b416" }) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true); // Csak akkor vált, ha láthatóvá válik
-          console.log("Látom a cipőt!", entry.isIntersecting)
         }
       },
       { threshold: 0.5 }, // Akkor indul, ha a cipő fele már látszik

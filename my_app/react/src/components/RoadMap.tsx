@@ -48,7 +48,7 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
           : 0;
 
       // Ha még kevés az oszlop, maradj az elején
-      if (maxCol < 8) {
+      if (maxCol <= 7) {
         scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
         return;
       }
