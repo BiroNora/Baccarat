@@ -1,7 +1,7 @@
-import React, { type JSX } from "react";
+import React from "react";
 import "../styles/burningCards.css";
 import type { GameStateData } from "../types/game-types";
-import { ClubIcon, DiamondIcon, HeartIcon, SpadeIcon } from "./CardIcons";
+import { formatCard } from "../utilities/utils";
 
 // --- KOMPONENS ---
 interface BurningCardsProps {
@@ -10,40 +10,6 @@ interface BurningCardsProps {
 
 const BurningCards: React.FC<BurningCardsProps> = ({ gameState }) => {
   const card = gameState.first_card;
-
-  // Segédfüggvény az ikon kiválasztásához
-  const getSuitIcon = (suit: string) => {
-    switch (suit) {
-      case "♥": return <HeartIcon />;
-      case "♦": return <DiamondIcon />;
-      case "♠": return <SpadeIcon />;
-      case "♣": return <ClubIcon />;
-      default: return suit;
-    }
-  };
-
-  const formatCard = (cardStr: string | null): JSX.Element | string => {
-    if (!cardStr) return "?";
-
-    const suit = cardStr[0];
-    const value = cardStr.substring(1).trim();
-
-    let suitClass = "";
-    if (suit === "♥" || suit === "♦") {
-      suitClass = "red-suit";
-    } else if (suit === "♠" || suit === "♣") {
-      suitClass = "black-suit";
-    } else {
-      return cardStr;
-    }
-
-    return (
-      <span style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
-        <span className={suitClass}>{getSuitIcon(suit)}</span>
-        <span className="merriweatherblack">{value}</span>
-      </span>
-    );
-  };
 
   return (
     <div className="cut-container">

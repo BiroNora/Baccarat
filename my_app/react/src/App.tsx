@@ -13,7 +13,6 @@ import { Shifting } from "./components/Shifting";
 import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
-import Winner from "./components/Winner";
 import { RoadMap } from "./components/RoadMap";
 //import { mockRoadmapMap } from "./data/mockData";
 
@@ -124,24 +123,14 @@ function App() {
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="game-action-area-wrapper">
-                    <Winner gameState={gameState} />
-                  </div>
-                  <div className="player-dealer-area-wrapper">
-                    <StandardGame gameState={gameState} />
-                  </div>
+                  <StandardGame gameState={gameState} />
                 </div>
               );
             case "MAIN_STAND_NATURAL":
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="game-action-area-wrapper">
-                    <Winner gameState={gameState} />
-                  </div>
-                  <div className="player-dealer-area-wrapper">
-                    <StandardGame gameState={gameState} />
-                  </div>
+                  <StandardGame gameState={gameState} />
                 </div>
               );
             case "OUT_OF_TOKENS":

@@ -1,0 +1,45 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 2rem 2.5rem 2rem;
+  background: radial-gradient(
+    circle,
+    #f91e43 0%,    /* Középen az eredeti világosabb szín */
+    #e01f3f 40%,   /* Kicsit sötétebb átmenet */
+    #a31e34 100%   /* A legszélén mély sötétbordó */
+  );
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #ca8a04; /* yellow-600 */
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.winner-title {
+  color: #eab308; /* yellow-500 */
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-style: italic;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  padding: 1rem 0;
+}
+
+.card-display {
+  padding: 1rem 0;
+  display: flex;        /* Ez teszi egymás mellé az elemeket */
+  flex-direction: row;  /* Alapértelmezett, sorba rendezi őket */
+  gap: 1rem;            /* Térköz a két kártya között */
+  align-items: left-start;
+  justify-content: flex-start;
+}
+
+.game_card {
+  font-size: clamp(1.5rem, 1.2vw, 2.2rem);
+}
+
+.sum-title {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+}
