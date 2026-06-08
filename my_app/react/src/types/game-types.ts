@@ -34,12 +34,14 @@ export interface GameStateData {
 
 export interface PlayerData {
   hand: string[];
-  sum: number;
+  sum_2: number;
+  sum_3: number;
 }
 
 export interface BankerData {
   hand: string[];
-  sum: number;
+  sum_2: number;
+  sum_3: number;
 }
 
 export interface ApiResponse {
@@ -63,9 +65,9 @@ export interface HistoryUnit {
 }
 
 export interface RoundResultUnit {
-  winner: number;        // A "winner" kulcsból jön
-  player_score: number;  // "player_score"
-  banker_score: number;  // "banker_score"
+  winner: number; 
+  is_player_third_card: boolean;
+  is_banker_third_card: boolean;
   is_natural?: boolean;   // "is_natural"
   is_dragon?: boolean;    // "is_dragon"
   is_panda?: boolean;     // "is_panda"

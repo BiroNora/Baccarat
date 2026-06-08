@@ -10,8 +10,8 @@ from my_app.backend.winner_state import WinnerState
 VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON", "P_PAIR", "B_PAIR"]
 ROUND_RESULTS = [
     "winner",
-    "player_score",
-    "banker_score",
+    "is_player_third_card",
+    "is_banker_third_card",
     "is_natural",
     "is_dragon",
     "is_panda",
@@ -34,11 +34,13 @@ class Game:
     def __init__(self):
         self.player: Dict[str, Any] = {
             "hand": [],
-            "sum": 0,
+            "sum_2": 0,
+            "sum_3": 0,
         }
         self.banker: Dict[str, Any] = {
             "hand": [],
-            "sum": 0,
+            "sum_2": 0,
+            "sum_3": 0,
         }
         self.suits = ["♥", "♦", "♣", "♠"]
         self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
@@ -114,10 +116,13 @@ class Game:
         card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
         p_hand, b_hand = [card1, card3], [card2, card4]
 
-        self.player = {"hand": p_hand, "sum": self.sum(p_hand)}
-        self.banker = {"hand": b_hand, "sum": self.sum(b_hand)}
+        p_sum = self.sum(p_hand)
+        b_sum = self.sum(b_hand)
 
-        if self.isNatural(self.player["sum"], self.banker["sum"]):
+        self.player = {"hand": p_hand, "sum_2": p_sum, "sum_3": p_sum}
+        self.banker = {"hand": b_hand, "sum_2": b_sum, "sum_3": b_sum}
+
+        if self.isNatural(p_sum, b_sum):
             self.is_natural = True
             self.side_winners = []
 
@@ -156,8 +161,8 @@ class Game:
         return len(ranks) >= 2 and ranks[0] == ranks[1]
 
     def check_third_card_rules(self):
-        p_score = self.player["sum"]
-        b_score = self.banker["sum"]
+        p_score = self.player["sum_2"]
+        b_score = self.banker["sum_2"]
 
         # PLAYER SZABÁLYA: Húz, ha 5 vagy kevesebb a pontja
         p_third = None
@@ -200,12 +205,12 @@ class Game:
                 self.is_banker_third_card = True
                 self.banker["hand"].append(self.deck.pop(0))
 
-        self.player["sum"] = self.sum(self.player["hand"])
-        self.banker["sum"] = self.sum(self.banker["hand"])
+        self.player["sum_3"] = self.sum(self.player["hand"])
+        self.banker["sum_3"] = self.sum(self.banker["hand"])
 
     def determine_main_outcome(self):
-        p_s = self.player["sum"]
-        b_s = self.banker["sum"]
+        p_s = self.player["sum_3"]
+        b_s = self.banker["sum_3"]
 
         is_natural = (
             len(self.player["hand"]) == 2
@@ -236,8 +241,8 @@ class Game:
             )
 
     def determine_side_outcomes(self):
-        p_s = self.player["sum"]
-        b_s = self.banker["sum"]
+        p_s = self.player["sum_3"]
+        b_s = self.banker["sum_3"]
         p_cards_count = len(self.player["hand"])
         b_cards_count = len(self.banker["hand"])
 
@@ -252,9 +257,6 @@ class Game:
             self.side_winners.append(BetType.PANDA.value)
 
     def update_round_result(self):
-        p_s = self.player["sum"]
-        b_s = self.banker["sum"]
-
         # Megnézzük, hogy a nyertes benne van-e a Naturalok között
         is_natural_round = self.winner in [
             WinnerState.NATURAL_PLAYER_WON.value,
@@ -264,8 +266,8 @@ class Game:
 
         self.round_result = {
             "winner": self.winner,  # Tiszta IntEnum érték (1-6)
-            "player_score": p_s,
-            "banker_score": b_s,
+            "is_player_third_card": self.is_player_third_card,
+            "is_banker_third_card": self.is_banker_third_card,
             "is_natural": is_natural_round,
             "is_dragon": BetType.DRAGON.value in self.side_winners,
             "is_panda": BetType.PANDA.value in self.side_winners,
@@ -369,11 +371,13 @@ class Game:
     def clear_up(self):
         self.player: Dict[str, Any] = {
             "hand": [],
-            "sum": 0,
+            "sum_2": 0,
+            "sum_3": 0,
         }
         self.banker: Dict[str, Any] = {
             "hand": [],
-            "sum": 0,
+            "sum_2": 0,
+            "sum_3": 0,
         }
         self.is_natural = False
         self.is_player_third_card = False
@@ -398,8 +402,8 @@ class Game:
     def set_player_hand(self, card):
         self.player["hand"].append(card)
 
-    def set_player_sum(self, sum):
-        self.player["sum"] = sum
+    #def set_player_sum(self, sum):
+        #self.player["sum"] = sum
 
     def set_bet(self, amount, bet_type):
         try:
@@ -452,8 +456,6 @@ class Game:
             "banker": self.banker,
             "winner": self.winner,
             "tie_counter": self.tie_counter,
-            "is_player_third_card": self.is_player_third_card,
-            "is_banker_third_card": self.is_banker_third_card,
             "deck_len": self.get_deck_len(),
             "bets": self.bets,
             "side_winners": self.side_winners,
@@ -474,8 +476,6 @@ class Game:
         game.banker = data["banker"]
         game.winner = data["winner"]
         game.tie_counter = data["tie_counter"]
-        game.is_player_third_card = data["is_player_third_card"]
-        game.is_banker_third_card = data["is_banker_third_card"]
         game.deck_len = data["deck_len"]
         raw_bets = data.get("bets")
         if raw_bets is not None:

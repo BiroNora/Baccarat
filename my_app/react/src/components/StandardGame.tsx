@@ -55,14 +55,27 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <span className="game_card">{formatCard(b2_card)}</span>
           <span className="game_card">{formatCard(null)}</span>
         </div>
-        <div>
-          <div className="sum-title" style={{ paddingTop: "1rem" }}>
-            Banker: {banker.sum}
+
+        <div className="label-container">
+          <div className="sum-line" style={{ paddingTop: "1rem" }}>
+            <span className="label-side">Banker:</span>
+            <span className="value-side">{banker.sum_2}</span>
           </div>
-          <div className="sum-title" style={{ paddingBottom: "1rem" }}>
-            Player: {player.sum}
+          <div className="sum-line"  style={{ paddingBottom: "1rem" }}>
+            <span className="label-side">Banker:</span>
+            <span className="value-side">{banker.sum_3}</span>
+          </div>
+
+          <div className="sum-line letter_p" style={{ paddingTop: "1rem" }}>
+            <span className="label-side">Player:</span>
+            <span className="value-side">{player.sum_2}</span>
+          </div>
+          <div className="sum-line letter_p" style={{ paddingBottom: "1rem" }}>
+            <span className="label-side">Player:</span>
+            <span className="value-side">{player.sum_3}</span>
           </div>
         </div>
+
         <div className="card-display">
           <span className="game_card">{formatCard(null)}</span>
           <span className="game_card">{formatCard(p1_card)}</span>

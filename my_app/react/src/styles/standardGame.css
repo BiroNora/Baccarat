@@ -41,5 +41,25 @@
 }
 
 .sum-title {
-  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+
+}
+
+.label-container {
+  display: flex;
+  flex-direction: column;
+  width: 10rem;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 2rem;
+}
+
+.sum-line {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.letter_p {
+  letter-spacing: 0.07em;
 }
