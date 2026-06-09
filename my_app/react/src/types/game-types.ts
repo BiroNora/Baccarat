@@ -65,9 +65,7 @@ export interface HistoryUnit {
 }
 
 export interface RoundResultUnit {
-  winner: number; 
-  is_player_third_card: boolean;
-  is_banker_third_card: boolean;
+  winner: number;
   is_natural?: boolean;   // "is_natural"
   is_dragon?: boolean;    // "is_dragon"
   is_panda?: boolean;     // "is_panda"
@@ -106,6 +104,7 @@ export type GameStateMachineHookResult = {
     newState: GameState,
     newData?: Partial<GameStateData>,
   ) => void;
+  handleStartBetting: () => void;
   handlePlaceBet: (amount: number, selectedBetType: BetTypeValue) => Promise<void>;
   handleRetakeBet: (selectedBetType: BetTypeValue) => void;
   handleShoeCut: (amount: number) => Promise<void>;

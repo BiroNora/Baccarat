@@ -249,32 +249,6 @@ button:disabled {
   min-height: 2rem;
 }
 
-.players-area-wrapper {
-  display: flex;
-  align-items: flex-start;
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
-  width: 100%;
-  padding-top: var(--extra-vertical-padding02);
-  box-sizing: border-box;
-}
-
-.hand-area-wrapper {
-  min-height: 2.8rem;
-}
-
-.band-area-wrapper {
-  display: flex;
-  width: 6rem;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 2rem;
-}
-
-.score-area-wrapper {
-  min-height: 2rem;
-}
-
 .winners {
   display: flex;
   font-size: var(--root-font-size);

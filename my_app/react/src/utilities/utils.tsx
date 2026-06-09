@@ -9,7 +9,7 @@ import {
   HeartIcon,
   SpadeIcon,
 } from "../components/CardIcons";
-import type { JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 
 export function extractGameStateData(
   apiResponse: unknown,
@@ -125,4 +125,27 @@ export const formatCard = (
       </div>
     </div>
   );
+};
+
+export const useDelayedSum = (sum2: number, sum3: number) => {
+  const [displayedSum, setDisplayedSum] = useState<number | null>(null);
+
+  useEffect(() => {
+    // 2000ms: megjelenik a sum_2
+    const showSum2 = setTimeout(() => {
+      setDisplayedSum(sum2);
+    }, 3500);
+
+    // 4500ms: váltás sum_3-ra
+    const showSum3 = setTimeout(() => {
+      setDisplayedSum(sum3);
+    }, 6000);
+
+    return () => {
+      clearTimeout(showSum2);
+      clearTimeout(showSum3);
+    };
+  }, [sum2, sum3]); // Újraindul, ha az összegek változnak
+
+  return displayedSum;
 };

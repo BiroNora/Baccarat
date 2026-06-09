@@ -22,8 +22,8 @@ export type GameAction =
 export const initialGameDataState: GameDataState = {
   gameState: {
     currentGameState: "LOADING",
-    player: { hand: [], sum: 0 },
-    banker: { hand: [], sum: 0 },
+    player: { hand: [], sum_2: 0, sum_3: 0 },
+    banker: { hand: [], sum_2: 0, sum_3: 0},
     winner: 0,
     is_player_third_card: false,
     is_banker_third_card: false,
@@ -41,8 +41,6 @@ export const initialGameDataState: GameDataState = {
     },
     round_result: {
       winner: 0,
-      player_score: 0,
-      banker_score: 0,
       is_natural: false,
       is_dragon: false,
       is_panda: false,

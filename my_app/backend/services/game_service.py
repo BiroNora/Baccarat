@@ -10,8 +10,7 @@ class GameService:
         # 1. Mátrix frissítése
         coords = self.matrix_manager.process_new_round(user, current_winner)
         coord_str = f"{coords['row']}:{coords['col']}"
-        print("13 service coord: ", coord_str)
-
+        
         # 2. History frissítése
         res = game.round_result
         unit = HistoryUnit(
@@ -24,7 +23,6 @@ class GameService:
             is_b_pair=res.get("is_b_pair", False),
             is_p_pair=res.get("is_p_pair", False),
         )
-        print("srevice 27 historyUnit: ", unit)
 
         if user.history is None:
             user.history = []

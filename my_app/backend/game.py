@@ -3,15 +3,12 @@ import random
 from typing import Any, Dict
 
 from my_app.backend.bet_type import BetType
-from my_app.backend.matrix_manager import MatrixManager
 from my_app.backend.phase_state import PhaseState
 from my_app.backend.winner_state import WinnerState
 
 VALID_BET_TYPES = ["PLAYER", "BANKER", "TIE", "PANDA", "DRAGON", "P_PAIR", "B_PAIR"]
 ROUND_RESULTS = [
     "winner",
-    "is_player_third_card",
-    "is_banker_third_card",
     "is_natural",
     "is_dragon",
     "is_panda",
@@ -61,8 +58,6 @@ class Game:
         self.is_session_init = False
         self.shoe_cut_limit = 0
         self.first_card = None
-        self.is_player_third_card = False
-        self.is_banker_third_card = False
 
     def get_cut_card_position(self):
         total_cards = TOTAL_INITIAL_CARDS
@@ -71,6 +66,7 @@ class Game:
         return total_cards - cut_offset
 
     def create_deck(self):
+        self.clear_up()
         single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
         self.deck = single_deck * NUM_DECKS
         random.shuffle(self.deck)
@@ -111,8 +107,6 @@ class Game:
         self.is_round_active = True
         self.is_session_init = False
 
-        print("112 init bets: ", self.bets)
-
         card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
         p_hand, b_hand = [card1, card3], [card2, card4]
 
@@ -129,7 +123,7 @@ class Game:
             self.determine_main_outcome()
             self.process_rewards()
 
-            self.target_phase = PhaseState.MAIN_STAND_NATURAL
+            self.target_phase = PhaseState.MAIN_STAND
         else:
             self.is_natural = False
             self.check_third_card_rules()
@@ -167,7 +161,6 @@ class Game:
         # PLAYER SZABÁLYA: Húz, ha 5 vagy kevesebb a pontja
         p_third = None
         if p_score <= 5:
-            self.is_player_third_card = True
             p_third_card = self.deck.pop(0)
             self.player["hand"].append(p_third_card)
             p_third = self.CARD_VALUES.get(self.hand_to_ranks([p_third_card])[0], 0)
@@ -194,7 +187,6 @@ class Game:
         # Ha a Player NEM húzott (mert 6 vagy 7 pontja volt): A Banker 0-5 között húz
         if p_third is None:
             if b_score <= 5:
-                self.is_banker_third_card = True
                 self.banker["hand"].append(self.deck.pop(0))
 
         # Ha a Player HÚZOTT: Ellenőrizzük a csökkentett feltételt
@@ -202,7 +194,6 @@ class Game:
             if b_score <= 2 or (
                 b_score in banker_rules and p_third in banker_rules[b_score]
             ):
-                self.is_banker_third_card = True
                 self.banker["hand"].append(self.deck.pop(0))
 
         self.player["sum_3"] = self.sum(self.player["hand"])
@@ -266,8 +257,6 @@ class Game:
 
         self.round_result = {
             "winner": self.winner,  # Tiszta IntEnum érték (1-6)
-            "is_player_third_card": self.is_player_third_card,
-            "is_banker_third_card": self.is_banker_third_card,
             "is_natural": is_natural_round,
             "is_dragon": BetType.DRAGON.value in self.side_winners,
             "is_panda": BetType.PANDA.value in self.side_winners,
@@ -380,8 +369,6 @@ class Game:
             "sum_3": 0,
         }
         self.is_natural = False
-        self.is_player_third_card = False
-        self.is_banker_third_card = False
         self.winner = WinnerState.NONE
         self.side_winners = []
         self.round_result = {key: 0 for key in ROUND_RESULTS}
@@ -419,10 +406,6 @@ class Game:
 
         except ValueError:
             print(f"Hiba: A kapott bet_type ({bet_type}) nem érvényes IntEnum szám!")
-
-    def set_bets_to_null(self):
-        self.bets = {key: 0 for key in VALID_BET_TYPES}
-        self.bets["TOTAL"] = 0
 
     def set_bet_type(self, type_value):
         self.bet_type = BetType(type_value)
