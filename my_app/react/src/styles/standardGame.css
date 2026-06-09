@@ -18,13 +18,14 @@
 
 .winner-title {
   color: #eab308; /* yellow-500 */
-  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-size: clamp(1.5rem, 1.5vw, 2.5rem);
   font-style: italic;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: block;
   padding: 1rem 0;
+  min-height: 4rem;
 }
 
 .card-display {
@@ -62,4 +63,14 @@
 
 .letter_p {
   letter-spacing: 0.07em;
+}
+
+.pair-area-wrapper {
+  display: flex;
+  min-height: 2rem;
+  color: #493701;
+}
+
+.p_pair {
+  align-items: flex-end;
 }
