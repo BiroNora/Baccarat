@@ -71,6 +71,8 @@ export interface RoundResultUnit {
   is_panda?: boolean;     // "is_panda"
   is_p_pair?: boolean;    // "is_p_pair"
   is_b_pair?: boolean;    // "is_b_pair"
+  is_perfect_p_pair: boolean;
+  is_perfect_b_pair: boolean;
 }
 
 export type GameStateForClient = {

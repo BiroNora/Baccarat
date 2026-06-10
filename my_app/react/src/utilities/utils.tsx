@@ -127,25 +127,25 @@ export const formatCard = (
   );
 };
 
-export const useDelayedSum = (sum2: number, sum3: number) => {
+export const useDelayedSum = (sum2: number, sum3: number, time2: number, time3: number) => {
   const [displayedSum, setDisplayedSum] = useState<number | null>(null);
 
   useEffect(() => {
-    // 2000ms: megjelenik a sum_2
+    // Első összeg (sum_2) megjelenítése
     const showSum2 = setTimeout(() => {
       setDisplayedSum(sum2);
-    }, 3500);
+    }, time2 * 1000); // Átváltás másodpercre
 
-    // 4500ms: váltás sum_3-ra
+    // Harmadik összeg (sum_3) megjelenítése
     const showSum3 = setTimeout(() => {
       setDisplayedSum(sum3);
-    }, 6000);
+    }, time3 * 1000);
 
     return () => {
       clearTimeout(showSum2);
       clearTimeout(showSum3);
     };
-  }, [sum2, sum3]); // Újraindul, ha az összegek változnak
+  }, [sum2, sum3, time2, time3]);
 
   return displayedSum;
 };

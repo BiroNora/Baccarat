@@ -14,6 +14,8 @@ ROUND_RESULTS = [
     "is_panda",
     "is_p_pair",
     "is_b_pair",
+    "is_perfect_p_pair",
+    "is_perfect_b_pair",
     "tie_count",
 ]
 
@@ -109,6 +111,9 @@ class Game:
 
         card1, card2, card3, card4 = [self.deck.pop(0) for _ in range(4)]
         p_hand, b_hand = [card1, card3], [card2, card4]
+
+        self.round_result["is_perfect_p_pair"] = card1 == card3
+        self.round_result["is_perfect_b_pair"] = card2 == card4
 
         p_sum = self.sum(p_hand)
         b_sum = self.sum(b_hand)

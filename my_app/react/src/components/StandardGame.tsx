@@ -10,9 +10,28 @@ interface TableProps {
 const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const { banker, player, round_result } = gameState;
 
-  // A hook használata:
-  const displayedBankerSum = useDelayedSum(banker.sum_2, banker.sum_3);
-  const displayedPlayerSum = useDelayedSum(player.sum_2, player.sum_3);
+  // timetable
+  const CARD_1 = 0.5;
+  const CARD_2 = 2;
+  const SCORE_2 = 3.5;
+  const CARD_3_P = 4.5;
+  const SCORE_3_P = 5.5;
+  const CARD_3_B = 6.5;
+  const SCORE_3_B = 7.5;
+  const CARD_PAIR = 3;
+
+  const bankerCard3Time = player.hand[2] ? CARD_3_B : CARD_3_P;
+  const bankerScore3Time = player.hand[2] ? SCORE_3_B : SCORE_3_P;
+
+  const displayedBankerSum = useDelayedSum(banker.sum_2,
+    banker.sum_3,
+    SCORE_2,
+    banker.hand[2] ? SCORE_3_B : SCORE_2);
+
+  const displayedPlayerSum = useDelayedSum(player.sum_2,
+    player.sum_3,
+    SCORE_2,
+    bankerScore3Time);
 
   if (
     !gameState ||
@@ -34,6 +53,10 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const has_p_pair = round_result.is_p_pair;
   const has_b_pair = round_result.is_b_pair;
 
+  const displayedPlayerPair = round_result.is_perfect_p_pair ? "Player Perfect Pair" : "Player Pair";
+  const displayedBankerPair = round_result.is_perfect_b_pair ? "Banker Perfect Pair" : "Banker Pair";
+
+
   const baseProps = {
     initial: { rotateY: 90, opacity: 0 },
     animate: { rotateY: 0, opacity: 1 },
@@ -45,7 +68,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
     <>
       <div className="game-container">
         <div className="winner-title">
-          <motion.span {...baseProps} transition={{ delay: (player.hand.length === 2 && banker.hand.length === 2) ? 5.5 : 8 }}>
+          <motion.span {...baseProps} transition={{ delay: (player.hand.length === 2 && banker.hand.length === 2) ? 5.5 : 9 }}>
             <span>{states[round_result.winner]}</span>
           </motion.span>
         </div>
@@ -54,7 +77,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             className="game_card"
             {...baseProps}
-            transition={{ ...baseProps.transition, delay: 4 }}
+            transition={{ ...baseProps.transition, delay: bankerCard3Time }}
           >
             {formatCard(b3_card, "left")}
           </motion.span>
@@ -64,7 +87,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: 0.5,
+              delay: CARD_1,
             }}
           >
             {formatCard(b1_card)}
@@ -75,7 +98,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: 2,
+              delay: CARD_2,
             }}
           >
             {formatCard(b2_card)}
@@ -91,11 +114,11 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
-                delay: 2.5,
+                delay: CARD_PAIR,
                 ease: "easeInOut",
               }}
             >
-              Banker Pair
+              {displayedBankerPair}
             </motion.span>
           )}
         </div>
@@ -111,7 +134,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 1 }}
                   >
                     {displayedBankerSum}
                   </motion.span>
@@ -130,7 +153,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 1 }}
                   >
                     {displayedPlayerSum}
                   </motion.span>
@@ -147,11 +170,11 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
-                delay: 2.5,
+                delay: CARD_PAIR,
                 ease: "easeInOut",
               }}
             >
-              Player Pair
+              {displayedPlayerPair}
             </motion.span>
           )}
         </div>
@@ -163,7 +186,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: 0.5,
+              delay: CARD_1,
             }}
           >
             {formatCard(p1_card)}
@@ -174,7 +197,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: 2,
+              delay: CARD_2,
             }}
           >
             {formatCard(p2_card)}
@@ -183,7 +206,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             className="game_card"
             {...baseProps}
-            transition={{ ...baseProps.transition, delay: 4 }}
+            transition={{ ...baseProps.transition, delay: CARD_3_P }}
           >
             {formatCard(p3_card, "right")}
           </motion.span>
