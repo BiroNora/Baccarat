@@ -139,4 +139,5 @@
   justify-content: center;
   align-items: center;
   pointer-events: none; /* Ne zavarja a kattintást */
+  margin-top: 3px;
 }

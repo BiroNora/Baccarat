@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 const DragonIcon = ({ width = 150 }) => {
@@ -21,38 +22,39 @@ const DragonIcon = ({ width = 150 }) => {
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <svg
-      ref={svgRef}
-      viewBox="-50 0 500 500"
-      width={width}
-      height={width}
-      className="animated-dragon"
-    >
-      {/* Animált csoport: a sárkány teste és lába/farka */}
-      <g className={isVisible ? "start-animation" : "hidden-lines"}>
-        <path
-          fill="#995710"
-          stroke="#995210"
-          strokeWidth="3"
-          d="M -33.342 17.519 C 243.789 61.141 -59.155 103.889 -28.536 259.409 C -22.582 268.339 12.92 260.319 10.711 257.006 C 9.638 362.056 192.812 453.174 131.656 479.673 L 214.155 507.707 L 352.721 506.105 C 368.229 506.105 342.28 413.194 288.644 384.359 C 262.565 388.923 111.122 247.253 181.316 219.361 C 251.51 191.469 279.108 266.971 315.076 249.797 C 351.044 232.623 311.092 281.183 272.625 289.845 C 598.466 312.783 436.435 26.304 -33.342 17.519 Z"
-        />
-        <path
-          fill="#995210"
-          stroke="#995210"
-          strokeWidth="3"
-          d="M 131.757 479.275 C 142.178 498.38 -10.773 442.909 -37.247 394.373 C -37.247 394.373 -18.688 507.94 23.627 495.293 C 65.942 482.646 210.251 508.108 210.251 508.108"
-        />
-      </g>
+  const baseProps = {
+    initial: { rotateY: 0, opacity: 0 },
+    animate: { rotateY: 720, opacity: 1 },
+    transition: { duration: 3, ease: "backOut" }, // repeat: 1 = összesen 2-szer fordul
+  } as const;
 
-      {/* Részletvonal (csoporton kívül) */}
-      <path
-        fill="rgb(0, 0, 0)"
-        stroke="rgb(0, 0, 0)"
-        strokeWidth="3"
-        d="M 190.927 90.106 C 220.343 72.456 310.636 133.619 299.057 140.566 C 273.32 180.716 223.353 142.043 190.927 93.309"
-      />
-    </svg>
+  return (
+    <div style={{ perspective: "1000px" }}>
+      <motion.svg
+        {...baseProps}
+        //ref={svgRef}
+        viewBox="0 0 500 500"
+        width={width}
+        height={width}
+        className="animated-dragon"
+      >
+        <g className={isVisible ? "start-animate" : "hidden"}>
+          <path
+            style={{
+              fill: "rgb(153, 82, 16)",
+            }}
+            d="M 478.966 15.718 C 232.324 -52.107 -249.087 277.206 185.815 280.836 L 144.165 240.788 C 262.743 145.218 371.782 219.177 200.232 356.927 C 170.285 360.696 80.751 470.117 108.122 498.697 L 426.904 499.498 C 445.396 508.744 514.791 401.671 498.189 395.373 C 511.524 419.206 342.923 486.994 333.192 474.668 C 285.062 448.774 462.156 344.06 448.53 252.802 L 486.976 252.001 C 496.126 239.072 480.985 134.389 360.424 62.174 C 400.011 24.069 478.14 14.941 478.966 15.718 Z"
+          />
+
+          <path
+            style={{
+              fill: "rgb(103, 233, 17)",
+            }}
+            d="M 268.313 80.095 C 276.249 120.767 174.123 178.167 164.989 131.357 C 153.931 111.452 258.018 61.564 268.313 80.095 Z"
+          />
+        </g>
+      </motion.svg>
+    </div>
   );
 };
 

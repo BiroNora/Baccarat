@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 const PandaIcon = ({ width = 150, color = "#7a2aab" }) => {
@@ -21,101 +22,59 @@ const PandaIcon = ({ width = 150, color = "#7a2aab" }) => {
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <svg
-      ref={svgRef}
-      viewBox="-25 0 500 500"
-      width={width}
-      height={width}
-      fill="none"
-      stroke={color}
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="animated-panda"
-    >
+  const baseProps = {
+    initial: { rotateY: 0, opacity: 0 },
+    animate: { rotateY: 720, opacity: 1 },
+    transition: { duration: 3, ease: "backOut" }, // repeat: 1 = összesen 2-szer fordul
+  } as const;
 
-        <g className={isVisible ? "start-animation" : "hidden-lines"}>
-          {/* A megadott útvonalak a csoporton belül */}
+  return (
+    <div style={{ perspective: "1000px" }}>
+      <motion.svg
+        {...baseProps}
+        //ref={svgRef}
+        viewBox="-40 0 500 500"
+        width={width}
+        height={width}
+        fill="none"
+        stroke={color}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="animated-panda"
+        style={{
+          transformOrigin: "center center",
+          overflow: "visible",
+        }}
+      >
+        <g className={isVisible ? "start-animate" : "hidden"}>
           <path
-            style={{ fill: "rgb(122, 42, 171)", strokeWidth: 1 }}
-            d="M 82.499 212.655 C -5.142 367.14 35.316 477.615 144.173 472.967 C 185.375 483.81 239.033 417.412 160.994 396.876 C 191.522 261.646 286.736 336.227 284.342 398.478 C 203.234 409.884 249.106 479.824 303.565 472.166 C 406.583 485.913 442.223 337.244 358.831 212.655 C 321.004 269.627 165.334 300.816 82.499 212.655 Z"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 349.213 225.066 C 329.091 266.96 167.754 335.452 68.076 227.469 C -33.768 368.97 30.592 500.396 114.532 494.189 C 191.009 500.292 223.379 432.695 148.171 418.899 C 67.012 337.226 359.053 311.433 269.117 419.7 C 166.809 444.378 262.497 503.025 293.146 495.791 C 417.694 491.002 433.581 353.892 349.213 225.066 Z"
           />
           <path
-            style={{
-              fill: "rgb(122, 42, 171)",
-              stroke: "rgb(122, 42, 171)",
-              paintOrder: "stroke",
-              strokeWidth: 1,
-            }}
-            d="M 295.261 69.375 C 320.181 18.811 386.179 63.29 340.316 113.228"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 80.09 118.238 C 27.816 66.256 114.411 23.124 128.148 75.787 C 123.537 84.779 109.819 71.638 81.692 117.437"
           />
           <path
-            style={{ fill: "rgb(122, 42, 171)", strokeWidth: 1 }}
-            d="M 163.704 182.31 C 87.352 191.143 157.878 52.666 189.535 143.864"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 289.14 81.394 C 281.983 25.871 396.3 57.742 333.193 117.437"
           />
           <path
-            style={{
-              fill: "rgb(115, 63, 222)",
-              stroke: "rgb(122, 42, 171)",
-              strokeWidth: 1,
-            }}
-            d="M 163.704 181.709 C 165.417 169.721 190.422 145.463 190.135 143.865"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 146.57 194.33 C 59.314 186.192 163.214 64.692 174.603 157.485"
           />
           <path
-            style={{ fill: "rgb(122, 42, 171)", strokeWidth: 1 }}
-            d="M 252.01 146.267 C 267.905 57.419 357.674 172.442 277.841 185.915"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 240.282 155.083 C 253.62 65.847 352.584 187.327 267.515 196.733"
           />
           <path
-            style={{ fill: "none", strokeWidth: 1 }}
-            d="M 253.211 145.066 C 250.347 147.89 270.606 157.263 277.841 185.915"
-          />
-          <path
-            style={{
-              fill: "rgb(122, 42, 171)",
-              stroke: "rgb(122, 42, 171)",
-              strokeWidth: 1,
-            }}
-            d="M 199.146 181.109 C 200.327 150.304 249.797 162.442 240.596 182.31"
-          />
-          <path
-            style={{
-              fill: "rgb(122, 42, 171)",
-              stroke: "rgb(122, 42, 171)",
-              strokeWidth: 1,
-            }}
-            d="M 198.426 180.029 C 214.164 194.056 241.799 182.106 240.716 181.95"
-          />
-          <path
-            style={{
-              fill: "rgb(122, 42, 171)",
-              stroke: "rgb(122, 42, 171)",
-              strokeWidth: 1,
-            }}
-            d="M 215.966 185.705 C 212.816 236.615 226.79 229.936 223.174 186.186"
+            style={{ fill: "rgb(122, 42, 171)" }}
+            d="M 202.637 198.334 L 187.419 194.33 C 183.803 162.991 249.457 182.583 229.87 192.728 C 210.283 202.873 212.398 200.357 213.049 200.737 L 213.049 231.975 L 202.637 233.577"
           />
         </g>
-
-        {/* Külső, mindig látható útvonalak */}
-        <path
-          style={{
-            fill: "none",
-            strokeWidth: 1,
-            stroke: "rgb(0, 0, 0)",
-            paintOrder: "fill",
-          }}
-          d="M 82.847 211.445 C 79.164 -37.502 393.103 24.389 359.059 213.727"
-        />
-        <path
-          style={{
-            fill: "rgb(122, 42, 171)",
-            stroke: "rgb(122, 42, 171)",
-            strokeWidth: 1,
-          }}
-          d="M 103.632 113.228 C 50.405 79.961 107.54 13.999 144.481 66.972"
-        />
-
-    </svg>
+      </motion.svg>
+    </div>
   );
 };
 

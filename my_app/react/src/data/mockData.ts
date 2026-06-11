@@ -30,4 +30,7 @@ export const mockRoadmapMap: Record<string, HistoryUnit[]> = {
   "0:7": [
     { coord: '0:5', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
   ],
+  "1:4": [
+    { coord: '0:4', w: 1, t: 0, p: true, bp: true } // Az 5. kör: Player piros/kék pöttyel
+  ],
 };
