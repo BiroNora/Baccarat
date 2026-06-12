@@ -32,7 +32,6 @@ const DragonIcon = ({ width = 150 }) => {
     <div style={{ perspective: "1000px" }}>
       <motion.svg
         {...baseProps}
-        //ref={svgRef}
         viewBox="0 0 500 500"
         width={width}
         height={width}
