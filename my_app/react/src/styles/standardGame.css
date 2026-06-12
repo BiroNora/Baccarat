@@ -14,6 +14,7 @@
   border: 1px solid #ca8a04; /* yellow-600 */
   max-width: 28rem;
   margin: 0 auto;
+  position: relative;
 }
 
 .winner-title {
@@ -74,4 +75,22 @@
 
 .p_pair {
   align-items: flex-end;
+}
+
+.panda-overlay {
+  position: absolute;
+  top: 50%;          /* A konténer közepére tolja */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Pontosan középre igazítja */
+  z-index: 10;       /* Hogy a kártyák felett legyen */
+  pointer-events: none; /* Ne akadályozza a kattintást */
+}
+
+.dragon-overlay {
+  position: absolute;
+  top: 55%;          /* A konténer közepére tolja */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Pontosan középre igazítja */
+  z-index: 10;       /* Hogy a kártyák felett legyen */
+  pointer-events: none; /* Ne akadályozza a kattintást */
 }

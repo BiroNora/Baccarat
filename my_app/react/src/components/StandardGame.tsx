@@ -2,6 +2,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { states, type GameStateData } from "../types/game-types";
 import { formatCard, useDelayedSum } from "../utilities/utils";
 import "../styles/standardGame.css";
+import PandaIcon from "./PandaIcon";
+import { useEffect, useState } from "react";
+import DragonIcon from "./DragonIcon";
+import PandaDragonIcon from "./PandaDragonIcon";
 
 interface TableProps {
   gameState: GameStateData;
@@ -9,6 +13,29 @@ interface TableProps {
 
 const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const { banker, player, round_result } = gameState;
+
+  //const is_panda = round_result.is_panda;
+  //const is_dragon = round_result.is_dragon;
+  const is_panda = true;
+  const is_dragon = false;
+
+  const [bonusState, setBonusState] = useState({
+    showPanda: false,
+    showDragon: false,
+    showCombined: false,
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBonusState({
+        showCombined: is_panda && is_dragon,
+        showPanda: is_panda && !is_dragon,
+        showDragon: is_dragon && !is_panda,
+      });
+    }, 11000);
+
+    return () => clearTimeout(timer);
+  }, [is_panda, is_dragon]);
 
   // timetable
   const CARD_1 = 0.5;
@@ -23,15 +50,19 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const bankerCard3Time = player.hand[2] ? CARD_3_B : CARD_3_P;
   const bankerScore3Time = player.hand[2] ? SCORE_3_B : SCORE_3_P;
 
-  const displayedBankerSum = useDelayedSum(banker.sum_2,
+  const displayedBankerSum = useDelayedSum(
+    banker.sum_2,
     banker.sum_3,
     SCORE_2,
-    banker.hand[2] ? SCORE_3_B : SCORE_2);
+    banker.hand[2] ? SCORE_3_B : SCORE_2,
+  );
 
-  const displayedPlayerSum = useDelayedSum(player.sum_2,
+  const displayedPlayerSum = useDelayedSum(
+    player.sum_2,
     player.sum_3,
     SCORE_2,
-    bankerScore3Time);
+    bankerScore3Time,
+  );
 
   if (
     !gameState ||
@@ -53,9 +84,12 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const has_p_pair = round_result.is_p_pair;
   const has_b_pair = round_result.is_b_pair;
 
-  const displayedPlayerPair = round_result.is_perfect_p_pair ? "Player Perfect Pair" : "Player Pair";
-  const displayedBankerPair = round_result.is_perfect_b_pair ? "Banker Perfect Pair" : "Banker Pair";
-
+  const displayedPlayerPair = round_result.is_perfect_p_pair
+    ? "Player Perfect Pair"
+    : "Player Pair";
+  const displayedBankerPair = round_result.is_perfect_b_pair
+    ? "Banker Perfect Pair"
+    : "Banker Pair";
 
   const baseProps = {
     initial: { rotateY: 90, opacity: 0 },
@@ -68,7 +102,13 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
     <>
       <div className="game-container">
         <div className="winner-title">
-          <motion.span {...baseProps} transition={{ delay: (player.hand.length === 2 && banker.hand.length === 2) ? 5.5 : 9 }}>
+          <motion.span
+            {...baseProps}
+            transition={{
+              delay:
+                player.hand.length === 2 && banker.hand.length === 2 ? 5.5 : 9,
+            }}
+          >
             <span>{states[round_result.winner]}</span>
           </motion.span>
         </div>
@@ -106,6 +146,24 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
           <span className="game_card">{formatCard(null)}</span>
         </div>
+
+        {bonusState.showCombined && (
+          <div className="dragon-overlay">
+            <PandaDragonIcon width={270} faceColor="rgb(227, 27, 61)" />
+          </div>
+        )}
+
+        {bonusState.showPanda && (
+          <div className="panda-overlay">
+            <PandaIcon width={270} faceColor="rgb(227, 27, 61)" />
+          </div>
+        )}
+
+        {bonusState.showDragon && (
+          <div className="dragon-overlay">
+            <DragonIcon width={270} />
+          </div>
+        )}
 
         <div className="pair-area-wrapper">
           {has_b_pair && (

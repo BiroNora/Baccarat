@@ -3,6 +3,7 @@ import "../styles/roadmap.css";
 import type { HistoryUnit } from "../types/game-types";
 import PandaIcon from "./PandaIcon";
 import DragonIcon from "./DragonIcon";
+import PandaDragonIcon from "./PandaDragonIcon";
 
 interface RoadMapProps {
   roadmapMap: Record<string, HistoryUnit[]>;
@@ -130,15 +131,23 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
                     )}
                     {isBankerPair && <div className="overlay-pair-banker" />}
                     {isPlayerPair && <div className="overlay-pair-player" />}
-                    {isPanda && (
+                    {isPanda && isDragon ? (
                       <div className="overlay-panda">
-                        <PandaIcon width={20} />
+                        <PandaDragonIcon width={20} />
                       </div>
-                    )}
-                    {isDragon && (
-                      <div className="overlay-panda">
-                        <DragonIcon width={20} />
-                      </div>
+                    ) : (
+                      <>
+                        {isPanda && (
+                          <div className="overlay-panda">
+                            <PandaIcon width={20} />
+                          </div>
+                        )}
+                        {isDragon && (
+                          <div className="overlay-panda">
+                            <DragonIcon width={20} />
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
