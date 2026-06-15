@@ -14,10 +14,10 @@ interface TableProps {
 const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const { banker, player, round_result } = gameState;
 
-  //const is_panda = round_result.is_panda;
-  //const is_dragon = round_result.is_dragon;
-  const is_panda = true;
-  const is_dragon = false;
+  const is_panda = round_result.is_panda;
+  const is_dragon = round_result.is_dragon;
+  //const is_panda = false;
+  //const is_dragon = false;
 
   const [bonusState, setBonusState] = useState({
     showPanda: false,
@@ -28,9 +28,9 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setBonusState({
-        showCombined: is_panda && is_dragon,
-        showPanda: is_panda && !is_dragon,
-        showDragon: is_dragon && !is_panda,
+        showCombined: !!(is_panda && is_dragon),
+        showPanda: !!(is_panda && !is_dragon),
+        showDragon: !!(is_dragon && !is_panda),
       });
     }, 11000);
 
@@ -148,7 +148,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         </div>
 
         {bonusState.showCombined && (
-          <div className="dragon-overlay">
+          <div className="panda-overlay">
             <PandaDragonIcon width={270} faceColor="rgb(227, 27, 61)" />
           </div>
         )}
@@ -160,7 +160,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         )}
 
         {bonusState.showDragon && (
-          <div className="dragon-overlay">
+          <div className="panda-overlay">
             <DragonIcon width={270} />
           </div>
         )}

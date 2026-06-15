@@ -198,6 +198,7 @@ def with_game_state(f):
 
     return decorated_function
 
+
 def with_game_service(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -210,6 +211,7 @@ def with_game_service(f):
         kwargs["service"] = service
 
         return f(*args, **kwargs)
+
     return decorated_function
 
 

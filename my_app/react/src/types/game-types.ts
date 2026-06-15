@@ -8,7 +8,6 @@ export type GameState =
   | "BETTING"
   | "INIT_GAME"
   | "MAIN_STAND"
-  | "MAIN_STAND_NATURAL"
   | "OUT_OF_TOKENS"
   | "RESTART_GAME"
   | "ERROR"

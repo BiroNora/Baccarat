@@ -14,12 +14,17 @@ import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import { RoadMap } from "./components/RoadMap";
+import Button from "./components/Button";
+//import PandaIcon from "./components/PandaIcon";
+//import DragonIcon from "./components/DragonIcon";
 //import { mockRoadmapMap } from "./data/mockData";
+//import PandaDragonIcon from "./components/PandaDragonIcon";
 
 function App() {
   const {
     gameState,
     roadmapMap,
+    handleStartBetting, // CSAK A BETTING FRONTHOZ
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -70,6 +75,7 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
+                    <div className="cards-wrapper"></div>
                     <CutSlider
                       onConfirm={handleShoeCut}
                       initDeckLen={initDeckLen}
@@ -89,7 +95,10 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                    <div className="cards-wrapper">
+                      <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                    </div>
+
                     <BurningCards gameState={gameState} />
                   </PageWrapper>
                 </div>
@@ -103,34 +112,33 @@ function App() {
             case "BETTING":
               return (
                 <div className="game-container-fullscreen">
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <div className="game-layout-wrapper">
-                    <RoadMap roadmapMap={roadmapMap} />
-                    {/* <RoadMap roadmapMap={mockRoadmapMap} /> */}
-                  </div>
-                  <div className="game-layout-wrapper">
-                    <Betting
-                      gameState={gameState}
-                      onPlaceBet={handlePlaceBet}
-                      retakeBet={handleRetakeBet}
-                      onStartGame={handleStartGame}
-                      isWFSR={isWFSR}
-                    />
-                  </div>
+                  <PageWrapper>
+                    <div className="cards-wrapper">
+                      <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                    </div>
+                  </PageWrapper>
+
+                  <RoadMap roadmapMap={roadmapMap} />
+                  {/* <RoadMap roadmapMap={mockRoadmapMap} /> */}
+
+                  <Betting
+                    gameState={gameState}
+                    onPlaceBet={handlePlaceBet}
+                    retakeBet={handleRetakeBet}
+                    onStartGame={handleStartGame}
+                    isWFSR={isWFSR}
+                  />
                 </div>
               );
             case "MAIN_STAND":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <StandardGame gameState={gameState} />
-                </div>
-              );
-            case "MAIN_STAND_NATURAL":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                  <StandardGame gameState={gameState} />
+                  <PageWrapper>
+                    <div className="cards-wrapper"></div>
+                    {/* <Cards gameState={gameState} initDeckLen={initDeckLen} /> */}
+                    <StandardGame gameState={gameState} />
+                    <Button onClick={handleStartBetting} />
+                  </PageWrapper>
                 </div>
               );
             case "OUT_OF_TOKENS":

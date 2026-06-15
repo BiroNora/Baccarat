@@ -22,4 +22,3 @@ class PhaseState(str, Enum):
 
     # Fő játékmenet
     MAIN_STAND = "MAIN_STAND"
-    MAIN_STAND_NATURAL = "MAIN_STAND_NATURAL"

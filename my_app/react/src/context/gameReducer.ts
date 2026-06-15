@@ -46,6 +46,8 @@ export const initialGameDataState: GameDataState = {
       is_panda: false,
       is_p_pair: false,
       is_b_pair: false,
+      is_perfect_p_pair: false,
+      is_perfect_b_pair: false,
     },
     target_phase: "LOADING",
     pre_phase: "BETTING",

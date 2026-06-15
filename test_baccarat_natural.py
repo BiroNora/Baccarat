@@ -31,7 +31,7 @@ class TestBaccaratNaturalOutcomes(unittest.TestCase):
         # 4. ELLENŐRZÉSEK (Asserts)
         self.assertTrue(self.game.is_natural, "A körnek Naturalnak kell lennie!")
         self.assertEqual(self.game.winner, WinnerState.NATURAL_PLAYER_WON.value)
-        self.assertEqual(self.game.target_phase, PhaseState.MAIN_STAND_NATURAL)
+        self.assertEqual(self.game.target_phase, PhaseState.MAIN_STAND)
 
         # Kifizetés ellenőrzése: 100 * 2 = 200 jár vissza a Playerre
         self.assertEqual(self.game.bets["PLAYER"], 200)

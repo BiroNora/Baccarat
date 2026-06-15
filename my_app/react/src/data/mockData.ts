@@ -4,8 +4,8 @@ export const mockRoadmapMap: Record<string, HistoryUnit[]> = {
   // A 0:0-s cellában két esemény van: egy Tie és egy Banker
   "0:0": [
     { coord: '0:0', w: 3, t: 1, bp: false }, // Az 1. kör: Tie
-    { coord: '0:0', w: 3, t: 2, bp: false }, // A 2. kör: Tie
-    { coord: '0:0', w: 1, t: 0, bp: true }   // A 3. kör: Player piros pöttyel
+    //{ coord: '0:0', w: 6, t: 2 },
+    { coord: '0:0', w: 1, t: 0, bp: true }
   ],
   // A 0:1-es cellában egy sima Banker
   "0:1": [
@@ -25,12 +25,12 @@ export const mockRoadmapMap: Record<string, HistoryUnit[]> = {
     { coord: '0:5', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
   ],
   "0:6": [
-    { coord: '0:5', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
+    { coord: '0:6', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
   ],
   "0:7": [
-    { coord: '0:5', w: 5, t: 0, d: true } // Az 5. kör: Player piros/kék pöttyel
+    { coord: '0:7', w: 5, t: 0, p: true, d: true }
   ],
   "1:4": [
-    { coord: '0:4', w: 1, t: 0, p: true, bp: true } // Az 5. kör: Player piros/kék pöttyel
+    { coord: '1:4', w: 1, t: 0, p: true, bp: true }
   ],
 };

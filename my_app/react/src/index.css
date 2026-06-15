@@ -249,6 +249,10 @@ button:disabled {
   min-height: 2rem;
 }
 
+.cards-wrapper {
+  min-height: 1.5rem;
+}
+
 .winners {
   display: flex;
   font-size: var(--root-font-size);

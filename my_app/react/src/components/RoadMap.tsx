@@ -112,6 +112,10 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
                 const winnerItem =
                   items.find((i) => i.w === 1 || i.w === 4) || item;
 
+                  console.log("winnerItem: ", winnerItem)
+                  console.log("PLAYER_WINS.has(winnerItem.w): ", PLAYER_WINS.has(winnerItem.w))
+                  console.log("BANKER_WINS.has(winnerItem.w): ", BANKER_WINS.has(winnerItem.w))
+
                 return (
                   <div
                     key={index}

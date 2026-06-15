@@ -5,10 +5,6 @@
   display: flex;
 }
 
-#cards {
-  padding-bottom: 0.2rem;
-}
-
 .betting-screen-container {
   display: flex;
   flex-direction: column;

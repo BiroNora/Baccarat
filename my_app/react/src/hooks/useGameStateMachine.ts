@@ -48,8 +48,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   useEffect(() => {
     // Akkor frissítjük a stabil térkép-alapot, amikor véget ért a kör
     // (vagy amikor a fázis épp 'BETTING' lett)
-    const curr_state = state.gameState.currentGameState
-    if ( curr_state === "MAIN_STAND" || curr_state === "MAIN_STAND_NATURAL") {
+    const curr_state = state.gameState.currentGameState;
+    if (curr_state === "MAIN_STAND") {
       setStableHistory(state.history || []);
     }
   }, [state.gameState.currentGameState, state.history]);
@@ -143,6 +143,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     },
     [transitionToState],
   );
+
+  // DIREKT A FRONTEND MIATT BETTING VÁLTÁSHOZ!!!
+  const handleStartBetting = useCallback(() => {
+    // Ide írhatod a logikát, ami a fázist a BETTING állapotra állítja
+    transitionToState("BETTING", state.gameState);
+  }, [state.gameState, transitionToState]);
 
   const handlePlaceBet = useCallback(
     async (amount: number, selectedBetType: BetTypeValue) => {
@@ -430,7 +436,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       transitionToState(target, data);
 
       isProcessingRef.current = false;
-    }, 4000);
+    }, 6000);
 
     return () => {
       clearTimeout(timer);
@@ -499,7 +505,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
 
-    timeoutIdRef.current = window.setTimeout(() => {
+    /* timeoutIdRef.current = window.setTimeout(() => {
       if (isMountedRef.current) {
         isProcessingRef.current = false;
         transitionToState(
@@ -507,41 +513,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           state.gameState,
         );
       }
-    }, 10000);
+    }, 11000);
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    state.gameState.currentGameState,
-    state.gameState.pre_phase,
-    transitionToState,
-  ]);
-
-  // --- MAIN_STAND_NATURAL ---
-  useEffect(() => {
-    if (
-      state.gameState.currentGameState !== "MAIN_STAND_NATURAL" ||
-      isProcessingRef.current
-    )
-      return;
-    isProcessingRef.current = true;
-    //console.log("--- MAIN_STAND_NATURAL INDUL ---");
-
-    timeoutIdRef.current = window.setTimeout(() => {
-      if (isMountedRef.current) {
-        isProcessingRef.current = false;
-        transitionToState(
-          state.gameState.final_phase as GameState,
-          state.gameState,
-        );
-      }
-    }, 10000);
-
-    return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    };
+    }; */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,
@@ -679,6 +655,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     roadmapMap,
     transitionToState,
     handleStartGame,
+    handleStartBetting, // frontend bettINGHEZ
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
