@@ -41,5 +41,23 @@
   color: #eab308;
   margin-top: 1.8rem;
   font-size: clamp(1.0rem, 1.0vw, 1.5rem);
-  padding-top: 0.5rem;
+  display: flex;
+  justify-content: center; /* Vízszintes középre igazítás */
+  align-items: center;     /* Függőleges középre igazítás */
+  gap: 20px;               /* Távolság a label és a szám között */
+  width: 100%;             /* Vagy adj meg egy fix pixelt, pl: 300px */
+  margin: 0 auto;
+  padding-top: 2rem;
+}
+
+.label {
+  display: inline-block;
+  width: 60px;             /* Fix hosszúság a "Cards:" szövegnek */
+  text-align: right;       /* Jobbra igazítva, hogy a kettőspont után egy vonalban legyen */
+}
+
+.deck-count {
+  display: inline-block;
+  width: 40px;             /* Fix hosszúság a számnak */
+  text-align: left;        /* Balra igazítva, hogy a szám ne "ugráljon" */
 }

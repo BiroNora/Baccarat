@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/burningCards.css";
 import type { GameStateData } from "../types/game-types";
 import { formatCard } from "../utilities/utils";
@@ -7,10 +7,47 @@ import { motion } from "motion/react";
 // --- KOMPONENS ---
 interface BurningCardsProps {
   gameState: GameStateData;
+  initDeckLen: number | null;
 }
 
-const BurningCards: React.FC<BurningCardsProps> = ({ gameState }) => {
+const BurningCards: React.FC<BurningCardsProps> = ({
+  gameState,
+  initDeckLen,
+}) => {
   const card = gameState.first_card;
+  console.log("initDeckLen: ", initDeckLen);
+
+  const { deck_len } = gameState;
+  const [displayedDeckLen, setDisplayedDeckLen] = useState(deck_len);
+  const [tmp, setTmp] = useState(initDeckLen);
+
+  useEffect(() => {
+    if (initDeckLen === null || initDeckLen <= deck_len) {
+    setDisplayedDeckLen(deck_len);
+    return;
+  }
+  
+    setDisplayedDeckLen(tmp!);
+    if (initDeckLen !== null && initDeckLen > deck_len) {
+      const startDelay = setTimeout(() => {
+        const interval = setInterval(() => {
+          setDisplayedDeckLen((prevDisplayedLen) => {
+            if (prevDisplayedLen <= deck_len) {
+              clearInterval(interval);
+              setTmp(deck_len);
+              return deck_len;
+            }
+            return prevDisplayedLen - 1;
+          });
+        }, 400);
+        return () => clearInterval(interval);
+      }, 1700);
+
+      return () => clearTimeout(startDelay);
+    } else {
+      setDisplayedDeckLen(deck_len);
+    }
+  }, [deck_len, initDeckLen, tmp]);
 
   const baseProps = {
     initial: { rotateY: 90, opacity: 0 },
@@ -36,9 +73,10 @@ const BurningCards: React.FC<BurningCardsProps> = ({ gameState }) => {
         </motion.span>
       </div>
 
-      <p className="burning-info-text">
-        Cards burned based on the value of the first card.
-      </p>
+      <div className="burning-info-text" id="cards">
+        <span className="label">Cards:</span>
+        <span className="deck-count merriweatherblack">{displayedDeckLen}</span>
+      </div>
     </div>
   );
 };
