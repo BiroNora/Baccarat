@@ -26,7 +26,7 @@ export interface GameStateData {
   target_phase: GameState | null;
   pre_phase: GameState | null;
   final_phase: GameState | null;
-  first_card: string | null;
+  first_card: [string, number] | null;
   round_result: RoundResultUnit;
   history?: HistoryUnit[];
 }

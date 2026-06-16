@@ -45,16 +45,14 @@ class GameSerializer:
 
     @staticmethod
     def serialize_for_client_bets(game) -> Dict[str, Any]:
-        print("48 game.is_round_active: ", game.is_round_active)
-        print("49 game.is_session_init: ", game.is_session_init)
         d_len = (
             TOTAL_INITIAL_CARDS
             if (not game.is_round_active and game.is_session_init)
             else game.get_deck_len()
         )
-        print("55 d_len: ", d_len)
+
         is_betting = game.bets.get("TOTAL", 0) == 0
-        print("75 d_len: ", d_len)
+
         calc_phase = (
             PhaseState.BETTING if is_betting
             else (
@@ -94,8 +92,6 @@ class GameSerializer:
     def serialize_start_game(game) -> Dict[str, Any]:
         d_len = game.get_deck_len()
         is_betting = game.bets["TOTAL"] == 0
-        print("95 d_len: ", d_len)
-        print("96 is_betting: ", is_betting)
 
         calc_phase = (
             PhaseState.BETTING if is_betting
@@ -105,7 +101,7 @@ class GameSerializer:
                 else PhaseState.INIT_GAME
             )
         )
-
+        
         return {
             "player": game.player,
             "banker": game.banker,

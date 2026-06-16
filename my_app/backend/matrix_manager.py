@@ -101,7 +101,7 @@ class MatrixManager:
         user.roadmap_matrix = updated_matrix
         user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner, "prev_w": prev_w}
 
-        for i, row in enumerate(matrix):
-            print(f"Row {i}: {row}")
+        #for i, row in enumerate(matrix):
+        #    print(f"Row {i}: {row}")
 
         return {"row": new_r, "col": new_c}

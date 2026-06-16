@@ -427,6 +427,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     const target = state.gameState.final_phase as GameState;
     const data = state.gameState;
+    
+    if (!data || !data.first_card) {
+      return;
+    }
+    const timing = data.first_card[1] * 600 + 3500;
 
     const timer = setTimeout(() => {
       console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
@@ -436,7 +441,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       transitionToState(target, data);
 
       isProcessingRef.current = false;
-    }, 6000);
+    }, timing);
 
     return () => {
       clearTimeout(timer);
@@ -505,7 +510,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
 
-    /* timeoutIdRef.current = window.setTimeout(() => {
+    timeoutIdRef.current = window.setTimeout(() => {
       if (isMountedRef.current) {
         isProcessingRef.current = false;
         transitionToState(
@@ -513,11 +518,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           state.gameState,
         );
       }
-    }, 11000);
+    }, 17000);
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    }; */
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,

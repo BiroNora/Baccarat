@@ -43,7 +43,7 @@ class Game:
         }
         self.suits = ["♥", "♦", "♣", "♠"]
         self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        # self.ranks = ["A", "K", "K", "K", "9", "10"]
+        # self.ranks = ["K", "K", "K", "9", "10", "Q", "J", "10", "Q", "J"]
         self.deck = []
         self.deck_len_init = TOTAL_INITIAL_CARDS
         self.bet: int = 0
@@ -59,7 +59,7 @@ class Game:
         self.final_phase = PhaseState.NONE
         self.is_session_init = False
         self.shoe_cut_limit = 0
-        self.first_card = None
+        self.first_card = []
 
     def get_cut_card_position(self):
         total_cards = TOTAL_INITIAL_CARDS
@@ -72,7 +72,7 @@ class Game:
         single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
         self.deck = single_deck * NUM_DECKS
         random.shuffle(self.deck)
-
+        self.tie_counter = 0
         self.target_phase = PhaseState.CUTSLIDER
 
         return self.deck
@@ -97,12 +97,12 @@ class Game:
         return random.randint(lower_limit, upper_limit)
 
     def burn_cards(self):
-        self.first_card = self.deck.pop(0)
-        rank = self.first_card[-1]
+        burned_card = self.deck.pop(0)
+        rank = burned_card[-1]
         burn_count = 10 if rank in "KQJ0" else (1 if rank == "A" else int(rank))
         self.deck = self.deck[burn_count:]
 
-        return self.first_card
+        return [burned_card, burn_count]
 
     def initialize_new_round(self):
         self.clear_up()
@@ -140,7 +140,7 @@ class Game:
             self.target_phase = PhaseState.MAIN_STAND
 
         self.final_phase = PhaseState.BETTING
-        print("137 >>>>>>>>> self.winner: ", self.winner)
+
         return self.winner
 
     def sum(self, hand):
@@ -267,6 +267,8 @@ class Game:
             "is_panda": BetType.PANDA.value in self.side_winners,
             "is_p_pair": self.check_initial_pairs(self.player["hand"]),
             "is_b_pair": self.check_initial_pairs(self.banker["hand"]),
+            "is_perfect_p_pair": self.round_result["is_perfect_p_pair"],
+            "is_perfect_b_pair": self.round_result["is_perfect_b_pair"],
             "tie_count": self.tie_counter,
         }
 

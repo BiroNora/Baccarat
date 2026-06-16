@@ -92,7 +92,7 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
             // 2. A cella (fészek) MINDIG kirajzolódik
             <div key={cell.id} className="roadmap-cell">
               {/* 3. A golyó csak akkor jelenik meg, ha van 'item' */}
-              {items.map((item, index) => {
+              {items.map((_, index) => {
                 const isBankerPair = items.some((i) => i.bp);
                 const isPlayerPair = items.some((i) => i.pp);
                 const isPanda = items.some((i) => i.p);
@@ -109,24 +109,19 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
                 const tieText = hasTie && num > 1 ? num.toString() : "";
                 const naturalText = isNatural ? "N" : "";
                 const displayLabel = naturalText + tieText;
-                const winnerItem =
-                  items.find((i) => i.w === 1 || i.w === 4) || item;
-
-                  console.log("winnerItem: ", winnerItem)
-                  console.log("PLAYER_WINS.has(winnerItem.w): ", PLAYER_WINS.has(winnerItem.w))
-                  console.log("BANKER_WINS.has(winnerItem.w): ", BANKER_WINS.has(winnerItem.w))
+                const hasPlayerWon = items.some((i) => PLAYER_WINS.has(i.w));
+                const hasBankerWon = items.some((i) => BANKER_WINS.has(i.w));
+                const cellTypeClass = hasPlayerWon
+                  ? "player"
+                  : hasBankerWon
+                    ? "banker"
+                    : "first-cell-tie";
 
                 return (
                   <div
                     key={index}
                     className={`bead
-                      ${
-                        PLAYER_WINS.has(winnerItem.w)
-                          ? "player"
-                          : BANKER_WINS.has(winnerItem.w)
-                            ? "banker"
-                            : "first-cell-tie"
-                      } ${hasTie ? "with-tie-line" : ""}`}
+                      ${cellTypeClass} ${hasTie ? "with-tie-line" : ""}`}
                   >
                     {displayLabel && (
                       <span className={`tie-label ${isNatural ? "nat" : ""}`}>

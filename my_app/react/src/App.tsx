@@ -95,20 +95,16 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <div className="cards-wrapper">
-                      <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                    </div>
-
-                    <BurningCards gameState={gameState} />
+                    <div className="cards-wrapper"></div>
+                    <BurningCards
+                      gameState={gameState}
+                      initDeckLen={initDeckLen}
+                    />
                   </PageWrapper>
                 </div>
               );
             case "INIT_GAME":
-              return (
-                <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
-                </div>
-              );
+              return <div></div>;
             case "BETTING":
               return (
                 <div className="game-container-fullscreen">
