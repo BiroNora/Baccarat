@@ -16,8 +16,8 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
   const is_panda = round_result.is_panda;
   const is_dragon = round_result.is_dragon;
-  //const is_panda = false;
-  //const is_dragon = false;
+  //const is_panda = true;
+  //const is_dragon = true;
 
   const [bonusState, setBonusState] = useState({
     showPanda: false,

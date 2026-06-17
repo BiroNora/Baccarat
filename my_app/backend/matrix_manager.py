@@ -33,18 +33,13 @@ class MatrixManager:
 
     def calculate_next_coords(self, matrix, last_coords, current_winner):
         """Kiszámolja a következő pozíciót a mátrix és last_coords alapján."""
-        # Első tie kezelése
+        # Első kör kezelése
         if not last_coords or 'r' not in last_coords:
-            return 0, 0
-
-        # Legelső tie utáni kör
-        if last_coords and last_coords['r'] == 0 and last_coords['c'] == 0 and last_coords['w'] in [3, 6]:
-            return last_coords['r'], last_coords['c']
+            return (0, 0)
 
         # TIE kezelése
         if current_winner in [3, 6]:
-            if last_coords:
-                return last_coords['r'], last_coords['c']
+           return last_coords['r'], last_coords['c']
 
         r, c = last_coords['r'], last_coords['c']
         curr_val = WINNER_MAP.get(current_winner, current_winner)
@@ -77,7 +72,7 @@ class MatrixManager:
                 return (new_row, new_col)
 
     def process_new_round(self, user, winner_type):
-        # 1. Betöltés
+        # Betöltés
         matrix = copy.deepcopy(user.roadmap_matrix) if (user.roadmap_matrix and len(user.roadmap_matrix) > 0) else [[0] for _ in range(6)]
         last_c = user.last_coords or {} # pl. {"r": 1, "c": 3}
 
@@ -88,18 +83,14 @@ class MatrixManager:
         prev_w = curr_w if curr_w not in [WinnerState.TIE, WinnerState.NATURAL_TIE] else user.last_coords.get("prev_w")
         norm_winner = WINNER_MAP.get(winner_type, winner_type)
 
-        # 2. Számolás: Csak ha NEM TIE
+        # Mátrix frissítése
         if winner_type not in [WinnerState.TIE, WinnerState.NATURAL_TIE]:
-            coords = self.calculate_next_coords(matrix, last_c, winner_type)
-            if coords:
-                new_r, new_c = coords
+            new_r, new_c = self.calculate_next_coords(matrix, last_c, winner_type)
+            updated_matrix = self.update_existing_matrix(matrix, new_r, new_c, winner_type)
 
-        # 3. Mátrix frissítése
-        updated_matrix = self.update_existing_matrix(matrix, new_r, new_c, winner_type)
-
-        # 4. Mentés
-        user.roadmap_matrix = updated_matrix
-        user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner, "prev_w": prev_w}
+            # Mentés
+            user.roadmap_matrix = updated_matrix
+            user.last_coords = {"r": new_r, "c": new_c, "w": norm_winner, "prev_w": prev_w}
 
         #for i, row in enumerate(matrix):
         #    print(f"Row {i}: {row}")

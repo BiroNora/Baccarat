@@ -559,13 +559,21 @@ def start_game(user, game, service):
 
     service.play_round(user, game, winner)
 
+    game_data = GameSerializer.serialize_by_context(game, request.path)
+
+    if user.tokens <= 0 and game_data["bets"].get("TOTAL", 0) == 0:
+        service.reset_game_data(user)
+        game_data["final_phase"] = PhaseState.OUT_OF_TOKENS.value
+    else:
+        game_data["final_phase"] = PhaseState.BETTING.value
+
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "game_state": game_data,
                 "history": user.history,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }

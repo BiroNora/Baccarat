@@ -42,8 +42,8 @@ class Game:
             "sum_3": 0,
         }
         self.suits = ["♥", "♦", "♣", "♠"]
-        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        # self.ranks = ["K", "K", "K", "9", "10", "Q", "J", "10", "Q", "J"]
+        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        self.ranks = ["K", "K", "K", "9", "10", "Q", "J", "10", "Q", "J"]
         self.deck = []
         self.deck_len_init = TOTAL_INITIAL_CARDS
         self.bet: int = 0
@@ -339,7 +339,7 @@ class Game:
         for key in VALID_BET_TYPES:
             self.bets[key] = local_payouts[key]
 
-        self.bets["TOTAL"] = sum(self.bets[key] for key in VALID_BET_TYPES)
+        self.bets["TOTAL"] = sum(self.bets.get(key, 0) for key in VALID_BET_TYPES)
 
         self.is_round_active = False
 
@@ -403,6 +403,7 @@ class Game:
         try:
             enum_type = BetType(int(bet_type))
             bet_type_name = enum_type.name
+            self.bets.setdefault("TOTAL", 0)
 
             if bet_type_name in self.bets and enum_type != BetType.NONE:
                 self.bets[bet_type_name] += amount
