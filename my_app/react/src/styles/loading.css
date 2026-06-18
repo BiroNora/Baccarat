@@ -118,6 +118,29 @@
   }
 }
 
+.reload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: radial-gradient(
+    circle,
+    #f91e43 0%, /* Középen az eredeti világosabb szín */
+    #e01f3f 40%, /* Kicsit sötétebb átmenet */
+    #a31e34 100% /* A legszélén mély sötétbordó */
+  );
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #ca8a04; /* yellow-600 */
+  width: 100%;
+  margin: 0 auto;
+  margin-bottom: 0.9rem;
+}
+
+.info-text {
+  color: #eab308;
+}
+
 .gap-right {
   margin-right: 0.5rem;
 }
@@ -141,4 +164,30 @@
 .status-message-box {
   padding-top: 2.5rem;
   padding-bottom: 2rem;
+}
+
+.bank3 {
+  padding: 1rem 0 1rem 0;
+}
+
+.icono {
+  padding: 0.5rem 0 0.5rem 0;
+}
+
+.iconbottom {
+  padding-bottom: 0.5rem;
+}
+
+.redcolor-suit {
+  color: #5e03038d;
+  font-size: clamp(2.0rem, 1.2vw, 3.2rem);
+}
+
+.black-suit {
+  color: black;
+  font-size: clamp(2.0rem, 1.2vw, 3.2rem);
+}
+
+.tops {
+  padding: 1rem 0rem 1rem 0rem;
 }

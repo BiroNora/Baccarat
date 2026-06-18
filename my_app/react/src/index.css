@@ -129,12 +129,6 @@ body {
   text-align: left;
   color:  rgb(95, 83, 13)
 }
-.black-suit {
-  color: black;
-}
-.grey-suit {
-  color: rgb(53, 154, 74);
-}
 
 button {
   font-family: inherit;

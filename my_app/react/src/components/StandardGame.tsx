@@ -115,7 +115,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
         <div className="card-display">
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps}
             transition={{ ...baseProps.transition, delay: bankerCard3Time }}
           >
@@ -123,7 +123,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </motion.span>
 
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
@@ -134,7 +134,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </motion.span>
 
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
@@ -144,7 +144,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {formatCard(b2_card)}
           </motion.span>
 
-          <span className="game_card">{formatCard(null)}</span>
+          <span className="game-card">{formatCard(null)}</span>
         </div>
 
         {bonusState.showCombined && (
@@ -238,9 +238,9 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         </div>
 
         <div className="card-display">
-          <span className="game_card">{formatCard(null)}</span>
+          <span className="game-card">{formatCard(null)}</span>
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
@@ -251,7 +251,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </motion.span>
 
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
@@ -262,7 +262,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </motion.span>
 
           <motion.span
-            className="game_card"
+            className="game-card"
             {...baseProps}
             transition={{ ...baseProps.transition, delay: CARD_3_P }}
           >

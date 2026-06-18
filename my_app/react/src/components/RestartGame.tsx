@@ -1,20 +1,39 @@
 import "../styles/loading.css";
+import DragonIcon from "./DragonIcon";
+import PandaIcon from "./PandaIcon";
 
 export function Restart() {
   return (
-    <div className="loading-container-centered">
+    <div>
       <div>
-        <h1>W E L L C O M E B A C K</h1>
-        <div className="bank3 merriweather">Your New Tokens: 1000</div>
-        <div>
-          <div className="bank2 merriweather">
-            <span className="grey-suit star-right">&#9733;&#9733;&#9733;</span>
-            <span className="red-suit gap-right">♥</span>
+        <div className="loading-container-centered">
+          <div>
+            <h1>W E L L C O M E</h1>
+          </div>
+          <div>
+            <h1>B A C K</h1>
+          </div>
+        </div>
+
+        <div className="bank3 merriweather">Your New Tokens: 1,000</div>
+
+        <div className="betting-screen-container">
+          <div className="merriweather tops">
+            <span className="redcolor-suit gap-right">♥</span>
             <span className="black-suit gap-right">♠</span>
-            <div>Enjoy Your Game</div>
+
+            <div className="icono">
+              <PandaIcon width={100} />
+            </div>
+
+            <div className="info-text">Enjoy Your Game</div>
+
+            <div className="icono">
+              <DragonIcon width={100} />
+            </div>
+
             <span className="black-suit gap-left">♣</span>
-            <span className="red-suit gap-left">♦</span>
-            <span className="grey-suit star-left">&#9733;&#9733;&#9733;</span>
+            <span className="redcolor-suit gap-left">♦</span>
           </div>
         </div>
       </div>

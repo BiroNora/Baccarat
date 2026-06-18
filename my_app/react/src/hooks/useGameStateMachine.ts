@@ -427,7 +427,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     const target = state.gameState.final_phase as GameState;
     const data = state.gameState;
-    
+
     if (!data || !data.first_card) {
       return;
     }
@@ -513,12 +513,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     timeoutIdRef.current = window.setTimeout(() => {
       if (isMountedRef.current) {
         isProcessingRef.current = false;
+
         transitionToState(
           state.gameState.final_phase as GameState,
           state.gameState,
         );
       }
-    }, 17000);
+    }, 12000);
 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
@@ -526,7 +527,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,
-    state.gameState.pre_phase,
+    state.gameState.final_phase,
     transitionToState,
   ]);
 
@@ -582,7 +583,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             if (isMountedRef.current) {
               transitionToState("RELOADING", state.gameState);
             }
-          }, 5000);
+          }, 9000);
         } catch (e) {
           console.error("Hiba a RESTART_GAME fázisban:", e);
           if (isMountedRef.current) {

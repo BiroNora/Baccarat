@@ -3,14 +3,9 @@
   flex-direction: column;
   align-items: center;
   padding: 1.5rem 2rem 2.5rem 2rem;
-  background: radial-gradient(
-    circle,
-    #f91e43 0%,    /* Középen az eredeti világosabb szín */
-    #e01f3f 40%,   /* Kicsit sötétebb átmenet */
-    #a31e34 100%   /* A legszélén mély sötétbordó */
-  );
+  background: radial-gradient(circle, #f91e43 0%, #e01f3f 40%, #a31e34 100%);
   border-radius: 0.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 20px 25px 25px -12px rgba(29, 17, 17, 0.5);
   border: 1px solid #ca8a04; /* yellow-600 */
   max-width: 28rem;
   margin: 0 auto;
@@ -31,14 +26,14 @@
 
 .card-display {
   padding: 1rem 0;
-  display: flex;        /* Ez teszi egymás mellé az elemeket */
-  flex-direction: row;  /* Alapértelmezett, sorba rendezi őket */
-  gap: 1rem;            /* Térköz a két kártya között */
+  display: flex; /* Ez teszi egymás mellé az elemeket */
+  flex-direction: row; /* Alapértelmezett, sorba rendezi őket */
+  gap: 1rem; /* Térköz a két kártya között */
   align-items: left-start;
   justify-content: flex-start;
 }
 
-.game_card {
+.game-card {
   font-size: clamp(1.5rem, 1.2vw, 2.2rem);
 }
 
@@ -79,9 +74,9 @@
 
 .panda-overlay {
   position: absolute;
-  top: 58%;          /* A konténer közepére tolja */
+  top: 58%; /* A konténer közepére tolja */
   left: 50%;
   transform: translate(-50%, -50%); /* Pontosan középre igazítja */
-  z-index: 10;       /* Hogy a kártyák felett legyen */
+  z-index: 10; /* Hogy a kártyák felett legyen */
   pointer-events: none; /* Ne akadályozza a kattintást */
 }
