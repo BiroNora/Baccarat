@@ -6,6 +6,7 @@ import PandaIcon from "./PandaIcon";
 import { useEffect, useState } from "react";
 import DragonIcon from "./DragonIcon";
 import PandaDragonIcon from "./PandaDragonIcon";
+import { TIMETABLE } from "../utilities/constans";
 
 interface TableProps {
   gameState: GameStateData;
@@ -32,35 +33,25 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         showPanda: !!(is_panda && !is_dragon),
         showDragon: !!(is_dragon && !is_panda),
       });
-    }, 11000);
+    }, TIMETABLE.ICON);
 
     return () => clearTimeout(timer);
   }, [is_panda, is_dragon]);
 
-  // timetable
-  const CARD_1 = 0.5;
-  const CARD_2 = 2;
-  const SCORE_2 = 3.5;
-  const CARD_3_P = 4.5;
-  const SCORE_3_P = 5.5;
-  const CARD_3_B = 6.5;
-  const SCORE_3_B = 7.5;
-  const CARD_PAIR = 3;
-
-  const bankerCard3Time = player.hand[2] ? CARD_3_B : CARD_3_P;
-  const bankerScore3Time = player.hand[2] ? SCORE_3_B : SCORE_3_P;
+  const bankerCard3Time = player.hand[2] ? TIMETABLE.CARD_3_B : TIMETABLE.CARD_3_P;
+  const bankerScore3Time = player.hand[2] ? TIMETABLE.SCORE_3_B : TIMETABLE.SCORE_3_P;
 
   const displayedBankerSum = useDelayedSum(
     banker.sum_2,
     banker.sum_3,
-    SCORE_2,
-    banker.hand[2] ? SCORE_3_B : SCORE_2,
+    TIMETABLE.SCORE_2,
+    banker.hand[2] ? TIMETABLE.SCORE_3_B : TIMETABLE.SCORE_2,
   );
 
   const displayedPlayerSum = useDelayedSum(
     player.sum_2,
     player.sum_3,
-    SCORE_2,
+    TIMETABLE.SCORE_2,
     bankerScore3Time,
   );
 
@@ -106,7 +97,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps}
             transition={{
               delay:
-                player.hand.length === 2 && banker.hand.length === 2 ? 5.5 : 9,
+                player.hand.length === 2 && banker.hand.length === 2 ? TIMETABLE.WINNER_AT_HAND_2 : TIMETABLE.WINNER_AT_HAND_3,
             }}
           >
             <span>{states[round_result.winner]}</span>
@@ -127,7 +118,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: CARD_1,
+              delay: TIMETABLE.CARD_1,
             }}
           >
             {formatCard(b1_card)}
@@ -138,7 +129,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: CARD_2,
+              delay: TIMETABLE.CARD_2,
             }}
           >
             {formatCard(b2_card)}
@@ -172,7 +163,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
-                delay: CARD_PAIR,
+                delay: TIMETABLE.CARD_PAIR,
                 ease: "easeInOut",
               }}
             >
@@ -228,7 +219,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
-                delay: CARD_PAIR,
+                delay: TIMETABLE.CARD_PAIR,
                 ease: "easeInOut",
               }}
             >
@@ -244,7 +235,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: CARD_1,
+              delay: TIMETABLE.CARD_1,
             }}
           >
             {formatCard(p1_card)}
@@ -255,7 +246,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
             {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
             transition={{
               ...baseProps.transition,
-              delay: CARD_2,
+              delay: TIMETABLE.CARD_2,
             }}
           >
             {formatCard(p2_card)}
@@ -264,7 +255,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             className="game-card"
             {...baseProps}
-            transition={{ ...baseProps.transition, delay: CARD_3_P }}
+            transition={{ ...baseProps.transition, delay: TIMETABLE.CARD_3_P }}
           >
             {formatCard(p3_card, "right")}
           </motion.span>

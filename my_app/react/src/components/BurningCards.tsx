@@ -3,6 +3,7 @@ import "../styles/burningCards.css";
 import type { GameStateData } from "../types/game-types";
 import { formatCard } from "../utilities/utils";
 import { motion } from "motion/react";
+import { BURN_TIMETABLE } from "../utilities/constans";
 
 // --- KOMPONENS ---
 interface BurningCardsProps {
@@ -19,10 +20,6 @@ const BurningCards: React.FC<BurningCardsProps> = ({
   const { deck_len } = gameState;
   const [displayedDeckLen, setDisplayedDeckLen] = useState(deck_len);
   const [tmp, setTmp] = useState(initDeckLen);
-  
-  const FIRST_STEP_DELAY = 800;
-  const PAUSE_BEFORE_COUNT = 1200;
-  const COUNT_SPEED = 600;
 
   useEffect(() => {
     if (initDeckLen === null || initDeckLen <= deck_len) {
@@ -48,12 +45,12 @@ const BurningCards: React.FC<BurningCardsProps> = ({
               }
               return prevDisplayedLen - 1;
             });
-          }, COUNT_SPEED);
-        }, PAUSE_BEFORE_COUNT);
+          }, BURN_TIMETABLE.COUNT_SPEED);
+        }, BURN_TIMETABLE.PAUSE_BEFORE_COUNT);
 
         // Cleanup a második timeout-nak
         return () => clearTimeout(startIntervalTimeout);
-      }, FIRST_STEP_DELAY);
+      }, BURN_TIMETABLE.FIRST_STEP_DELAY);
 
       // Cleanup az első timeout-nak
       return () => clearTimeout(firstStepTimeout);

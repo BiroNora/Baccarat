@@ -127,7 +127,12 @@ export const formatCard = (
   );
 };
 
-export const useDelayedSum = (sum2: number, sum3: number, time2: number, time3: number) => {
+export const useDelayedSum = (
+  sum2: number,
+  sum3: number,
+  time2: number,
+  time3: number,
+) => {
   const [displayedSum, setDisplayedSum] = useState<number | null>(null);
 
   useEffect(() => {
@@ -149,3 +154,5 @@ export const useDelayedSum = (sum2: number, sum3: number, time2: number, time3: 
 
   return displayedSum;
 };
+
+

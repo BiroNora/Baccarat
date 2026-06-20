@@ -101,25 +101,32 @@ class GameSerializer:
                 else PhaseState.INIT_GAME
             )
         )
-        
+
+        raw_result = game.round_result
+        # Alap mezők
+        round_data = {
+            "winner": raw_result.get("winner", 0),
+            "tie_count": raw_result.get("tie_count", 0)
+        }
+
+        # Opcionális mezők hozzáadása (csak ha True)
+        optional_fields = [
+            "is_natural", "is_dragon", "is_panda",
+            "is_p_pair", "is_b_pair", "is_perfect_p_pair", "is_perfect_b_pair"
+        ]
+
+        for field in optional_fields:
+            if raw_result.get(field):
+                round_data[field] = True
+
+
         return {
             "player": game.player,
             "banker": game.banker,
             "bets": game.bets,
-            "round_result": game.round_result,
+            "round_result": round_data,
             "deck_len": game.get_deck_len(),
             "target_phase": game.get_target_phase().value,
             "final_phase": game.get_final_phase().value,
             "pre_phase": calc_phase.value,
-        }
-
-    @staticmethod
-    def serialize_reward_state(game) -> Dict[str, Any]:
-        return {
-            "player": game.player,
-            "banker": game.banker,
-            "deck_len": game.get_deck_len(),
-            "bet": game.bet,
-            "winner": game.winner,
-            "target_phase": game.get_target_phase().value,
         }

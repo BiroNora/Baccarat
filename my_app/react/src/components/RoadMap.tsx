@@ -12,7 +12,6 @@ interface RoadMapProps {
 const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
   const historyMap = roadmapMap;
 
-  console.log("Kibányászott history:", historyMap);
   // Egyelőre létrehozunk egy üres 6 soros x 18 oszlopos rácsot teszteléshez
   const PLAYER_WINS = new Set([1, 4]);
   const BANKER_WINS = new Set([2, 5]);
@@ -78,8 +77,6 @@ const RoadMapComponent = ({ roadmapMap }: RoadMapProps) => {
       }
     }
   }, [roadmapMap]);
-
-  console.log("Feldolgozott history:", historyMap);
 
   return (
     <div className="roadmap-screen-container">

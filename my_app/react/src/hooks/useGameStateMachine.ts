@@ -29,6 +29,7 @@ import {
 } from "../types/game-types";
 import { extractGameStateData } from "../utilities/utils";
 import { gameReducer, initialGameDataState } from "../context/gameReducer";
+import { BURN_TIMETABLE, TIMETABLE } from "../utilities/constans";
 
 // A hook visszatérési típusa most inline van deklarálva, nincs külön 'type' definíció.
 export function useGameStateMachine(): GameStateMachineHookResult {
@@ -61,9 +62,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           acc[unit.coord] = [];
         }
         acc[unit.coord].push(unit);
-        console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, {
+        /* console.log(`&&&&&& Feldolgozva: ${unit.coord}, Jelenlegi térkép:`, {
           ...acc,
-        });
+        }); */
         return acc;
       },
       {} as Record<string, HistoryUnit[]>,
@@ -155,8 +156,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const currentTokens = state.gameState.tokens;
       const currentBets = state.gameState.bets;
 
-      console.log("currentBets: on bet", currentBets);
-
       const betKey = Object.keys(BetTypes).find(
         (key) => BetTypes[key as keyof typeof BetTypes] === selectedBetType,
       ) as BetKey | undefined;
@@ -173,9 +172,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         const response = extractGameStateData(data);
         if (!response) return;
-
-        console.log("response: on bet", response);
-
         transitionToState(response?.target_phase as GameState, response);
       });
     },
@@ -210,9 +206,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         const response = extractGameStateData(data);
         if (!response) return;
-
-        console.log("response: on retake bet", response);
-
         transitionToState(response?.target_phase as GameState, response);
       });
     },
@@ -242,18 +235,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleShoeCut = useCallback(
     async (amount: number) => {
-      if (amount === 0 || amount === 1 || amount === 416) return;
+      if (amount === 0 || amount === 1 || amount === state.initDeckLen) return;
 
       executeAsyncAction(async () => {
         const data = await handleApiAction(() => setShoeCut(amount));
 
         const response = extractGameStateData(data);
         if (!response) return;
-        console.log("TARGET: ", response?.target_phase);
         transitionToState(response?.target_phase as GameState, response);
       });
     },
-    [executeAsyncAction, handleApiAction, transitionToState],
+    [executeAsyncAction, handleApiAction, transitionToState, state.initDeckLen],
   );
 
   const handleShiftingFirstPhaseEnd = useCallback(() => {
@@ -423,7 +415,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       return;
 
     isProcessingRef.current = true;
-    console.log("--- BURNING_CARDS SZALAD ---");
+    //console.log("--- BURNING_CARDS SZALAD ---");
 
     const target = state.gameState.final_phase as GameState;
     const data = state.gameState;
@@ -431,10 +423,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (!data || !data.first_card) {
       return;
     }
-    const timing = data.first_card[1] * 600 + 3500;
+    const timing = data.first_card[1] * BURN_TIMETABLE.COUNT_SPEED + 3500;
 
     const timer = setTimeout(() => {
-      console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
+      //console.log("--- IDŐZÍTŐ LEJÁRT, VÁLTÁS: ", target);
       const currentDeckLen = data.deck_len;
       dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
@@ -462,7 +454,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       return;
 
     isProcessingRef.current = true;
-    console.log("--- INIT_GAME BLOKK INDUL ---");
+    //console.log("--- INIT_GAME BLOKK INDUL ---");
 
     const initGameAct = async () => {
       try {
@@ -479,7 +471,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           isProcessingRef.current = false;
           return;
         }
-        console.log("INIT GAME TARGET: ", response.target_phase);
         transitionToState(response?.target_phase as GameState, response);
       } catch (error) {
         console.error("Init Game hiba:", error);
@@ -501,29 +492,37 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   // --- MAIN_STAND ---
   useEffect(() => {
-    if (
-      state.gameState.currentGameState !== "MAIN_STAND" ||
-      isProcessingRef.current
-    )
-      return;
+    const { currentGameState, final_phase, player, banker, round_result } =
+      state.gameState;
+    if (currentGameState !== "MAIN_STAND" || isProcessingRef.current) return;
 
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
+    const player_hand = player.hand.length === 2;
+    const banker_hand = banker.hand.length === 2;
+    const is_panda = round_result.is_panda;
+    const is_dragon = round_result.is_dragon;
 
-    timeoutIdRef.current = window.setTimeout(() => {
+    const hand =
+      player_hand && banker_hand
+        ? TIMETABLE.WINNER_2_SEC
+        : TIMETABLE.WINNER_3_SEC;
+    const icon = is_panda || is_dragon ? TIMETABLE.ICON_GS : 0;
+    const timing = hand + icon + 4000;
+
+    const timer = setTimeout(() => {
       if (isMountedRef.current) {
         isProcessingRef.current = false;
 
-        transitionToState(
-          state.gameState.final_phase as GameState,
-          state.gameState,
-        );
+        transitionToState(final_phase as GameState, state.gameState);
       }
-    }, 12000);
+    }, timing);
 
     return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      clearTimeout(timer);
+      isProcessingRef.current = false;
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.gameState.currentGameState,
