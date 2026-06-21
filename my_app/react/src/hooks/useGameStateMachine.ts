@@ -502,13 +502,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const banker_hand = banker.hand.length === 2;
     const is_panda = round_result.is_panda;
     const is_dragon = round_result.is_dragon;
+    const has_p_pair = round_result.is_p_pair || round_result.is_perfect_p_pair;
+    const has_b_pair = round_result.is_b_pair || round_result.is_perfect_b_pair;
 
     const hand =
       player_hand && banker_hand
         ? TIMETABLE.WINNER_2_SEC
         : TIMETABLE.WINNER_3_SEC;
     const icon = is_panda || is_dragon ? TIMETABLE.ICON_GS : 0;
-    const timing = hand + icon + 4000;
+    const pair = has_p_pair || has_b_pair ? TIMETABLE.CARD_PAIR : 0;
+    const timing = hand + icon + pair + 4000;
 
     const timer = setTimeout(() => {
       if (isMountedRef.current) {

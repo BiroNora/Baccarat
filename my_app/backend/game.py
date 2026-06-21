@@ -324,10 +324,10 @@ class Game:
             local_payouts["PANDA"] = b.get("PANDA", 0) * 26
 
         if has_p_pair:
-            local_payouts["P PAIR"] = b.get("P PAIR", 0) * 12
+            local_payouts["P_PAIR"] = b.get("P_PAIR", 0) * 12
 
         if has_b_pair:
-            local_payouts["B PAIR"] = b.get("B PAIR", 0) * 12
+            local_payouts["B_PAIR"] = b.get("B_PAIR", 0) * 12
 
         # 3. Összegezzük a bruttó kifizetést (amennyi pénz most az asztalon landol összesen)
         total_gross_payout = sum(local_payouts.values())

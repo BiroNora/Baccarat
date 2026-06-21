@@ -52,8 +52,7 @@ export async function setBet(betAmount: number, selectedBetType: number) {
 }
 
 export async function retakeBet(selectedBetType: number) {
-  console.log("55 selectedBetType: ", selectedBetType)
-  const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetType});
+ const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetType});
 
   return data;
 }
