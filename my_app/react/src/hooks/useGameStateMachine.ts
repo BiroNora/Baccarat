@@ -30,6 +30,7 @@ import {
 import { extractGameStateData } from "../utilities/utils";
 import { gameReducer, initialGameDataState } from "../context/gameReducer";
 import { BURN_TIMETABLE, TIMETABLE } from "../utilities/constans";
+import toast from "react-hot-toast";
 
 // A hook visszatérési típusa most inline van deklarálva, nincs külön 'type' definíció.
 export function useGameStateMachine(): GameStateMachineHookResult {
@@ -165,6 +166,19 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       if (betKey === "BANKER" && (currentBets["PLAYER"] || 0) > 0) return;
       if (betKey === "PLAYER" && (currentBets["BANKER"] || 0) > 0) return;
 
+      const isMainBet = betKey === "BANKER" || betKey === "PLAYER";
+      const hasMainBet =
+        (currentBets["BANKER"] || 0) > 0 || (currentBets["PLAYER"] || 0) > 0;
+
+      // Mellékfogadás fő tét nélkül ell.
+      if (!isMainBet && !hasMainBet) {
+        toast("Player or Banker bet is a must", {
+          id: "must-bet-error", // Ez a kulcs: mindegyik ugyanazt az ID-t kapja
+          duration: 2000, // Kicsit rövidebb idő, hogy gyorsan eltűnjön
+        });
+        return;
+      }
+
       executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
           setBet(amount, selectedBetType),
@@ -221,6 +235,24 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const response = state.gameState;
 
     if (!response) return;
+
+    const { bets } = response;
+    const bankerBet = bets?.["BANKER"] || 0;
+    const playerBet = bets?.["PLAYER"] || 0;
+    const totalBet = bets?.["TOTAL"] || 0;
+
+    if (totalBet === 0) return;
+
+    const hasMainBet = bankerBet > 0 || playerBet > 0;
+    const hasBoth = bankerBet > 0 && playerBet > 0;
+
+    if (!hasMainBet || hasBoth) {
+      toast("Player or Banker bet is a must", {
+        id: "must-bet-error", // Ez a kulcs: mindegyik ugyanazt az ID-t kapja
+        duration: 2000, // Kicsit rövidebb idő, hogy gyorsan eltűnjön
+      });
+      return;
+    }
 
     setIsWFSR(true);
 

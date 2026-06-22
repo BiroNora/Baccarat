@@ -15,6 +15,7 @@ import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import { RoadMap } from "./components/RoadMap";
 import Button from "./components/Button";
+import { Toaster } from "react-hot-toast";
 //import PandaIcon from "./components/PandaIcon";
 //import DragonIcon from "./components/DragonIcon";
 //import { mockRoadmapMap } from "./data/mockData";
@@ -50,6 +51,25 @@ function App() {
   return (
     <>
       <HeaderTitles />
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          top: "40%",
+        }}
+        toastOptions={{
+          duration: 2000,
+          style: {
+            background:
+              "radial-gradient(circle, #f91e43 0%, #e01f3f 40%, #a31e34 100%)",
+            color: "#fef3c7",
+            borderRadius: "10px",
+            border: "1px solid #ca8a04",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+            padding: "0.5rem",
+            fontStyle: "italic",
+          },
+        }}
+      />
       <AnimatePresence mode="wait">
         {(() => {
           const phase = gameState.currentGameState;
