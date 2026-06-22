@@ -241,12 +241,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const playerBet = bets?.["PLAYER"] || 0;
     const totalBet = bets?.["TOTAL"] || 0;
 
-    if (totalBet === 0) return;
-
     const hasMainBet = bankerBet > 0 || playerBet > 0;
     const hasBoth = bankerBet > 0 && playerBet > 0;
 
-    if (!hasMainBet || hasBoth) {
+    if (totalBet === 0 || (!hasMainBet || hasBoth)) {
       toast("Player or Banker bet is a must", {
         id: "must-bet-error", // Ez a kulcs: mindegyik ugyanazt az ID-t kapja
         duration: 2000, // Kicsit rövidebb idő, hogy gyorsan eltűnjön

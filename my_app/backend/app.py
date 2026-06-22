@@ -400,6 +400,9 @@ def bet(user, game):
     bet_amount = data.get("bet", 0)
     bet_type = data.get("type")
 
+    if bet_type is None:
+        return jsonify({"status": "error"}), 400
+
     hint = "BET_SUCCESSFULLY_PLACED"
 
     try:
@@ -419,7 +422,6 @@ def bet(user, game):
             enum_type = BetType(int(bet_type))
             bet_type_name = enum_type.name  # pl. "PLAYER", "BANKER", "TIE"
 
-            # Kivesszük az aktuális téteket a backend string kulcsaival
             current_player_bet = game.bets.get("PLAYER", 0)
             current_banker_bet = game.bets.get("BANKER", 0)
 
@@ -428,7 +430,9 @@ def bet(user, game):
                 hint = "PLAYER_BET_BLOCKED_BY_BANKER"
             elif bet_type_name == "BANKER" and current_player_bet > 0:
                 hint = "BANKER_BET_BLOCKED_BY_PLAYER"
-
+            # 5. VALIDÁCIÓ: Mellékfogadás ellenőrzése (fő tét mellett)
+            elif bet_type_name not in ["PLAYER", "BANKER"] and (current_player_bet == 0 and current_banker_bet == 0):
+                hint = "MAIN_BET_REQUIRED"
             # HA MINDEN LÉPÉS SIKERES, CSAK AKKOR HAJTJUK VÉGRE A FOGADÁST
             else:
                 game.set_bet(bet_amount, bet_type)
@@ -460,10 +464,8 @@ def retake_bet(user, game):
     data = request.get_json() or {}
     bet_type = data.get("type")
 
-    hint = "NO_BET_TO_RETAKE"
-
     if bet_type is None:
-        hint = "MISSING_BET_TYPE"
+        return jsonify({"status": "error"}), 400
     else:
         try:
             enum_type = BetType(int(bet_type))
@@ -548,15 +550,27 @@ def shoe_cut(user, game):
     )
 
 
-# 4
+# 5
 @app.route("/api/start_game", methods=["POST"])
 @api_error_handler
 @login_required
 @with_game_state
 @with_game_service
 def start_game(user, game, service):
-    winner = game.initialize_new_round()
+    current_player_bet = game.bets.get("PLAYER", 0)
+    current_banker_bet = game.bets.get("BANKER", 0)
 
+    # VALIDÁCIÓ: Főtét ellenőrzése
+    if current_player_bet == 0 and current_banker_bet == 0:
+        return (
+            jsonify({
+                "status": "error",
+                "game_state_hint": "MAIN_BET_REQUIRED"
+            }),
+            400,
+        )
+
+    winner = game.initialize_new_round()
     service.play_round(user, game, winner)
 
     game_data = GameSerializer.serialize_by_context(game, request.path)
@@ -581,39 +595,7 @@ def start_game(user, game, service):
         200,
     )
 
-
-# 8
-@app.route("/api/stand_and_rewards", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def stand_and_rewards(user, game):
-    game.stand(False)
-    token_change = game.rewards()
-    user.tokens += token_change
-
-    game_data = GameSerializer.serialize_by_context(game, request.path)
-
-    if user.tokens <= 0:
-        game_data["pre_phase"] = PhaseState.OUT_OF_TOKENS.value
-    else:
-        game_data["pre_phase"] = PhaseState.BETTING.value
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Rewards processed and tokens updated.",
-                "current_tokens": user.tokens,
-                "game_state": game_data,
-                "game_state_hint": "REWARDS_PROCESSED",
-            }
-        ),
-        200,
-    )
-
-
-# 16
+# 6
 @app.route("/api/set_restart", methods=["POST"])
 @api_error_handler
 @login_required
@@ -636,7 +618,7 @@ def set_restart(user, game):
     )
 
 
-# 17
+# 7
 @app.route("/api/force_restart", methods=["POST"])
 @api_error_handler
 @login_required
@@ -679,7 +661,7 @@ def force_restart_by_client_id(user):
     )
 
 
-# 18
+# 8
 @app.route("/api/recover_game_state", methods=["POST"])
 @api_error_handler
 @login_required
@@ -704,7 +686,7 @@ def recover_game_state(user, game):
     )
 
 
-# 19
+# 9
 @app.route("/api/clear_game_state", methods=["POST"])
 @api_error_handler
 @login_required
@@ -729,7 +711,7 @@ def clear_game_state(user, game):
     )
 
 
-# 20
+# 10
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")
