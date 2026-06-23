@@ -105,7 +105,6 @@ export type GameStateMachineHookResult = {
     newState: GameState,
     newData?: Partial<GameStateData>,
   ) => void;
-  handleStartBetting: () => void;
   handlePlaceBet: (amount: number, selectedBetType: BetTypeValue) => Promise<void>;
   handleRetakeBet: (selectedBetType: BetTypeValue) => void;
   handleShoeCut: (amount: number) => Promise<void>;

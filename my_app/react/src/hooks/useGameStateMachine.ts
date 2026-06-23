@@ -146,12 +146,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     [transitionToState],
   );
 
-  // DIREKT A FRONTEND MIATT BETTING VÁLTÁSHOZ!!!
-  const handleStartBetting = useCallback(() => {
-    // Ide írhatod a logikát, ami a fázist a BETTING állapotra állítja
-    transitionToState("BETTING", state.gameState);
-  }, [state.gameState, transitionToState]);
-
   const handlePlaceBet = useCallback(
     async (amount: number, selectedBetType: BetTypeValue) => {
       const currentTokens = state.gameState.tokens;
@@ -693,7 +687,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     roadmapMap,
     transitionToState,
     handleStartGame,
-    handleStartBetting, // frontend bettINGHEZ
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,

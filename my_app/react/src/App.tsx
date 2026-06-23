@@ -14,7 +14,6 @@ import BurningCards from "./components/BurningCards";
 import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import { RoadMap } from "./components/RoadMap";
-import Button from "./components/Button";
 import { Toaster } from "react-hot-toast";
 //import PandaIcon from "./components/PandaIcon";
 //import DragonIcon from "./components/DragonIcon";
@@ -25,7 +24,6 @@ function App() {
   const {
     gameState,
     roadmapMap,
-    handleStartBetting, // CSAK A BETTING FRONTHOZ
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -153,7 +151,6 @@ function App() {
                     <div className="cards-wrapper"></div>
                     {/* <Cards gameState={gameState} initDeckLen={initDeckLen} /> */}
                     <StandardGame gameState={gameState} />
-                    <Button onClick={handleStartBetting} />
                   </PageWrapper>
                 </div>
               );
