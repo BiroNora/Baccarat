@@ -15,10 +15,6 @@ import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import { RoadMap } from "./components/RoadMap";
 import { Toaster } from "react-hot-toast";
-//import PandaIcon from "./components/PandaIcon";
-//import DragonIcon from "./components/DragonIcon";
-//import { mockRoadmapMap } from "./data/mockData";
-//import PandaDragonIcon from "./components/PandaDragonIcon";
 
 function App() {
   const {
@@ -133,7 +129,6 @@ function App() {
                   </PageWrapper>
 
                   <RoadMap roadmapMap={roadmapMap} />
-                  {/* <RoadMap roadmapMap={mockRoadmapMap} /> */}
 
                   <Betting
                     gameState={gameState}
@@ -149,7 +144,6 @@ function App() {
                 <div>
                   <PageWrapper>
                     <div className="cards-wrapper"></div>
-                    {/* <Cards gameState={gameState} initDeckLen={initDeckLen} /> */}
                     <StandardGame gameState={gameState} />
                   </PageWrapper>
                 </div>
