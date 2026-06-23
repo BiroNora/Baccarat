@@ -112,24 +112,6 @@ body {
   max-width: 600px; /* Pl. egy tartalom blokk max szélessége mobil nézetben */
 }
 
-.title1 {
-  font-size: clamp(0.225rem, 3vw, 1rem);
-  line-height: 1;
-  margin: 0;
-  text-align: left;
-  color: #118634;
-  color:  rgb(24, 22, 5)
-}
-.title2 {
-  font-size: clamp(2.2rem, 8vw, 3.45rem);
-  line-height: 1;
-  font-weight: 600;
-  padding-bottom: 0.5em;
-  margin: 0;
-  text-align: left;
-  color:  rgb(95, 83, 13)
-}
-
 button {
   font-family: inherit;
   font-size: inherit;
@@ -176,24 +158,6 @@ button:disabled {
   opacity: 1;
 }
 
-.button-container1 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  opacity: 0.7;
-  transition: opacity 1s ease-out;
-  justify-content: center;
-}
-
-.button-container1.show-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  opacity: 1;
-  justify-content: center;
-}
-
-/* Általános stílus a Start gomb engedélyezett állapotához, ha a hover és focus nem kell, hogy eltérjen: */
 #start-button {
   margin: 1rem;
   padding: 0.2em 0.6em;
@@ -225,34 +189,8 @@ button:disabled {
   outline: none;
 }
 
-.player-dealer-area-wrapper {
-  display: flex;
-  align-items: flex-start; /* Függőlegesen középre igazítja az elemeket */
-  justify-content: center;
-  width: 100%;
-  min-height: 16rem;
-  box-sizing: border-box;
-}
-
-.game-action-area-wrapper {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 2rem;
-}
-
 .cards-wrapper {
   min-height: 1.5rem;
-}
-
-.winners {
-  display: flex;
-  font-size: var(--root-font-size);
-  font-weight: 700;
-  font-size: clamp(1.4rem, 1.2vw, 2rem);
-  position: relative;
 }
 
 .merriweather {
@@ -266,39 +204,6 @@ button:disabled {
   font-style: italic;
   font-variation-settings: "wdth" 100;
   color: #000000ff;
-}
-
-.merriweather9red {
-  font-weight: 800;
-  font-style: italic;
-  font-variation-settings: "wdth" 100;
-  color: #ba1616ff;
-}
-
-.merriweather9black {
-  font-weight: 900;
-  font-style: italic;
-  font-variation-settings: "wdth" 100;
-}
-
-.merriweather9 {
-  font-weight: 900;
-  font-style: italic;
-  font-variation-settings: "wdth" 100;
-}
-
-.merriweather5grey {
-  font-weight: 400;
-  font-style: italic;
-  font-variation-settings: "wdth" 100;
-  color: #403d3d;
-}
-
-.merriweather5grey2 {
-  font-weight: 200;
-  font-style: italic;
-  font-variation-settings: "wdth" 100;
-  color: #403d3d;
 }
 
 .error-container-centered h1 {

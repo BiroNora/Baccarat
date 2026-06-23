@@ -1,4 +1,4 @@
-.title2 {
+.title1 {
   font-size: clamp(2.2rem, 8vw, 3.5rem);
   line-height: 1;
   font-weight: 600;
@@ -25,14 +25,22 @@
 }
 
 @keyframes flagWave {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 0% center; }
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
 }
 
 /* Az új fázis bejöveteléhez egy külön animáció */
 .phase-enter {
-  animation: slideInAndWave 0.8s ease-out, flagWave 3s ease-in-out forwards;
+  animation:
+    slideInAndWave 0.8s ease-out,
+    flagWave 3s ease-in-out forwards;
 }
 
 @keyframes slideInAndWave {

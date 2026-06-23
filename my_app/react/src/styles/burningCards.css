@@ -30,7 +30,7 @@
   align-items: center;
 }
 
-.burning_card {
+.burning-card {
   font-size: clamp(1.5rem, 1.2vw, 2.2rem);
   display: inline-block;
   transform-style: preserve-3d; /* Fontos: megtartja a 3D teret */
@@ -44,20 +44,26 @@
   display: flex;
   justify-content: center; /* Vízszintes középre igazítás */
   align-items: center;     /* Függőleges középre igazítás */
-  gap: 20px;               /* Távolság a label és a szám között */
+  gap: 15px;               /* Távolság a label és a szám között */
   width: 100%;             /* Vagy adj meg egy fix pixelt, pl: 300px */
   margin: 0 auto;
   padding-top: 2rem;
 }
 
+.cards {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .label {
   display: inline-block;
-  width: 60px;             /* Fix hosszúság a "Cards:" szövegnek */
-  text-align: right;       /* Jobbra igazítva, hogy a kettőspont után egy vonalban legyen */
+  width: 60px;
+  text-align: right;
 }
 
 .deck-count {
   display: inline-block;
-  width: 40px;             /* Fix hosszúság a számnak */
-  text-align: left;        /* Balra igazítva, hogy a szám ne "ugráljon" */
+  width: 40px;
+  text-align: left;
 }

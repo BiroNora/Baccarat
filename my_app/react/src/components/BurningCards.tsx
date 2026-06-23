@@ -73,7 +73,7 @@ const BurningCards: React.FC<BurningCardsProps> = ({
 
       <div className="burning-card-display">
         <motion.span
-          className="burning_card"
+          className="burning-card"
           {...baseProps} // Itt kapja meg az initial, animate, exit értékeket
           transition={{
             ...baseProps.transition,
@@ -84,7 +84,7 @@ const BurningCards: React.FC<BurningCardsProps> = ({
         </motion.span>
       </div>
 
-      <div className="burning-info-text" id="cards">
+      <div className="burning-info-text">
         <span className="label">Cards:</span>
         <span className="deck-count merriweatherblack">{displayedDeckLen}</span>
       </div>

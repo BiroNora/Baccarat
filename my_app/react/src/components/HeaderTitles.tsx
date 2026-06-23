@@ -2,8 +2,8 @@ import "../styles/headerTitle.css";
 
 function HeaderTitles() {
   return (
-    <div className="titles">
-      <h1 className="title2">my baccarat</h1>
+    <div>
+      <h1 className="title1">my baccarat</h1>
     </div>
   );
 }
