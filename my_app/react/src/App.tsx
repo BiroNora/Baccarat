@@ -122,21 +122,26 @@ function App() {
             case "BETTING":
               return (
                 <div className="game-container-fullscreen">
-                  <PageWrapper>
+                  <motion.div
+                    key="betting-container"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  >
                     <div className="cards-wrapper">
                       <Cards gameState={gameState} initDeckLen={initDeckLen} />
                     </div>
-                  </PageWrapper>
 
-                  <RoadMap roadmapMap={roadmapMap} />
+                    <RoadMap roadmapMap={roadmapMap} />
 
-                  <Betting
-                    gameState={gameState}
-                    onPlaceBet={handlePlaceBet}
-                    retakeBet={handleRetakeBet}
-                    onStartGame={handleStartGame}
-                    isWFSR={isWFSR}
-                  />
+                    <Betting
+                      gameState={gameState}
+                      onPlaceBet={handlePlaceBet}
+                      retakeBet={handleRetakeBet}
+                      onStartGame={handleStartGame}
+                      isWFSR={isWFSR}
+                    />
+                  </motion.div>
                 </div>
               );
             case "MAIN_STAND":

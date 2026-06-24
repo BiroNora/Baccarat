@@ -32,14 +32,15 @@
   overflow-x: auto;
   align-items: center;
 
-
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: #b4094d transparent;
+  padding-bottom: 4px;
 }
 
 /* Chrome/Safari görgetősáv */
 .roadmap-grid::-webkit-scrollbar {
   height: 6px;
+  display: none;
 }
 .roadmap-grid::-webkit-scrollbar-thumb {
   background-color: #b4094d;
