@@ -14,6 +14,8 @@ export const TIMETABLE = {
   WINNER_3_SEC: 9000,
   ICON: 11000,
   ICON_GS: 3000,
+  CARD_PAIR_2_GS: 1000,
+  CARD_PAIR_3_GS: 500,
 } as const;
 
 export const BURN_TIMETABLE = {

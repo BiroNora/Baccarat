@@ -238,7 +238,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const hasMainBet = bankerBet > 0 || playerBet > 0;
     const hasBoth = bankerBet > 0 && playerBet > 0;
 
-    if (totalBet === 0 || (!hasMainBet || hasBoth)) {
+    if (totalBet === 0 || !hasMainBet || hasBoth) {
       toast("Player or Banker bet is a must", {
         id: "must-bet-error", // Ez a kulcs: mindegyik ugyanazt az ID-t kapja
         duration: 2000, // Kicsit rövidebb idő, hogy gyorsan eltűnjön
@@ -522,20 +522,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
-    const player_hand = player.hand.length === 2;
-    const banker_hand = banker.hand.length === 2;
-    const is_panda = round_result.is_panda;
-    const is_dragon = round_result.is_dragon;
-    const has_p_pair = round_result.is_p_pair || round_result.is_perfect_p_pair;
-    const has_b_pair = round_result.is_b_pair || round_result.is_perfect_b_pair;
+    const isHand2 = player.hand.length === 2 && banker.hand.length === 2;
+    const hasPair =
+      round_result.is_p_pair ||
+      round_result.is_perfect_p_pair ||
+      round_result.is_b_pair ||
+      round_result.is_perfect_b_pair;
 
-    const hand =
-      player_hand && banker_hand
-        ? TIMETABLE.WINNER_2_SEC
-        : TIMETABLE.WINNER_3_SEC;
-    const icon = is_panda || is_dragon ? TIMETABLE.ICON_GS : 0;
-    const pair = has_p_pair || has_b_pair ? TIMETABLE.CARD_PAIR : 0;
-    const timing = hand + icon + pair + 4000;
+    const handTime = isHand2 ? TIMETABLE.WINNER_2_SEC : TIMETABLE.WINNER_3_SEC;
+    const iconTime =
+      round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
+    const pairTime = hasPair
+      ? isHand2
+        ? TIMETABLE.CARD_PAIR_2_GS
+        : TIMETABLE.CARD_PAIR_3_GS
+      : 0;
+    const timing = handTime + iconTime + pairTime + 4000;
 
     const timer = setTimeout(() => {
       if (isMountedRef.current) {
