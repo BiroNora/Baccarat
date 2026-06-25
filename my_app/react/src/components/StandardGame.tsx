@@ -140,13 +140,13 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
         {bonusState.showCombined && (
           <div className="panda-overlay">
-            <PandaDragonIcon width={270} faceColor="rgb(227, 27, 61)" />
+            <PandaDragonIcon width={270} faceColor="#e8546d" />
           </div>
         )}
 
         {bonusState.showPanda && (
-          <div className="panda-overlay">
-            <PandaIcon width={270} faceColor="rgb(227, 27, 61)" />
+          <div className="panda-overlay pnda">
+            <PandaIcon width={270} faceColor="#e8546d" />
           </div>
         )}
 
@@ -228,7 +228,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           )}
         </div>
 
-        <div className="card-display">
+        <div className="card-display pl">
           <span className="game-card">{formatCard(null)}</span>
           <motion.span
             className="game-card"
