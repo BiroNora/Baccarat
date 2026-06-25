@@ -174,7 +174,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
         <div className="label-container">
           <div className="sum-line">
-            <span className="label-side letter">Banker</span>
+            <span className="label-side">Banker</span>
             <div className="value-side">
               <AnimatePresence mode="wait">
                 {displayedBankerSum !== null && (
@@ -193,7 +193,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </div>
 
           <div className="sum-line">
-            <span className="label-side letter">Player</span>
+            <span className="label-side">Player</span>
             <div className="value-side">
               <AnimatePresence mode="wait">
                 {displayedPlayerSum !== null && (

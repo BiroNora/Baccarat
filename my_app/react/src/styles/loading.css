@@ -19,8 +19,8 @@
   font-size: clamp(1.8rem, 2.3vw, 5.5rem);
   font-weight: 600;
   color: #504343ff; /* A szöveg színe */
-  display: flex;  /*<-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
-  align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */
+  display: flex;  /* Inline-flex, hogy jobban viselkedjen az alapvonallal */
+  align-items: baseline; /* A pontok a szöveg alapvonalához igazodnak */
   gap: 0; /* Ne legyen extra rés a "LOADING" és az első pont között */
   white-space: pre; /* Fontos! Megakadályozza, hogy a böngésző törje a sort a pontok előtt */
 

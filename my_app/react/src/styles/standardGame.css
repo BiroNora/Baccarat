@@ -13,14 +13,14 @@
 }
 
 .winner-title {
-  color: #eab308; /* yellow-500 */
+  color: #f4c22f; /* yellow-500 */
   font-size: clamp(1.3rem, 1.5vw, 2.5rem);
   font-style: italic;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   display: block;
-  padding: 1.5rem 0;
+  padding: 2.5rem 0 2rem 0;
   min-height: 4rem;
 }
 
@@ -38,8 +38,9 @@
 }
 
 .label-side {
-  color: #eab308;
+  color: #f4c22f;
   font-weight: bold;
+  letter-spacing: 0.2em;
 }
 
 .label-container {
@@ -56,10 +57,6 @@
   justify-content: space-between;
   width: 100%;
   font-size: 1.2rem;
-}
-
-.letter {
-  letter-spacing: 0.2em;
 }
 
 .pair-area-wrapper {
