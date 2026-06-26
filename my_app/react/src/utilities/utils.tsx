@@ -10,6 +10,7 @@ import {
   SpadeIcon,
 } from "../components/CardIcons";
 import { useEffect, useState, type JSX } from "react";
+import { TIMETABLE } from "./constans";
 
 export function extractGameStateData(
   apiResponse: unknown,
@@ -155,4 +156,10 @@ export const useDelayedSum = (
   return displayedSum;
 };
 
+export const getWinnerDelay = (pLen: number, bLen: number) => {
+    const delays: Record<string, number> = {
+      "2-2": TIMETABLE.WINNER_AT_HAND_2,
+    };
 
+    return delays[`${pLen}-${bLen}`] || TIMETABLE.WINNER_AT_HAND_3;
+  };

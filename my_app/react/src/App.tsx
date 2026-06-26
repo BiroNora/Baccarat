@@ -126,7 +126,7 @@ function App() {
                     key="betting-container"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    transition={{ duration: 1, ease: "easeOut" }}
                   >
                     <div className="cards-wrapper">
                       <Cards gameState={gameState} initDeckLen={initDeckLen} />

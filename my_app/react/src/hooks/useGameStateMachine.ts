@@ -27,7 +27,7 @@ import {
   type HistoryUnit,
   type SessionInitResponse,
 } from "../types/game-types";
-import { extractGameStateData } from "../utilities/utils";
+import { extractGameStateData, getWinnerDelay } from "../utilities/utils";
 import { gameReducer, initialGameDataState } from "../context/gameReducer";
 import { BURN_TIMETABLE, TIMETABLE } from "../utilities/constans";
 import toast from "react-hot-toast";
@@ -529,15 +529,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       round_result.is_b_pair ||
       round_result.is_perfect_b_pair;
 
-    const handTime = isHand2 ? TIMETABLE.WINNER_2_SEC : TIMETABLE.WINNER_3_SEC;
+    const handTime = getWinnerDelay(player.hand.length, banker.hand.length) * 1000;
+
     const iconTime =
       round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
+
     const pairTime = hasPair
       ? isHand2
         ? TIMETABLE.CARD_PAIR_2_GS
         : TIMETABLE.CARD_PAIR_3_GS
       : 0;
-    const timing = handTime + iconTime + pairTime + 4000;
+    const timing = handTime + iconTime + pairTime + 3000;
 
     const timer = setTimeout(() => {
       if (isMountedRef.current) {
