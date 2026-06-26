@@ -9,11 +9,11 @@ export const TIMETABLE = {
   SCORE_3_B: 7.5,
   CARD_PAIR: 3,
   WINNER_AT_HAND_2: 5,
-  WINNER_AT_HAND_3: 9,
+  WINNER_AT_HAND_3: 9.5,
   ICON: 11000,
-  ICON_GS: 4000,
-  CARD_PAIR_2_GS: 1000,
-  CARD_PAIR_3_GS: 500,
+  ICON_GS: 3500,
+  CARD_PAIR_GS: 1000,
+  CARD_P_PAIR_GS: 500,
 } as const;
 
 export const BURN_TIMETABLE = {
