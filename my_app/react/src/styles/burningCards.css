@@ -1,7 +1,3 @@
-.cut-container {
-  margin: 0 auto;
-}
-
 .card-icon {
   /* Itt a szélesség és magasság követi a betűméretet az em egységgel */
   width: clamp(1.2rem, 1.2vw, 2.2rem);
@@ -38,7 +34,7 @@
 }
 
 .burning-info-text {
-  color: #eab308;
+  color: #e4c458;
   margin-top: 1.8rem;
   font-size: clamp(1.0rem, 1.0vw, 1.5rem);
   display: flex;

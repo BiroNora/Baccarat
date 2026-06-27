@@ -139,8 +139,8 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         </div>
 
         {showBonus === "PANDA" && (
-          <div className="panda-overlay pnda">
-            <PandaIcon width={270} faceColor="#e8546d" />
+          <div className="panda-overlay">
+            <PandaIcon width={270} faceColor="#e0596f" />
           </div>
         )}
 
@@ -157,6 +157,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
+                duration: 3,
                 delay: TIMETABLE.CARD_PAIR,
                 ease: "easeInOut",
               }}
@@ -213,6 +214,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               {...baseProps}
               transition={{
                 ...baseProps.transition,
+                duration: 3,
                 delay: TIMETABLE.CARD_PAIR,
                 ease: "easeInOut",
               }}

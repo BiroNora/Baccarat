@@ -13,7 +13,6 @@ export const TIMETABLE = {
   ICON: 11000,
   ICON_GS: 3500,
   CARD_PAIR_GS: 1000,
-  CARD_P_PAIR_GS: 500,
 } as const;
 
 export const BURN_TIMETABLE = {

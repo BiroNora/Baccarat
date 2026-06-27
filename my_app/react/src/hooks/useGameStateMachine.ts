@@ -522,19 +522,20 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
-    const hasAnyPair = round_result.is_p_pair || round_result.is_b_pair;
-    const hasPerfectPair = round_result.is_perfect_p_pair || round_result.is_perfect_b_pair;
-
+    const hasAnyPair =
+      round_result.is_p_pair ||
+      round_result.is_b_pair ||
+      round_result.is_perfect_p_pair ||
+      round_result.is_perfect_b_pair;
     const pairTime = hasAnyPair ? TIMETABLE.CARD_PAIR_GS : 0;
-    const pPairTime = hasPerfectPair ? TIMETABLE.CARD_P_PAIR_GS : 0;
-    
+
     const handTime =
       getWinnerDelay(player.hand.length, banker.hand.length) * 1000;
 
     const iconTime =
       round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
 
-    const timing = handTime + iconTime + pairTime + pPairTime + 3000;
+    const timing = handTime + iconTime + pairTime + 3000;
 
     const timer = setTimeout(() => {
       if (isMountedRef.current) {

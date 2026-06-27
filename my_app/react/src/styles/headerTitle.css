@@ -9,11 +9,11 @@
   /* Gradiens beállítása */
   background: linear-gradient(
     to right,
-    rgb(95, 83, 13) 0%,
-    rgb(194, 170, 31) 25%,
-    rgb(95, 83, 13) 50%,
-    rgb(194, 170, 31) 75%,
-    rgb(95, 83, 13) 100%
+    rgb(136, 118, 18) 0%,
+    rgb(226, 197, 31) 25%,
+    rgb(136, 118, 18) 50%,
+    rgb(226, 197, 31) 75%,
+    rgb(136, 118, 18) 100%
   );
   background-size: 200% auto;
   color: transparent;
