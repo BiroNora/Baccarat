@@ -87,15 +87,28 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
     transition: { duration: 8, ease: "backOut" },
   } as const;
 
+  const winnerProps = {
+  initial: { opacity: 0, },
+  animate: { opacity: 1,},
+  exit: { opacity: 0, scale: 0.95 },
+  transition: {
+    duration: 0.35,
+    ease: "circOut",
+  },
+} as const;
+
   return (
     <>
       <div className="game-container">
         <div className="winner-title">
           <motion.span
-            {...baseProps}
-            transition={{
-              delay: getWinnerDelay(player.hand.length, banker.hand.length),
-            }}
+           {...winnerProps}
+              transition={{
+                ...winnerProps.transition,
+                duration: 3,
+                delay: getWinnerDelay(player.hand.length, banker.hand.length),
+                ease: "easeInOut",
+              }}
           >
             <span>{states[round_result.winner]}</span>
           </motion.span>
@@ -150,7 +163,6 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
         <div className="pair-area-wrapper">
           {has_b_pair && (
             <motion.span
-              className="pair-badge player-pair"
               {...baseProps}
               transition={{
                 ...baseProps.transition,
@@ -204,10 +216,9 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           </div>
         </div>
 
-        <div className="pair-area-wrapper p_pair">
+        <div className="pair-area-wrapper p-pair">
           {has_p_pair && (
             <motion.span
-              className="pair-badge player-pair"
               {...baseProps}
               transition={{
                 ...baseProps.transition,

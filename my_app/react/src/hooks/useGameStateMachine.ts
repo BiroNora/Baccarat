@@ -530,7 +530,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const pairTime = hasAnyPair ? TIMETABLE.CARD_PAIR_GS : 0;
 
     const handTime =
-      getWinnerDelay(player.hand.length, banker.hand.length) * 1000;
+      getWinnerDelay(player.hand.length, banker.hand.length) * 1200;
 
     const iconTime =
       round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
