@@ -94,8 +94,8 @@ export const formatCard = (
   }
 
   const rotationMap: Record<string, string> = {
-    left: "rotate(-90deg)",
-    right: "rotate(90deg)",
+    left: "rotate(-65deg)",
+    right: "rotate(-65deg)",
   };
 
   const suit = cardStr[0];
@@ -157,9 +157,9 @@ export const useDelayedSum = (
 };
 
 export const getWinnerDelay = (pLen: number, bLen: number) => {
-    const delays: Record<string, number> = {
-      "2-2": TIMETABLE.WINNER_AT_HAND_2,
-    };
-
-    return delays[`${pLen}-${bLen}`] || TIMETABLE.WINNER_AT_HAND_3;
+  const delays: Record<string, number> = {
+    "2-2": TIMETABLE.WINNER_AT_HAND_2,
   };
+
+  return delays[`${pLen}-${bLen}`] || TIMETABLE.WINNER_AT_HAND_3;
+};

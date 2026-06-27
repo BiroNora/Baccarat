@@ -34,12 +34,10 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
     return () => clearTimeout(timer);
   }, [is_panda, is_dragon]);
 
-  const bankerCard3Time = player.hand.length === 3
-    ? TIMETABLE.CARD_3_B
-    : TIMETABLE.CARD_3_P;
-  const bankerScore3Time = player.hand.length === 3
-    ? TIMETABLE.SCORE_3_B
-    : TIMETABLE.SCORE_3_P;
+  const bankerCard3Time =
+    player.hand.length === 3 ? TIMETABLE.CARD_3_B : TIMETABLE.CARD_3_P;
+  const bankerScore3Time =
+    player.hand.length === 3 ? TIMETABLE.SCORE_3_B : TIMETABLE.SCORE_3_P;
 
   const displayedBankerSum = useDelayedSum(
     banker.sum_2,
@@ -96,8 +94,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             {...baseProps}
             transition={{
-              delay:
-                getWinnerDelay(player.hand.length, banker.hand.length),
+              delay: getWinnerDelay(player.hand.length, banker.hand.length),
             }}
           >
             <span>{states[round_result.winner]}</span>
