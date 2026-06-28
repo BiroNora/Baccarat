@@ -11,9 +11,7 @@
   padding: 0.5rem;
   background: radial-gradient(
     circle,
-    #f91e43 0%, /* Középen az eredeti világosabb szín */
-    #e01f3f 40%, /* Kicsit sötétebb átmenet */
-    #a31e34 100% /* A legszélén mély sötétbordó */
+    #e73755 0%, #d02e49 48%, #a9152d 100%
   );
   border-radius: 0.75rem;
   box-shadow: 20px 25px 25px -12px rgba(29, 17, 17, 0.5);

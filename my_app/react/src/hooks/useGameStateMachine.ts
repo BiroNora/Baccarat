@@ -523,7 +523,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
     const timings = getTiming(player.hand.length, banker.hand.length);
-    const winnerTime = timings.winner * 1000;
+    const winnerTime = timings.winner * 1000 + 300;
 
     const iconTime =
       round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;

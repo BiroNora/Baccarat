@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/shoe.css";
 
-const HighHeelIcon = ({ width = 150, color = "#e3b416" }) => {
+const HighHeelIcon = ({ width = 150, color = "#e2c51f" }) => {
   const [isVisible, setIsVisible] = useState(false);
   const svgRef = useRef(null);
 

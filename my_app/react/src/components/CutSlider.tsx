@@ -12,7 +12,7 @@ const CutSlider: React.FC<CutSliderProps> = ({ initDeckLen, onConfirm }) => {
 
   return (
     <div className="cut-container">
-      <div className="cut-title">C U T the S H O E</div>
+      <div className="cut-title">C U T&nbsp;&nbsp;the&nbsp;&nbsp;S H O E</div>
 
       <div className="shoe-icon-container">
         <Shoe />

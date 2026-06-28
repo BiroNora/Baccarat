@@ -147,7 +147,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
 
         {showBonus === "PANDA" && (
           <div className="panda-overlay">
-            <PandaIcon width={270} faceColor="#e0596f" />
+            <PandaIcon width={270} faceColor="#e54463" />
           </div>
         )}
 
