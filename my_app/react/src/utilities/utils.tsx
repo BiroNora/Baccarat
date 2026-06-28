@@ -10,7 +10,6 @@ import {
   SpadeIcon,
 } from "../components/CardIcons";
 import { useEffect, useState, type JSX } from "react";
-import { TIMETABLE } from "./constans";
 
 export function extractGameStateData(
   apiResponse: unknown,
@@ -128,38 +127,80 @@ export const formatCard = (
   );
 };
 
+type TimingConfig = {
+  card_3_b: number | undefined;
+  card_3_p: number | undefined;
+  score_3_b: number | 0;
+  score_3_p: number | 0;
+  winner: number;
+};
+
+export const BACCARAT_TIMINGS: Record<string, TimingConfig> = {
+  // 'B-P' formátumban kulcsolva
+  '2-2': {
+    card_3_b: 0,
+    card_3_p: 0,
+    score_3_b: 0,
+    score_3_p: 0,
+    winner: 4.5
+  },
+  '3-2': {
+    card_3_b: 4.5,
+    card_3_p: 0,
+    score_3_b: 5.5,
+    score_3_p: 0,
+    winner: 6.5
+  },
+  '2-3': {
+    card_3_b: 0,
+    card_3_p: 4.5,
+    score_3_b: 0,
+    score_3_p: 5.5,
+    winner: 6.5
+  },
+  '3-3': {
+    card_3_b: 6.5,
+    card_3_p: 4.5,
+    score_3_b: 7.5,
+    score_3_p: 5.5,
+    winner: 9
+  },
+};
+
+export const getTiming = (playerLen: number, bankerLen: number) => {
+  const key = `${bankerLen}-${playerLen}`;
+  // Visszaadjuk a teljes configot, vagy egy defaultot, ha a kulcs nem létezne
+  return BACCARAT_TIMINGS[key] || BACCARAT_TIMINGS['2-2'];
+};
+
+
 export const useDelayedSum = (
   sum2: number,
-  sum3: number,
+  sum3: number | null | undefined,
   time2: number,
-  time3: number,
+  time3: number | null | undefined,
 ) => {
   const [displayedSum, setDisplayedSum] = useState<number | null>(null);
 
   useEffect(() => {
-    // Első összeg (sum_2) megjelenítése
-    const showSum2 = setTimeout(() => {
-      setDisplayedSum(sum2);
-    }, time2 * 1000); // Átváltás másodpercre
+    setDisplayedSum(null);
 
-    // Harmadik összeg (sum_3) megjelenítése
-    const showSum3 = setTimeout(() => {
-      setDisplayedSum(sum3);
-    }, time3 * 1000);
+    const timer2 = setTimeout(() => {
+      setDisplayedSum(sum2);
+    }, time2 * 1000);
+
+    let timer3: ReturnType<typeof setTimeout> | undefined;
+    if (time3 !== null && time3 !== undefined && time3 > time2 && sum3 !== null && sum3 !== undefined) {
+      timer3 = setTimeout(() => {
+        setDisplayedSum(sum3);
+      }, time3 * 1000);
+    }
 
     return () => {
-      clearTimeout(showSum2);
-      clearTimeout(showSum3);
+      clearTimeout(timer2);
+      if (timer3) clearTimeout(timer3);
     };
   }, [sum2, sum3, time2, time3]);
 
   return displayedSum;
-};
-
-export const getWinnerDelay = (pLen: number, bLen: number) => {
-  const delays: Record<string, number> = {
-    "2-2": TIMETABLE.WINNER_AT_HAND_2,
-  };
-
-  return delays[`${pLen}-${bLen}`] || TIMETABLE.WINNER_AT_HAND_3;
 };

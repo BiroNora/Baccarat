@@ -27,7 +27,7 @@ import {
   type HistoryUnit,
   type SessionInitResponse,
 } from "../types/game-types";
-import { extractGameStateData, getWinnerDelay } from "../utilities/utils";
+import { extractGameStateData, getTiming } from "../utilities/utils";
 import { gameReducer, initialGameDataState } from "../context/gameReducer";
 import { BURN_TIMETABLE, TIMETABLE } from "../utilities/constans";
 import toast from "react-hot-toast";
@@ -241,7 +241,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (totalBet === 0 || !hasMainBet || hasBoth) {
       toast("Player or Banker bet is a must", {
         id: "must-bet-error", // Ez a kulcs: mindegyik ugyanazt az ID-t kapja
-        duration: 2000, // Kicsit rövidebb idő, hogy gyorsan eltűnjön
+        duration: 2000,
       });
       return;
     }
@@ -522,6 +522,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     isProcessingRef.current = true;
     //console.log("--- MAIN_STAND INDUL ---");
+    const timings = getTiming(player.hand.length, banker.hand.length);
+    const winnerTime = timings.winner * 1000;
+
+    const iconTime =
+      round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
+
     const hasAnyPair =
       round_result.is_p_pair ||
       round_result.is_b_pair ||
@@ -529,13 +535,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       round_result.is_perfect_b_pair;
     const pairTime = hasAnyPair ? TIMETABLE.CARD_PAIR_GS : 0;
 
-    const handTime =
-      getWinnerDelay(player.hand.length, banker.hand.length) * 1200;
-
-    const iconTime =
-      round_result.is_panda || round_result.is_dragon ? TIMETABLE.ICON_GS : 0;
-
-    const timing = handTime + iconTime + pairTime + 3000;
+    const timing = winnerTime + iconTime + pairTime + 4000;
 
     const timer = setTimeout(() => {
       if (isMountedRef.current) {

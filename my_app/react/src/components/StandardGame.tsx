@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { states, type GameStateData } from "../types/game-types";
-import { formatCard, getWinnerDelay, useDelayedSum } from "../utilities/utils";
+import { formatCard, getTiming, useDelayedSum } from "../utilities/utils";
 import "../styles/standardGame.css";
 import { useEffect, useState } from "react";
 import PandaIcon from "./PandaIcon";
@@ -34,23 +34,20 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
     return () => clearTimeout(timer);
   }, [is_panda, is_dragon]);
 
-  const bankerCard3Time =
-    player.hand.length === 3 ? TIMETABLE.CARD_3_B : TIMETABLE.CARD_3_P;
-  const bankerScore3Time =
-    player.hand.length === 3 ? TIMETABLE.SCORE_3_B : TIMETABLE.SCORE_3_P;
+  const timings = getTiming(player.hand.length, banker.hand.length);
 
   const displayedBankerSum = useDelayedSum(
     banker.sum_2,
     banker.sum_3,
     TIMETABLE.SCORE_2,
-    banker.hand.length === 3 ? TIMETABLE.SCORE_3_B : TIMETABLE.SCORE_2,
+    timings.score_3_b,
   );
 
   const displayedPlayerSum = useDelayedSum(
     player.sum_2,
     player.sum_3,
     TIMETABLE.SCORE_2,
-    bankerScore3Time,
+    timings.score_3_p,
   );
 
   if (
@@ -106,7 +103,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
               transition={{
                 ...winnerProps.transition,
                 duration: 3,
-                delay: getWinnerDelay(player.hand.length, banker.hand.length),
+                delay: timings.winner,
                 ease: "easeInOut",
               }}
           >
@@ -118,7 +115,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             className="game-card"
             {...baseProps}
-            transition={{ ...baseProps.transition, delay: bankerCard3Time }}
+            transition={{ ...baseProps.transition, delay: timings.card_3_b }}
           >
             {formatCard(b3_card, "left")}
           </motion.span>
@@ -259,7 +256,7 @@ const StandardGame: React.FC<TableProps> = ({ gameState }) => {
           <motion.span
             className="game-card"
             {...baseProps}
-            transition={{ ...baseProps.transition, delay: TIMETABLE.CARD_3_P }}
+            transition={{ ...baseProps.transition, delay: timings.card_3_p }}
           >
             {formatCard(p3_card, "right")}
           </motion.span>
