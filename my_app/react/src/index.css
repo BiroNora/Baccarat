@@ -4,7 +4,7 @@
   line-height: clamp(1.4em, 1.8vw, 2em);
   font-weight: 400;
 
-  background-color: #cb0033;
+  background-color: #cf4058;
   opacity: 1;
   box-sizing: border-box;
   color: #171515;
@@ -126,7 +126,7 @@ button {
 
 button:not(:disabled):hover,
 button:not(:disabled):focus {
-  background-color: #a00d0d !important;
+  background-color: #df4e4e !important;
   color: #f5e2b7;
   border: 1px solid rgb(88, 85, 59) ;
   outline: none;

@@ -65,7 +65,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 15rem;
+  max-width: 18rem;
   width: 100%;
   margin: 0 auto;
   padding-bottom: 1rem;
@@ -75,7 +75,7 @@
 .bet-slot {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Ez nyomja szét a két oldalra */
+  gap: 12px;
   width: 100%;
   position: relative;
 }
@@ -85,16 +85,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 7rem;
+  flex: 1;
 }
 
 /* A jobb oldali fix oszlop a számoknak */
 .mini-bet-display {
-  min-width: 7rem;
   display: flex;
   justify-content: center;
   align-items: center;
-
+  flex: 1;
   flex-shrink: 0;
 }
 

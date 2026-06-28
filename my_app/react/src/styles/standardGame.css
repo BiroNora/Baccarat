@@ -13,7 +13,7 @@
 }
 
 .winner-title {
-  color: #e1e105; /* yellow-500 */
+  color: #e3c728;
   font-size: clamp(1.5rem, 1.2vw, 2.5rem);
   font-style: italic;
   font-weight: bold;
@@ -46,7 +46,7 @@
 }
 
 .label-side {
-  color: #e1e105;
+  color: #e3c728;
   font-weight: bold;
   letter-spacing: 0.2em;
 }
