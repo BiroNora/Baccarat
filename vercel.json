@@ -1,23 +1,6 @@
 {
-  "builds": [
-    {
-      "src": "run.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "my_app/react/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "run.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/my_app/react/$1"
-    }
+    { "source": "/api/(.*)", "destination": "/run.py" },
+    { "source": "/(.*)", "destination": "/my_app/react/dist/$1" }
   ]
 }
