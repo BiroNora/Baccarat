@@ -431,7 +431,9 @@ def bet(user, game):
             elif bet_type_name == "BANKER" and current_player_bet > 0:
                 hint = "BANKER_BET_BLOCKED_BY_PLAYER"
             # 5. VALIDÁCIÓ: Mellékfogadás ellenőrzése (fő tét mellett)
-            elif bet_type_name not in ["PLAYER", "BANKER"] and (current_player_bet == 0 and current_banker_bet == 0):
+            elif bet_type_name not in ["PLAYER", "BANKER"] and (
+                current_player_bet == 0 and current_banker_bet == 0
+            ):
                 hint = "MAIN_BET_REQUIRED"
             # HA MINDEN LÉPÉS SIKERES, CSAK AKKOR HAJTJUK VÉGRE A FOGADÁST
             else:
@@ -563,10 +565,7 @@ def start_game(user, game, service):
     # VALIDÁCIÓ: Főtét ellenőrzése
     if current_player_bet == 0 and current_banker_bet == 0:
         return (
-            jsonify({
-                "status": "error",
-                "game_state_hint": "MAIN_BET_REQUIRED"
-            }),
+            jsonify({"status": "error", "game_state_hint": "MAIN_BET_REQUIRED"}),
             400,
         )
 
@@ -594,6 +593,7 @@ def start_game(user, game, service):
         ),
         200,
     )
+
 
 # 6
 @app.route("/api/set_restart", methods=["POST"])
@@ -662,56 +662,6 @@ def force_restart_by_client_id(user):
 
 
 # 8
-@app.route("/api/recover_game_state", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def recover_game_state(user, game):
-    game.is_session_init = False
-    user.current_game_state = game.serialize()
-
-    db.session.commit()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Game state recovered.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "RECOVERY_DATA_LOADED",
-            }
-        ),
-        200,
-    )
-
-
-# 9
-@app.route("/api/clear_game_state", methods=["POST"])
-@api_error_handler
-@login_required
-@with_game_state
-def clear_game_state(user, game):
-    game.clear_game_state()
-
-    # Idempotencia törlése, hogy az új kör tiszta lappal induljon
-    user.idempotency_key = None
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Game state cleared.",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
-                "game_state_hint": "GAME STATE CLEARED",
-            }
-        ),
-        200,
-    )
-
-
-# 10
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")

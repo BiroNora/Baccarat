@@ -30,18 +30,6 @@ export async function initializeSessionAPI(): Promise<SessionInitResponse> {
   }
 }
 
-export async function clearGameState() {
-  const data = await callApiEndpoint("/api/clear_game_state", "POST");
-
-  return data;
-}
-
-export async function recoverGameState() {
-  const data = await callApiEndpoint("/api/recover_game_state", "POST");
-
-  return data;
-}
-
 export async function setBet(betAmount: number, selectedBetType: number) {
   const data = await callApiEndpoint("/api/bet", "POST", {
     bet: betAmount,
@@ -71,12 +59,6 @@ export async function setShoeCut(amount: number) {
 
 export async function startGame() {
   const data = await callApiEndpoint("/api/start_game", "POST");
-
-  return data;
-}
-
-export async function handleStandAndRewards() {
-  const data = await callApiEndpoint("/api/stand_and_rewards", "POST");
 
   return data;
 }
