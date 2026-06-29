@@ -14,10 +14,8 @@ interface TableProps {
 const StandardGame: React.FC<TableProps> = ({ gameState }) => {
   const { banker, player, round_result } = gameState;
 
-  //const is_panda = round_result.is_panda;
+  const is_panda = round_result.is_panda;
   const is_dragon = round_result.is_dragon;
-  const is_panda = true;
-  //const is_dragon = true;
 
   const [showBonus, setShowBonus] = useState<"PANDA" | "DRAGON" | null>(null);
 

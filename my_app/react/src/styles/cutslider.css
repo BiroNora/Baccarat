@@ -17,8 +17,8 @@
 }
 
 .cut-title {
-  color: #e4c458; /* yellow-500 */
-  font-size: clamp(1.5rem, 1.2vw, 2rem);
+  color: #e4c458;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
   font-weight: bold;
   margin-bottom: 1.5rem;
   letter-spacing: 0.1em;
