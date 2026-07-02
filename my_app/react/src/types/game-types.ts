@@ -1,6 +1,5 @@
 export type GameState =
   | "LOADING"
-  | "RECOVERY_DECISION"
   | "SHUFFLING"
   | "CUTSLIDER"
   | "SHIFTING_THE_STACKS"
