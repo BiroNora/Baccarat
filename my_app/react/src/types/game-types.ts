@@ -52,8 +52,8 @@ export interface ApiResponse {
 }
 
 export interface HistoryUnit {
-  coord: string;     // <-- Kell a koordináta, hogy tudd, hova teszed!
-  w: number;         // winner
+  coord: string;      // koordináta
+  w: number;          // winner
   n?: boolean;        // is_natural
   d?: boolean;        // is_dragon
   p?: boolean;        // is_panda
