@@ -63,7 +63,6 @@ class GameSerializer:
         )
 
         return {
-            "shoe_cut": game.shoe_cut_limit,
             "bets": game.bets,
             "deck_len": d_len,
             "target_phase": PhaseState.BETTING.value,

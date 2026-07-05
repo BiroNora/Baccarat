@@ -378,7 +378,6 @@ def initialize_session():
             {
                 "status": "success",
                 "message": "User and game session initialized.",
-                "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
                 "history": [],
