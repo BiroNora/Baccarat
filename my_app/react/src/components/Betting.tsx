@@ -80,7 +80,7 @@ const Betting: React.FC<BettingProps> = ({
     };
   }, []);
 
-  const hasActiveBet = betOptions.some((option) => (bets[option.backendKey] || 0) > 0);
+  const hasActiveBet = (bets["BANKER"] || 0) > 0 || (bets["PLAYER"] || 0) > 0;
 
   const isTypeDisabled = (backendKey: string) => {
     if (isWFSR) return true;
