@@ -626,26 +626,7 @@ def force_restart_by_client_id(user):
     session["user_id"] = user.id
     session.permanent = True
 
-    old_game_data = user.current_game_state
-    saved_bets = None
-
-    if old_game_data and isinstance(old_game_data, dict):
-        saved_bets = old_game_data.get("bets")
-
-    # 2. ÚJRAINDÍTÁS: Tiszta lap a játékmenetnek
-    game = Game()
-    game.restart_game()
-
-    # 3. VISSZAINJEKTÁLÁS: Mivel a Game TUD a betekről, visszaadjuk neki az értékeket,
-    # így a belső állapota és a későbbi szerializáció is a megmentett tétekkel fog futni!
-    if saved_bets is not None:
-        game.bets = saved_bets  # Visszaadjuk a PLAYER, BANKER, TIE stb. értékeket
-
-    # 4. MENTÉS: Az adatbázisba már a visszatöltött betekkel rendelkező állapot kerül
-    user.current_game_state = game.serialize()
-    user.idempotency_key = None
-
-    db.session.commit()
+    game = Game.deserialize(user.current_game_state) if user.current_game_state else None
 
     return (
         jsonify(
