@@ -23,6 +23,7 @@ from sqlalchemy.ext.mutable import MutableDict, MutableList
 load_dotenv()
 
 MINIMUM_BET = 1
+INITIAL_TOKENS = 1000
 
 # =========================================================================
 # FLASK APPLICATION BASICS
@@ -68,7 +69,7 @@ class User(db.Model):
     client_id = db.Column(
         db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
     )
-    tokens = db.Column(db.Integer, default=1000)
+    tokens = db.Column(db.Integer, default=INITIAL_TOKENS)
     current_game_state = db.Column(JSONB, nullable=True)
     history = db.Column(
         MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
@@ -307,7 +308,7 @@ def initialize_session():
             initial_game = Game()
             user = User(
                 client_id=client_id_from_request,
-                tokens=1000,
+                tokens=INITIAL_TOKENS,
                 current_game_state=initial_game.serialize(),
             )
             db.session.add(user)
@@ -602,7 +603,7 @@ def start_game(user, game, service):
 def set_restart(user, game):
     game.restart_game()
 
-    user.tokens = 1000
+    user.tokens = INITIAL_TOKENS
 
     return (
         jsonify(
