@@ -1,5 +1,5 @@
 import type { GameStateData } from "../types/game-types";
-import "../styles/burningCards.css";
+import "../styles/cards.css";
 
 interface CardsProps {
   gameState: GameStateData;
@@ -11,8 +11,16 @@ const Cards: React.FC<CardsProps> = ({ gameState }) => {
 
   return (
     <div className="cards merriweather">
-      <span className="label">Cards:</span>
-      <span className="deck-count">{deck_len}</span>
+      <div className="cards-left">
+        <span className="label">Cards:</span>
+        <span className="deck-count">{deck_len}</span>
+      </div>
+
+      <div className="cards-right">
+        <a href="http://" className="login-link">
+        Log in / Sign up
+        </a>
+      </div>
     </div>
   );
 };
