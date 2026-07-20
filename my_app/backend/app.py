@@ -653,6 +653,7 @@ def force_restart_by_client_id(user):
                 "status": "success",
                 "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "history": user.history,
                 "game_state_hint": "FORCE_RESTART_SUCCESSFUL",
             }
         ),
