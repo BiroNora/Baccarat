@@ -11,7 +11,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     console.log(isLogin ? "Logging in..." : "Signing up...", { username, password });
   };
