@@ -4,10 +4,11 @@ import "../styles/cards.css";
 interface CardsProps {
   gameState: GameStateData;
   initDeckLen: number | null;
+  onOpenAuth: () => void;
 }
 
-const Cards: React.FC<CardsProps> = ({ gameState }) => {
-  const { deck_len } = gameState;
+const Cards: React.FC<CardsProps> = ({ gameState, onOpenAuth }) => {
+  const { deck_len, currentGameState } = gameState;
 
   return (
     <div className="cards merriweather">
@@ -15,12 +16,21 @@ const Cards: React.FC<CardsProps> = ({ gameState }) => {
         <span className="label">Cards:</span>
         <span className="deck-count">{deck_len}</span>
       </div>
-
-      <div className="cards-right">
-        <a href="http://" className="login-link">
-        Log in / Sign up
-        </a>
-      </div>
+      
+      {currentGameState === "BETTING" && (
+        <div className="cards-right">
+          <a
+            href="#auth"
+            className="login-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onOpenAuth();
+            }}
+          >
+            Log in / Sign up
+          </a>
+        </div>
+      )}
     </div>
   );
 };

@@ -15,8 +15,11 @@ import Betting from "./components/Betting";
 import StandardGame from "./components/StandardGame";
 import { RoadMap } from "./components/RoadMap";
 import { Toaster } from "react-hot-toast";
+import { useState } from "react";
+import { AuthModal } from "./components/AuthModal";
 
 function App() {
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const {
     gameState,
     roadmapMap,
@@ -45,6 +48,9 @@ function App() {
   return (
     <>
       <HeaderTitles />
+      <AnimatePresence>
+        {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
+      </AnimatePresence>
       <Toaster
         position="top-center"
         containerStyle={{
@@ -129,7 +135,11 @@ function App() {
                     transition={{ duration: 1, ease: "easeOut" }}
                   >
                     <div className="cards-wrapper">
-                      <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                      <Cards
+                        gameState={gameState}
+                        initDeckLen={initDeckLen}
+                        onOpenAuth={() => setIsAuthOpen(true)}
+                      />
                     </div>
 
                     <RoadMap roadmapMap={roadmapMap} />
