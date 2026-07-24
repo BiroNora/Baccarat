@@ -71,7 +71,8 @@
 .switch-text {
   margin-top: 1rem;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 300;
   cursor: pointer;
   text-decoration: underline;
 }

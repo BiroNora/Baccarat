@@ -30,6 +30,16 @@ export async function initializeSessionAPI(): Promise<SessionInitResponse> {
   }
 }
 
+export async function setAuth(username: string, password: string, isLogIn: boolean) {
+  const data = await callApiEndpoint("/api/handle_auth", "POST", {
+    username: username,
+    password: password,
+    is_login: isLogIn,
+  });
+
+  return data;
+}
+
 export async function setBet(betAmount: number, selectedBetType: number) {
   const data = await callApiEndpoint("/api/bet", "POST", {
     bet: betAmount,

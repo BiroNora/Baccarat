@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   initializeSessionAPI,
+  setAuth,
   setBet,
   retakeBet,
   getShuffling,
@@ -144,6 +145,25 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     },
     [transitionToState],
+  );
+
+  const handleAuth = useCallback(
+    async (username: string, password: string, isLogIn: boolean) => {
+      executeAsyncAction(async () => {
+        const data = await handleApiAction(() =>
+          setAuth(username, password, isLogIn),
+        );
+
+        const response = extractGameStateData(data);
+        if (!response) return;
+        transitionToState(response?.target_phase as GameState, response);
+      });
+    },
+    [
+      executeAsyncAction,
+      handleApiAction,
+      transitionToState,
+    ],
   );
 
   const handlePlaceBet = useCallback(
@@ -686,6 +706,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     currentGameState: state.gameState.currentGameState,
     roadmapMap,
     transitionToState,
+    handleAuth,
     handleStartGame,
     handlePlaceBet,
     handleRetakeBet,

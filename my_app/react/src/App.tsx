@@ -23,6 +23,7 @@ function App() {
   const {
     gameState,
     roadmapMap,
+    handleAuth,
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -49,7 +50,7 @@ function App() {
     <>
       <HeaderTitles />
       <AnimatePresence>
-        {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
+        {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} onAuthSubmit={handleAuth} />}
       </AnimatePresence>
       <Toaster
         position="top-center"
