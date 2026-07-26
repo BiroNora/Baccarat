@@ -18,6 +18,8 @@ class GameSerializer:
             return GameSerializer.serialize_start_game(game)
         if "clear_game_state" in p:
             return GameSerializer.serialize_clear_game_state(game)
+        if "handle_auth" in p:
+            return GameSerializer.serialize_handle_auth(game)
 
         if any(x in p for x in ["bet", "retake_bet", "restart"]):
             return GameSerializer.serialize_for_client_bets(game)
@@ -35,6 +37,23 @@ class GameSerializer:
             "target_phase": game.get_target_phase().value,
             "pre_phase": calc_phase.value,
         }
+
+    @staticmethod
+    def serialize_handle_auth(game) -> Dict[str, Any]:
+        if isinstance(game, dict):
+            game = Game.deserialize(game)
+            
+        is_betting = game.bets.get("TOTAL", 0) == 0
+
+        calc_phase = PhaseState.BETTING if is_betting else PhaseState.SHUFFLING
+
+        return {
+            "bets": game.bets,
+            "deck_len": TOTAL_INITIAL_CARDS,
+            "target_phase": PhaseState.BETTING.value,
+            "pre_phase": calc_phase.value,
+        }
+
 
     @staticmethod
     def serialize_clear_game_state(game) -> Dict[str, Any]:

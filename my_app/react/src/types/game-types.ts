@@ -101,6 +101,7 @@ export type GameStateMachineHookResult = {
   currentGameState: GameState;
   roadmapMap: Record<string, HistoryUnit[]>;
   handleAuth: (username: string, password: string, isLogIn: boolean) => Promise<void>;
+  handleForgotPasswordSubmit: (token: string, password: string) => Promise<void>;
   transitionToState: (
     newState: GameState,
     newData?: Partial<GameStateData>,

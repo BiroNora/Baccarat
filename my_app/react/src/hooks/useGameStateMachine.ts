@@ -9,6 +9,7 @@ import {
 import {
   initializeSessionAPI,
   setAuth,
+  setForgotPasswordSubmit,
   setBet,
   retakeBet,
   getShuffling,
@@ -149,6 +150,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleAuth = useCallback(
     async (username: string, password: string, isLogIn: boolean) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(username)) {
+        console.error("Érvénytelen email formátum!");
+        // Itt megjeleníthetsz egy hibaüzenetet a felhasználónak is (pl. state-ből)
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        console.error("A jelszónak legalább 6 karakter hosszúnak kell lennie!");
+        return;
+      }
       executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
           setAuth(username, password, isLogIn),
@@ -159,11 +171,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         transitionToState(response?.target_phase as GameState, response);
       });
     },
-    [
-      executeAsyncAction,
-      handleApiAction,
-      transitionToState,
-    ],
+    [executeAsyncAction, handleApiAction, transitionToState],
+  );
+
+  const handleForgotPasswordSubmit = useCallback(
+    async (token: string, password: string) => {
+      executeAsyncAction(async () => {
+        const data = await handleApiAction(() =>
+          setForgotPasswordSubmit(token, password),
+        );
+
+        const response = extractGameStateData(data);
+        if (!response) return;
+        transitionToState(response?.target_phase as GameState, response);
+      });
+    },
+    [executeAsyncAction, handleApiAction, transitionToState],
   );
 
   const handlePlaceBet = useCallback(
@@ -350,7 +373,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const initializeApplicationOnLoad = async () => {
       try {
         const minLoadingTimePromise = new Promise((resolve) =>
-          setTimeout(resolve, 6000),
+          setTimeout(resolve, 600),
         );
         const initializationPromise = handleApiAction(initializeSessionAPI);
 
@@ -707,6 +730,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     roadmapMap,
     transitionToState,
     handleAuth,
+    handleForgotPasswordSubmit,
     handleStartGame,
     handlePlaceBet,
     handleRetakeBet,

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
+import toast from "react-hot-toast";
 import "../styles/auth.css";
 
 interface AuthModalProps {
@@ -13,6 +14,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleForgotPassword = () => {
+    if (!username || username.trim() === "") {
+      toast("Missing email address", {
+        id: "forgot-pass-error",
+        duration: 2000,
+      });
+      return;
+    }
+
+    toast("Check your emails", {
+      id: "forgot-pass-success",
+      duration: 3000,
+    });
+  };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -54,9 +70,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Username / Email</label>
+            <label htmlFor="email-input">Email</label>
             <input
-              type="text"
+              id="email-input"
+              type="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -64,13 +81,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <small id="password-hint" className="helper-text">At least 6 characters long</small>
           </div>
 
           <button type="submit" className="submit-btn" disabled={loading}>
@@ -81,6 +100,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
         <p className="switch-text" onClick={() => setIsLogin(!isLogin)}>
           {isLogin ? "Don't have an account? Sign up!" : "Already registered? Sign in!"}
         </p>
+        <div className="forget-text" onClick={handleForgotPassword}>
+          {isLogin ? "Forgot password?" : " "}
+        </div>
       </motion.div>
     </motion.div>
   );

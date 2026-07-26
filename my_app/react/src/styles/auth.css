@@ -47,7 +47,7 @@
 }
 
 .form-group input {
-  padding: 0.5rem;
+  padding: 0.7rem;
   border-radius: 6px;
   border: 1px solid #ca8a04;
   background: rgba(0, 0, 0, 0.2);
@@ -75,4 +75,15 @@
   font-weight: 300;
   cursor: pointer;
   text-decoration: underline;
+}
+
+.helper-text {
+  padding-top: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.forget-text {
+  min-height: 1.5rem;
+  font-size: 1rem;
+  font-weight: 300;
 }

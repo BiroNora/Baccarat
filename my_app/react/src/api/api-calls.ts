@@ -30,60 +30,57 @@ export async function initializeSessionAPI(): Promise<SessionInitResponse> {
   }
 }
 
-export async function setAuth(username: string, password: string, isLogIn: boolean) {
-  const data = await callApiEndpoint("/api/handle_auth", "POST", {
-    username: username,
+export async function setAuth(
+  email: string,
+  password: string,
+  isLogIn: boolean,
+) {
+  return await callApiEndpoint("/api/handle_auth", "POST", {
+    username: email,
     password: password,
     is_login: isLogIn,
   });
+}
 
-  return data;
+export async function setForgotPasswordSubmit(token: string, password: string) {
+  return await callApiEndpoint(`/api/reset_password/${token}`, "POST", {
+    password: password,
+  });
 }
 
 export async function setBet(betAmount: number, selectedBetType: number) {
-  const data = await callApiEndpoint("/api/bet", "POST", {
+  return await callApiEndpoint("/api/bet", "POST", {
     bet: betAmount,
     type: selectedBetType,
   });
-
-  return data;
 }
 
 export async function retakeBet(selectedBetType: number) {
- const data = await callApiEndpoint("/api/retake_bet", "POST", {type: selectedBetType});
-
-  return data;
+  return await callApiEndpoint("/api/retake_bet", "POST", {
+    type: selectedBetType,
+  });
 }
 
 export async function getShuffling() {
-  const data = await callApiEndpoint("/api/create_deck", "POST");
-
-  return data;
+  return await callApiEndpoint("/api/create_deck", "POST");
 }
 
 export async function setShoeCut(amount: number) {
-  const data = await callApiEndpoint("/api/shoe_cut", "POST", { cut: amount });
-
-  return data;
+  return await callApiEndpoint("/api/shoe_cut", "POST", { cut: amount });
 }
 
 export async function startGame() {
-  const data = await callApiEndpoint("/api/start_game", "POST");
-
-  return data;
+  return await callApiEndpoint("/api/start_game", "POST");
 }
 
 export async function setRestart() {
-  const data = await callApiEndpoint("/api/set_restart", "POST");
-
-  return data;
+  return await callApiEndpoint("/api/set_restart", "POST");
 }
 
 export async function forceRestart() {
   // Már nem kell a localStorage-ból semmi,
   // mert a callApiEndpoint elküldi a sütit!
-  const data = await callApiEndpoint("/api/force_restart", "POST");
-  return data;
+  return await callApiEndpoint("/api/force_restart", "POST");
 }
 
 export interface HttpError extends Error {

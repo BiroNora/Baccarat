@@ -5,21 +5,18 @@ import logging
 from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
-from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta, timezone
 from my_app.backend.bet_type import BetType
-from my_app.backend.history import HistoryUnit
+from my_app.backend.models import db, User
 from my_app.backend.services.game_service import GameService
+from my_app.backend.services.user_service import UserService
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.sql import func
-from sqlalchemy import CheckConstraint
 
 from my_app.backend.game import TOTAL_INITIAL_CARDS, Game
 from my_app.backend.game_serializer import GameSerializer
 from my_app.backend.phase_state import PhaseState
-
-from sqlalchemy.ext.mutable import MutableDict, MutableList
 
 load_dotenv()
 
@@ -44,6 +41,14 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("VERCEL", "False") == "True"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'az.emaild@gmail.com'
+app.config['MAIL_PASSWORD'] = 'az_alkalmazasjelszavam'
+
+mail = Mail(app)
+
 # =========================================================================
 # DATABASE SETUP (NEON POSTGRES)
 # =========================================================================
@@ -54,59 +59,14 @@ DATABASE_URL = os.environ.get(
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # Logging finomhangolás
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
-
-# =========================================================================
-# MODEL
-# =========================================================================
-class User(db.Model):
-    __tablename__ = "my_baccarat"
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    client_id = db.Column(
-        db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
-    )
-    tokens = db.Column(db.Integer, default=INITIAL_TOKENS)
-
-    username = db.Column(db.String(150), unique=True, nullable=True)
-    password_hash = db.Column(db.String(255), nullable=True)
-
-    current_game_state = db.Column(JSONB, nullable=True)
-    history = db.Column(
-        MutableList.as_mutable(JSONB), nullable=False, server_default="[]", default=list
-    )
-    roadmap_matrix = db.Column(
-        MutableList.as_mutable(JSONB),
-        nullable=False,
-        server_default="[]",
-        default=list,
-    )
-    last_coords = db.Column(
-        MutableDict.as_mutable(JSONB), nullable=False, server_default="{}", default=dict
-    )
-    idempotency_key = db.Column(db.String(36), nullable=True)
-    last_activity = db.Column(
-        db.TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-
-    __table_args__ = (
-        CheckConstraint(
-            "(username IS NULL AND password_hash IS NULL) OR (username IS NOT NULL AND password_hash IS NOT NULL)",
-            name="check_username_password_required",
-        ),
-    )
-
-    def __repr__(self):
-        return f"<User {self.id[:8]} (Client: {self.client_id[:8]})>"
-
-
 with app.app_context():
     db.create_all()
-
 
 # =========================================================================
 # AUTH DECORATORS
@@ -222,6 +182,20 @@ def with_game_service(f):
 
         # Hozzáadjuk a service-t a paraméterekhez
         kwargs["service"] = service
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def with_user_service(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        db_session = db.session
+        service = UserService(db_session)
+
+        # Hozzáadjuk a user_service-t a paraméterekhez
+        kwargs["user_service"] = service
 
         return f(*args, **kwargs)
 
@@ -400,6 +374,29 @@ def initialize_session():
         ),
         200,
     )
+
+# 0
+@app.route("/api/handle_auth", methods=["POST"])
+@api_error_handler
+@with_user_service
+def handle_auth(user_service):
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    is_login = data.get("is_login")
+
+    current_user_id = session.get("user_id")
+    user = user_service.handle_user_auth(username, password, is_login, current_user_id)
+
+    session["user_id"] = user.id
+
+    game = getattr(user, "current_game_state")
+
+    return jsonify({
+        "status": "success",
+        "game_state": GameSerializer.serialize_by_context(game, request.path),
+        "current_tokens": user.tokens
+    }), 200
 
 
 # 1
@@ -656,6 +653,61 @@ def force_restart_by_client_id(user):
 
 
 # 8
-@app.route("/error_page", methods=["GET"])
-def error_page():
-    return render_template("error.html")
+@app.route('/api/forgot_password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"error": "Missing Email address"}), 400
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"error": "User does not exist"}), 404
+
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    token = serializer.dumps(email, salt='password-reset-salt')
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    reset_link = f"{frontend_url}/reset_password/{token}"
+
+    msg = Message(
+        'Password Reset',
+        sender=app.config['MAIL_USERNAME'],
+        recipients=[email]
+    )
+
+    msg.body = f'Click the link below to reset your password: {reset_link}. The link is valid 5 mins.'
+
+    try:
+        mail.send(msg)
+        return jsonify({"message": "Check your emails"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# 9
+@app.route('/api/reset_password/<token>', methods=['POST'])
+def reset_password(token):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        # A token 5 percig (300 másodpercig) érvényes
+        email = serializer.loads(token, salt='password-reset-salt', max_age=300)
+    except Exception:
+        return jsonify({"error": "The link is invalid or has expired."}), 400
+
+    data = request.get_json()
+    new_password = data.get('password')
+
+    if not new_password:
+        return jsonify({"error": "Missing new password"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "User does not exist"}), 404
+
+    # Itt állítsd be a jelszót (ha hash-eled, akkor add meg a hash-elt verziót, pl. werkzeug.security-vel)
+    user.password = new_password  # vagy user.set_password(new_password) a te rendszered szerint
+    db.session.commit()
+
+    return jsonify({"message": "Password successfully updated!"}), 200
