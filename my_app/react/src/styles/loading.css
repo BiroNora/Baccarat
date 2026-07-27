@@ -41,7 +41,6 @@
 
   /* Az animáció: egyszer fut le (1.5s), majd megáll */
   animation: waveOnce 1.5s ease-out infinite;
-  gap: 0;
   max-width: 60rem;
 }
 
@@ -175,4 +174,8 @@
 
 .tops {
   padding: 1rem 0rem 1rem 0rem;
+}
+
+.text {
+  padding-top: 1rem;
 }

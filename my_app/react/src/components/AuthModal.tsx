@@ -5,10 +5,17 @@ import "../styles/auth.css";
 
 interface AuthModalProps {
   onClose: () => void;
-  onAuthSubmit: (username: string, password: string, isLogin: boolean) => Promise<void>;
+  onAuthSubmit: (
+    username: string,
+    password: string,
+    isLogin: boolean,
+  ) => Promise<void>;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({
+  onClose,
+  onAuthSubmit,
+}) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -34,14 +41,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
     e.preventDefault();
     setError("");
     setLoading(true);
-    console.log(isLogin ? "Logging in..." : "Signing up...", { username, password });
+    console.log(isLogin ? "Logging in..." : "Signing up...", {
+      username,
+      password,
+    });
 
-  try {
+    try {
       // Itt hívjuk meg a state machine / hook által biztosított függvényt
       await onAuthSubmit(username, password, isLogin);
       onClose(); // Siker esetén bezárjuk
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Authentication failed.";
+      const errorMessage =
+        err instanceof Error ? err.message : "Authentication failed.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -63,10 +74,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
         exit={{ y: -50, opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <button className="close-btn" onClick={onClose}>⏻</button>
+        <button className="close-btn" onClick={onClose}>
+          ⏻
+        </button>
         <h2>{isLogin ? "Log In" : "Register"}</h2>
 
-        {error && <div style={{ color: "#fca5a5", marginBottom: "1rem", fontSize: "0.9rem" }}>{error}</div>}
+        {error && (
+          <div
+            style={{
+              color: "#fca5a5",
+              marginBottom: "1rem",
+              fontSize: "0.9rem",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -89,20 +112,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSubmit }) =
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <small id="password-hint" className="helper-text">At least 6 characters long</small>
+            <small id="password-hint" className="helper-text">
+              At least 6 characters long
+            </small>
+          </div>
+
+          <div className="forget-text" onClick={handleForgotPassword}>
+            {isLogin ? "Forgot password?" : " "}
           </div>
 
           <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? "Please wait..." : (isLogin ? "Log In" : "Register")}
+            {loading ? "Please wait..." : isLogin ? "Log In" : "Register"}
           </button>
         </form>
 
         <p className="switch-text" onClick={() => setIsLogin(!isLogin)}>
-          {isLogin ? "Don't have an account? Sign up!" : "Already registered? Sign in!"}
+          {isLogin
+            ? "Don't have an account? Sign up!"
+            : "Already registered? Sign in!"}
         </p>
-        <div className="forget-text" onClick={handleForgotPassword}>
-          {isLogin ? "Forgot password?" : " "}
-        </div>
+
+        {/* <div className="guest-text">
+          {isLogin && (
+            <button className="submit-btn">
+              {isLogin ? "Play as a guest" : " "}
+            </button>
+          )}
+        </div> */}
       </motion.div>
     </motion.div>
   );

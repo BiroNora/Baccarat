@@ -84,6 +84,13 @@
 
 .forget-text {
   min-height: 1.5rem;
-  font-size: 1rem;
-  font-weight: 300;
+  margin-bottom: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.guest-text {
+  min-height: 4rem;
+  font-size: 1.3rem;
+  font-weight: 400;
 }

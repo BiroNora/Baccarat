@@ -1,22 +1,22 @@
+import Betting from "./components/Betting";
+import BurningCards from "./components/BurningCards";
 import Cards from "./components/Cards";
-import { ErrorPage } from "./components/ErrorPage";
+import CutSlider from "./components/CutSlider";
 import HeaderTitles from "./components/HeaderTitles";
-import { Loading } from "./components/Loading";
+import Loading from "./components/Loading";
+import StandardGame from "./components/StandardGame";
+import { AuthModal } from "./components/AuthModal";
+import { ErrorPage } from "./components/ErrorPage";
 import { OutOfTokens } from "./components/OutOfTokens";
+import { Reloading } from "./components/Reloading";
 import { Restart } from "./components/RestartGame";
+import { RoadMap } from "./components/RoadMap";
+import { Shifting } from "./components/Shifting";
 import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
-import { AnimatePresence, motion } from "motion/react";
-import { Reloading } from "./components/Reloading";
-import CutSlider from "./components/CutSlider";
-import { Shifting } from "./components/Shifting";
-import BurningCards from "./components/BurningCards";
-import Betting from "./components/Betting";
-import StandardGame from "./components/StandardGame";
-import { RoadMap } from "./components/RoadMap";
-import { Toaster } from "react-hot-toast";
 import { useState } from "react";
-import { AuthModal } from "./components/AuthModal";
+import { AnimatePresence, motion } from "motion/react";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -24,6 +24,7 @@ function App() {
     gameState,
     roadmapMap,
     handleAuth,
+    handleSkipAuth,
     handlePlaceBet,
     handleRetakeBet,
     handleShoeCut,
@@ -50,7 +51,12 @@ function App() {
     <>
       <HeaderTitles />
       <AnimatePresence>
-        {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} onAuthSubmit={handleAuth} />}
+        {isAuthOpen && (
+          <AuthModal
+            onClose={() => setIsAuthOpen(false)}
+            onAuthSubmit={handleAuth}
+          />
+        )}
       </AnimatePresence>
       <Toaster
         position="top-center"
@@ -80,7 +86,11 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <Loading />
+                    <Loading
+                      onOpenAuth={() => setIsAuthOpen(true)}
+                      onSkipAuth={() => handleSkipAuth()}
+                      isAuthOpen={isAuthOpen}
+                    />
                   </PageWrapper>
                 </div>
               );

@@ -45,7 +45,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const isMountedRef = useRef(true);
   // Ez a védelmi zár (lock) az ismételt hívások ellen
   const isProcessingRef = useRef(false);
-  const isAppInitializedRef = useRef(false);
+  //const isAppInitializedRef = useRef(false);
 
   const [stableHistory, setStableHistory] = useState<HistoryUnit[]>([]);
 
@@ -188,6 +188,38 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     },
     [executeAsyncAction, handleApiAction, transitionToState],
   );
+
+  // Ez fut le, ha a felhasználó kihagyja az auth-ot ("No, thanks")
+  const handleSkipAuth = useCallback(async () => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    setIsWFSR(true);
+
+    try {
+      const initData = await handleApiAction(initializeSessionAPI);
+      if (!initData || !isMountedRef.current) return;
+
+      const { tokens, game_state } = initData as SessionInitResponse;
+      const nextPhase = game_state.target_phase as GameState;
+
+      dispatch({
+        type: "SET_DECK_LEN",
+        payload: game_state.deck_len,
+      });
+
+      transitionToState(nextPhase, { tokens, ...game_state });
+    } catch (error) {
+      console.error("Initialization Error: ", error);
+      if (isMountedRef.current) {
+        transitionToState("ERROR", { tokens: 0, deck_len: 0 });
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+        isProcessingRef.current = false;
+      }
+    }
+  }, [handleApiAction, transitionToState]);
 
   const handlePlaceBet = useCallback(
     async (amount: number, selectedBetType: BetTypeValue) => {
@@ -352,61 +384,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     };
   }, []);
-
-  // --- SPECIÁLIS EFFECT: Csak az app indulásakor/inicializálásakor ---
-  // --- LOADING ---
-  useEffect(() => {
-    // 1. Kapuőr: Csak ha LOADING fázisban vagyunk és nem dolgozunk éppen
-    if (
-      state.gameState.currentGameState !== "LOADING" ||
-      isProcessingRef.current
-    )
-      return;
-
-    // 2. Egyszeri futás védelme
-    if (isAppInitializedRef.current) return;
-    isAppInitializedRef.current = true;
-
-    isProcessingRef.current = true;
-    //console.log("--- INITIALIZING SESSION INDUL ---");
-
-    const initializeApplicationOnLoad = async () => {
-      try {
-        const minLoadingTimePromise = new Promise((resolve) =>
-          setTimeout(resolve, 600),
-        );
-        const initializationPromise = handleApiAction(initializeSessionAPI);
-
-        const [initData] = await Promise.all([
-          initializationPromise,
-          minLoadingTimePromise,
-        ]);
-
-        if (!isMountedRef.current) return;
-
-        const { tokens, game_state } = initData as SessionInitResponse;
-        const nextPhase = game_state.target_phase as GameState;
-
-        dispatch({
-          type: "SET_DECK_LEN",
-          payload: game_state.deck_len,
-        });
-
-        // Itt egyetlen hívással lerendezzük az adatot és a fázisváltást is a Reducerben
-        transitionToState(nextPhase, { tokens, ...game_state });
-
-        // Ezután a state.gameState.currentGameState megváltozik,
-        // és ez az effekt már nem fog újra belépni a legfelső IF miatt.
-      } catch (error) {
-        console.error("Initialization Error: ", error);
-        isProcessingRef.current = false;
-        if (isMountedRef.current)
-          transitionToState("ERROR", { tokens: 0, deck_len: 0 });
-      }
-    };
-
-    initializeApplicationOnLoad();
-  }, [state.gameState.currentGameState, transitionToState, handleApiAction]);
 
   // --- SHUFFLING ---
   useEffect(() => {
@@ -731,6 +708,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState,
     handleAuth,
     handleForgotPasswordSubmit,
+    handleSkipAuth,
     handleStartGame,
     handlePlaceBet,
     handleRetakeBet,
