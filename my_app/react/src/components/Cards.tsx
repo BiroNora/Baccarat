@@ -8,7 +8,7 @@ interface CardsProps {
 }
 
 const Cards: React.FC<CardsProps> = ({ gameState, onOpenAuth }) => {
-  const { deck_len, currentGameState } = gameState;
+  const { deck_len } = gameState;
 
   return (
     <div className="cards merriweather">
@@ -16,21 +16,19 @@ const Cards: React.FC<CardsProps> = ({ gameState, onOpenAuth }) => {
         <span className="label">Cards:</span>
         <span className="deck-count">{deck_len}</span>
       </div>
-      
-      {currentGameState === "BETTING" && (
-        <div className="cards-right">
-          <a
-            href="#auth"
-            className="login-link"
-            onClick={(e) => {
-              e.preventDefault();
-              onOpenAuth();
-            }}
-          >
-            Log in / Sign up
-          </a>
-        </div>
-      )}
+
+      <div className="cards-right">
+        <a
+          href="#auth"
+          className="login-link"
+          onClick={(e) => {
+            e.preventDefault();
+            onOpenAuth();
+          }}
+        >
+          Log in / Sign up
+        </a>
+      </div>
     </div>
   );
 };
