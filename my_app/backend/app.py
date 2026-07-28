@@ -267,8 +267,9 @@ def initialize_session():
     """
     data = request.get_json() or {}
     client_id_from_request = data.get("client_id")
+    skip_auth = data.get("skip_auth", False)
 
-    # JAVÍTÁS: Ha üres, null vagy a JS-ből érkező "undefined" string, generálunk egy újat
+    # Ha üres, null vagy a JS-ből érkező "undefined" string, generálunk egy újat
     if (
         not client_id_from_request
         or client_id_from_request == "undefined"
@@ -279,6 +280,7 @@ def initialize_session():
     # 1. Felhasználó keresése (vagy a session-ből, vagy client_id alapján)
     user_id_in_session = session.get("user_id")
     user = None
+    is_brand_new_user = False
 
     if user_id_in_session:
         user = db.session.get(User, user_id_in_session)
@@ -289,6 +291,7 @@ def initialize_session():
 
     # 2. Új felhasználó létrehozása, ha még nem létezik
     if not user:
+        is_brand_new_user = True
         try:
             # Létrehozunk egy alap játékállapotot az új usernek
             initial_game = Game()
@@ -303,6 +306,7 @@ def initialize_session():
             # Ha közben valaki más létrehozta, visszagördítünk és lekérjük
             db.session.rollback()
             user = User.query.filter_by(client_id=client_id_from_request).one()
+            is_brand_new_user = False
 
     # 3. Session és állapot frissítése
     session["user_id"] = user.id
@@ -321,23 +325,28 @@ def initialize_session():
 
     game_instance.is_session_init = True
 
-    actual_total = sum(
-        value
-        for key, value in game_instance.bets.items()
-        if key != "TOTAL" and isinstance(value, (int, float))
-    )
+    if not is_brand_new_user or skip_auth:
+        actual_total = sum(
+            value
+            for key, value in game_instance.bets.items()
+            if key != "TOTAL" and isinstance(value, (int, float))
+        )
 
-    game_instance.bets["TOTAL"] = actual_total
+        game_instance.bets["TOTAL"] = actual_total
 
-    if actual_total > 0:
-        game_instance.pre_phase = PhaseState.SHUFFLING
+        if actual_total > 0:
+            game_instance.pre_phase = PhaseState.SHUFFLING
+        else:
+            game_instance.pre_phase = PhaseState.NONE
+
+        if user.tokens <= 0 and not game_instance.is_round_active:
+            game_instance.target_phase = PhaseState.OUT_OF_TOKENS
+        else:
+            game_instance.target_phase = PhaseState.BETTING
     else:
+        # VADIÚJ látogató, és nem skip_auth: LOADING fázis
+        game_instance.target_phase = PhaseState.LOADING
         game_instance.pre_phase = PhaseState.NONE
-
-    if user.tokens <= 0 and not game_instance.is_round_active:
-        game_instance.target_phase = PhaseState.OUT_OF_TOKENS
-    else:
-        game_instance.target_phase = PhaseState.BETTING
 
     service = GameService(db.session)
     service.reset_game_data(user)
@@ -365,6 +374,7 @@ def initialize_session():
             {
                 "status": "success",
                 "message": "User and game session initialized.",
+                "client_id": user.client_id,
                 "tokens": user.tokens,
                 "game_state": custom_game_state,
                 "history": [],

@@ -196,7 +196,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsWFSR(true);
 
     try {
-      const initData = await handleApiAction(initializeSessionAPI);
+      const minLoadingTimePromise = new Promise((resolve) =>
+        setTimeout(resolve, 2000),
+      );
+
+      const initializationPromise = handleApiAction(() =>
+        initializeSessionAPI(true),
+      );
+
+      const [initData] = await Promise.all([
+        initializationPromise,
+        minLoadingTimePromise,
+      ]);
       if (!initData || !isMountedRef.current) return;
 
       const { tokens, game_state } = initData as SessionInitResponse;
@@ -363,6 +374,30 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [state.gameState, transitionToState]);
 
   // --- useEffect blokkok ---
+  // --- ÚJRATÖLTÉS, INDÍTÁS ---
+  useEffect(() => {
+    const initApp = async () => {
+      try {
+        // Megnevezzük vagy meghívjuk az inicializációt oldalbetöltéskor
+        // Nem kényszerítünk ki vendég módot
+        const initData = await initializeSessionAPI(false);
+
+        if (initData && initData.game_state) {
+          const nextPhase = initData.game_state.target_phase as GameState;
+          // Átállítjuk a játékot a backendtől kapott fázisra (pl. BETTING)
+          transitionToState(nextPhase, {
+            tokens: initData.tokens,
+            ...initData.game_state,
+          });
+        }
+      } catch (error) {
+        console.error("Hiba az induláskori inicializáláskor:", error);
+      }
+    };
+
+    initApp();
+  }, [transitionToState]);
+
   // --- SPECIAL FOR SHIFFTING AND SHOE CUT ---
   useEffect(() => {
     if (

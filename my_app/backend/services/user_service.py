@@ -19,6 +19,9 @@ class UserService:
                 # INVALID_CREDENTIALS = IC
                 raise ValueError("IC")
 
+            user.is_guest = False
+            self.db.commit()
+
             return user
 
         else:
@@ -37,10 +40,12 @@ class UserService:
                 # HA VAN MÁR SESSION: Frissítjük a meglévő vendég fiókot (megtartva a tokeneket és a játékállapotot!)
                 user.username = username
                 user.password_hash = generate_password_hash(password)
+                user.is_guest = False
             else:
                 user = User(
                     username=username,
-                    password_hash=generate_password_hash(password)
+                    password_hash=generate_password_hash(password),
+                    is_guest=False
                 )
 
                 initial_game = Game()

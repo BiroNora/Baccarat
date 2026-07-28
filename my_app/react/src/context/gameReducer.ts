@@ -53,7 +53,7 @@ export const initialGameDataState: GameDataState = {
     pre_phase: "BETTING",
     final_phase: "BETTING",
     first_card: null,
-  } as GameStateData,
+  } as unknown as GameStateData,
   history: [],
   initDeckLen: null,
   totalInitialCards: null,

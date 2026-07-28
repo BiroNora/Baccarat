@@ -90,6 +90,7 @@ function App() {
                       onOpenAuth={() => setIsAuthOpen(true)}
                       onSkipAuth={() => handleSkipAuth()}
                       isAuthOpen={isAuthOpen}
+                      isWFSR={isWFSR}
                     />
                   </PageWrapper>
                 </div>
