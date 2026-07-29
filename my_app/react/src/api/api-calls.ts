@@ -6,7 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function initializeSessionAPI(skipAuth: boolean = false): Promise<SessionInitResponse> {
   // 1. Megpróbáljuk lekérni a meglévő azonosítót (ha van)
-  const clientUuid = localStorage.getItem("cid") || undefined;
+  let clientUuid = localStorage.getItem("cid") || undefined;
+  if (!clientUuid) {
+    clientUuid = crypto.randomUUID();
+    localStorage.setItem("cid", clientUuid);
+  }
 
   try {
     // 2. Meghívjuk a végpontot.
@@ -28,6 +32,11 @@ export async function initializeSessionAPI(skipAuth: boolean = false): Promise<S
     console.error("Hiba az inicializálás során:", error);
     throw error;
   }
+}
+
+export async function checkSessionAPI() {
+  return await callApiEndpoint("/api/check_session", "POST", {
+  });
 }
 
 export async function setAuth(

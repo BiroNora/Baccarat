@@ -41,11 +41,11 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("VERCEL", "False") == "True"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = 'az.emaild@gmail.com'
-app.config['MAIL_PASSWORD'] = 'az_alkalmazasjelszavam'
+app.config["MAIL_SERVER"] = "smtp.googlemail.com"
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_SSL"] = True
+app.config["MAIL_USERNAME"] = "az.emaild@gmail.com"
+app.config["MAIL_PASSWORD"] = "az_alkalmazasjelszavam"
 
 mail = Mail(app)
 
@@ -67,6 +67,7 @@ log.setLevel(logging.ERROR)
 
 with app.app_context():
     db.create_all()
+
 
 # =========================================================================
 # AUTH DECORATORS
@@ -258,7 +259,7 @@ def index():
 # =========================================================================
 # GAME API ENDPOINTS
 # =========================================================================
-# 0
+# 0/1
 @app.route("/api/initialize_session", methods=["POST"])
 @api_error_handler
 def initialize_session():
@@ -385,7 +386,41 @@ def initialize_session():
         200,
     )
 
-# 0
+
+# 0/2
+@app.route("/api/check_session", methods=["POST"])
+@api_error_handler
+@with_user_service
+def check_session(user_service):
+    user = user_service.handle_check_session(session, request)
+
+    if not user:
+        return (
+            jsonify(
+                {
+                    "status": "not_logged_in",
+                    "game_state": {"target_phase": PhaseState.LOADING.value},
+                }
+            ),
+            200,
+        )
+
+    raw_game = getattr(user, "current_game_state")
+    game = Game.deserialize(raw_game) if isinstance(raw_game, (dict, str)) else raw_game
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "current_tokens": user.tokens,
+            }
+        ),
+        200,
+    )
+
+
+# 0/3
 @app.route("/api/handle_auth", methods=["POST"])
 @api_error_handler
 @with_user_service
@@ -402,11 +437,16 @@ def handle_auth(user_service):
 
     game = getattr(user, "current_game_state")
 
-    return jsonify({
-        "status": "success",
-        "game_state": GameSerializer.serialize_by_context(game, request.path),
-        "current_tokens": user.tokens
-    }), 200
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "current_tokens": user.tokens,
+            }
+        ),
+        200,
+    )
 
 
 # 1
@@ -646,7 +686,9 @@ def force_restart_by_client_id(user):
     session["user_id"] = user.id
     session.permanent = True
 
-    game = Game.deserialize(user.current_game_state) if user.current_game_state else None
+    game = (
+        Game.deserialize(user.current_game_state) if user.current_game_state else None
+    )
 
     return (
         jsonify(
@@ -663,10 +705,10 @@ def force_restart_by_client_id(user):
 
 
 # 8
-@app.route('/api/forgot_password', methods=['POST'])
+@app.route("/api/forgot_password", methods=["POST"])
 def forgot_password():
     data = request.get_json()
-    email = data.get('email')
+    email = data.get("email")
 
     if not email:
         return jsonify({"error": "Missing Email address"}), 400
@@ -676,18 +718,16 @@ def forgot_password():
     if not user:
         return jsonify({"error": "User does not exist"}), 404
 
-    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-    token = serializer.dumps(email, salt='password-reset-salt')
-    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+    token = serializer.dumps(email, salt="password-reset-salt")
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     reset_link = f"{frontend_url}/reset_password/{token}"
 
     msg = Message(
-        'Password Reset',
-        sender=app.config['MAIL_USERNAME'],
-        recipients=[email]
+        "Password Reset", sender=app.config["MAIL_USERNAME"], recipients=[email]
     )
 
-    msg.body = f'Click the link below to reset your password: {reset_link}. The link is valid 5 mins.'
+    msg.body = f"Click the link below to reset your password: {reset_link}. The link is valid 5 mins."
 
     try:
         mail.send(msg)
@@ -697,17 +737,17 @@ def forgot_password():
 
 
 # 9
-@app.route('/api/reset_password/<token>', methods=['POST'])
+@app.route("/api/reset_password/<token>", methods=["POST"])
 def reset_password(token):
-    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
     try:
         # A token 5 percig (300 másodpercig) érvényes
-        email = serializer.loads(token, salt='password-reset-salt', max_age=300)
+        email = serializer.loads(token, salt="password-reset-salt", max_age=300)
     except Exception:
         return jsonify({"error": "The link is invalid or has expired."}), 400
 
     data = request.get_json()
-    new_password = data.get('password')
+    new_password = data.get("password")
 
     if not new_password:
         return jsonify({"error": "Missing new password"}), 400
@@ -717,7 +757,9 @@ def reset_password(token):
         return jsonify({"error": "User does not exist"}), 404
 
     # Itt állítsd be a jelszót (ha hash-eled, akkor add meg a hash-elt verziót, pl. werkzeug.security-vel)
-    user.password = new_password  # vagy user.set_password(new_password) a te rendszered szerint
+    user.password = (
+        new_password  # vagy user.set_password(new_password) a te rendszered szerint
+    )
     db.session.commit()
 
     return jsonify({"message": "Password successfully updated!"}), 200

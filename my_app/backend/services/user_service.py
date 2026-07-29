@@ -57,3 +57,17 @@ class UserService:
             self.db.commit()
 
             return user
+
+    def handle_check_session(self, session, request):
+        """
+        Ellenőrzi a session vagy süti alapján, hogy van-e aktív felhasználó.
+        """
+        user_id = session.get("user_id") or request.cookies.get("user_id")
+
+        if not user_id:
+            print("68 NO USER!!!!!")
+            return None
+
+        user = self.db.query(User).filter_by(id=user_id).first()
+
+        return user

@@ -9,6 +9,7 @@ import {
 import {
   initializeSessionAPI,
   setAuth,
+  checkSessionAPI,
   setForgotPasswordSubmit,
   setBet,
   retakeBet,
@@ -21,6 +22,7 @@ import {
 } from "../api/api-calls";
 import {
   BetTypes,
+  type ApiResponse,
   type BetKey,
   type BetTypeValue,
   type GameState,
@@ -376,27 +378,36 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   // --- useEffect blokkok ---
   // --- ÚJRATÖLTÉS, INDÍTÁS ---
   useEffect(() => {
-    const initApp = async () => {
-      try {
-        // Megnevezzük vagy meghívjuk az inicializációt oldalbetöltéskor
-        // Nem kényszerítünk ki vendég módot
-        const initData = await initializeSessionAPI(false);
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
 
-        if (initData && initData.game_state) {
-          const nextPhase = initData.game_state.target_phase as GameState;
-          // Átállítjuk a játékot a backendtől kapott fázisra (pl. BETTING)
-          transitionToState(nextPhase, {
-            tokens: initData.tokens,
-            ...initData.game_state,
-          });
+    const checkExistingSession = async () => {
+      try {
+        // Ellenőrizzük a session-t
+        const sessionData = (await handleApiAction(() => checkSessionAPI()) as ApiResponse);
+        const response = extractGameStateData(sessionData);
+
+        if (
+          isMountedRef.current &&
+          response &&
+          sessionData &&
+          sessionData.status === "success"
+        ) {
+          transitionToState(response.target_phase as GameState, response);
+        } else {
+
+          isProcessingRef.current = false;
         }
-      } catch (error) {
-        console.error("Hiba az induláskori inicializáláskor:", error);
+      } catch {
+        if (isMountedRef.current) {
+          isProcessingRef.current = false;
+          // A transitionToState("ERROR")-t a handleApiAction már megcsinálta belül!
+        }
       }
     };
 
-    initApp();
-  }, [transitionToState]);
+    checkExistingSession();
+  }, [handleApiAction, transitionToState]);
 
   // --- SPECIAL FOR SHIFFTING AND SHOE CUT ---
   useEffect(() => {
