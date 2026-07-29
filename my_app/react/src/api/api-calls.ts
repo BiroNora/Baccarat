@@ -111,10 +111,11 @@ export async function callApiEndpoint<T>(
     };
 
     if (method === "POST") {
-      const effectiveBody = (body ?? {}) as { idempotency_key?: string };
-      if (!effectiveBody.idempotency_key) {
-        effectiveBody.idempotency_key = uuidv4();
-      }
+      const incomingBody = (body ?? {}) as Record<string, unknown>;
+      const effectiveBody = {
+        ...incomingBody,
+        idempotency_key: (incomingBody.idempotency_key as string) || uuidv4(),
+      };
       options.body = JSON.stringify(effectiveBody);
     }
 
