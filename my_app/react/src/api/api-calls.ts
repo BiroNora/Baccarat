@@ -4,7 +4,9 @@ import {
 } from "../types/game-types";
 import { v4 as uuidv4 } from "uuid";
 
-export async function initializeSessionAPI(skipAuth: boolean = false): Promise<SessionInitResponse> {
+export async function initializeSessionAPI(
+  skipAuth: boolean = false,
+): Promise<SessionInitResponse> {
   // 1. Megpróbáljuk lekérni a meglévő azonosítót (ha van)
   let clientUuid = localStorage.getItem("cid") || undefined;
   if (!clientUuid) {
@@ -35,8 +37,7 @@ export async function initializeSessionAPI(skipAuth: boolean = false): Promise<S
 }
 
 export async function checkSessionAPI() {
-  return await callApiEndpoint("/api/check_session", "POST", {
-  });
+  return await callApiEndpoint("/api/check_session", "POST", {});
 }
 
 export async function setAuth(
@@ -171,13 +172,11 @@ export async function callApiEndpoint<T>(
     // Típusbiztos hibakezelés a catch ágban
     const httpError = error as HttpError;
     const isAuthError = httpError.response?.status === 401;
-    const isSplitError =
-      httpError.response?.status === 400 &&
-      httpError.response?.data?.error === "No more split hands.";
 
-    if (!isAuthError && !isSplitError) {
+    if (!isAuthError) {
       console.error("Váratlan hiba:", error);
     }
+
     throw error;
   }
 }

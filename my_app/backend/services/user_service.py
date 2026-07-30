@@ -17,7 +17,7 @@ class UserService:
 
             if not user or not check_password_hash(user.password_hash, password):
                 # INVALID_CREDENTIALS = IC
-                raise ValueError("IC")
+                return None
 
             user.is_guest = False
             self.db.commit()
@@ -30,7 +30,7 @@ class UserService:
 
             if existing_user:
                 # USERNAME_ALREADY_EXISTS = UAE
-                raise ValueError("UAE")
+                return None
 
             user = None
             if current_user_id:

@@ -433,6 +433,16 @@ def handle_auth(user_service):
     current_user_id = session.get("user_id")
     user = user_service.handle_user_auth(username, password, is_login, current_user_id)
 
+    if not user:
+        return (
+                jsonify(
+                    {
+                        "status": "IC",
+                    }
+                ),
+                200,
+            )
+
     session["user_id"] = user.id
 
     game = getattr(user, "current_game_state")

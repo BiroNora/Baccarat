@@ -104,7 +104,7 @@ export type GameStateMachineHookResult = {
     username: string,
     password: string,
     isLogIn: boolean,
-  ) => Promise<void>;
+  ) => Promise<{ status: string } | void>;
   handleForgotPasswordSubmit: (
     token: string,
     password: string,

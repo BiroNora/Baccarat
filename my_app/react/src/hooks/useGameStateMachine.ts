@@ -151,27 +151,38 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   );
 
   const handleAuth = useCallback(
-    async (username: string, password: string, isLogIn: boolean) => {
+    async (
+      username: string,
+      password: string,
+      isLogIn: boolean,
+    ): Promise<{ status: string } | void> => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(username)) {
-        console.error("Érvénytelen email formátum!");
-        // Itt megjeleníthetsz egy hibaüzenetet a felhasználónak is (pl. state-ből)
-        return;
+        throw new Error("Invalid email address");
       }
 
       if (!password || password.length < 6) {
-        console.error("A jelszónak legalább 6 karakter hosszúnak kell lennie!");
-        return;
+        throw new Error("Password must be at least 6 characters long");
       }
-      executeAsyncAction(async () => {
+      let resultStatus = "success";
+
+      await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
           setAuth(username, password, isLogIn),
         );
+
+        const resData = data as { status?: string };
+        if (resData && resData.status === "IC") {
+          resultStatus = resData.status;
+          return;
+        }
 
         const response = extractGameStateData(data);
         if (!response) return;
         transitionToState(response?.target_phase as GameState, response);
       });
+
+      return { status: resultStatus };
     },
     [executeAsyncAction, handleApiAction, transitionToState],
   );
@@ -384,7 +395,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     const checkExistingSession = async () => {
       try {
         // Ellenőrizzük a session-t
-        const sessionData = (await handleApiAction(() => checkSessionAPI()) as ApiResponse);
+        const sessionData = (await handleApiAction(() =>
+          checkSessionAPI(),
+        )) as ApiResponse;
         const response = extractGameStateData(sessionData);
 
         if (
@@ -395,7 +408,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         ) {
           transitionToState(response.target_phase as GameState, response);
         } else {
-
           isProcessingRef.current = false;
         }
       } catch {

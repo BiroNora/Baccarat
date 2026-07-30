@@ -9,7 +9,7 @@ interface AuthModalProps {
     username: string,
     password: string,
     isLogin: boolean,
-  ) => Promise<void>;
+  ) => Promise<{ status: string } | void>;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -19,7 +19,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = () => {
@@ -39,21 +38,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
-    console.log(isLogin ? "Logging in..." : "Signing up...", {
-      username,
-      password,
-    });
 
     try {
-      // Itt hívjuk meg a state machine / hook által biztosított függvényt
-      await onAuthSubmit(username, password, isLogin);
-      onClose(); // Siker esetén bezárjuk
+      const result = await onAuthSubmit(username, password, isLogin);
+
+      if (result?.status === "IC") {
+        throw new Error("IC");
+      }
+
+      onClose();
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Authentication failed.";
-      setError(errorMessage);
+      let errorMessage =
+        err instanceof Error ? err.message : "Authentication failed";
+      if (errorMessage === "IC") {
+        errorMessage = "Invalid credentials";
+      }
+
+      toast(errorMessage, {
+        id: "auth-error-toast",
+        duration: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -79,26 +84,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </button>
         <h2>{isLogin ? "Log In" : "Register"}</h2>
 
-        {error && (
-          <div
-            style={{
-              color: "#fca5a5",
-              marginBottom: "1rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email-input">Email</label>
+            <label htmlFor="email">Email</label>
             <input
-              id="email-input"
+              id="email"
               type="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="email"
               required
             />
           </div>
@@ -131,14 +125,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ? "Don't have an account? Sign up!"
             : "Already registered? Sign in!"}
         </p>
-
-        {/* <div className="guest-text">
-          {isLogin && (
-            <button className="submit-btn">
-              {isLogin ? "Play as a guest" : " "}
-            </button>
-          )}
-        </div> */}
       </motion.div>
     </motion.div>
   );
