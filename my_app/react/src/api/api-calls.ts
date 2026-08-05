@@ -46,9 +46,15 @@ export async function setAuth(
   isLogIn: boolean,
 ) {
   return await callApiEndpoint("/api/handle_auth", "POST", {
-    username: email,
+    email: email,
     password: password,
     is_login: isLogIn,
+  });
+}
+
+export async function handleForgotPasswordAPI(email: string) {
+  return await callApiEndpoint(`/api/forgot_password`, "POST", {
+    email: email,
   });
 }
 

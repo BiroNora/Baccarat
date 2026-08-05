@@ -426,12 +426,12 @@ def check_session(user_service):
 @with_user_service
 def handle_auth(user_service):
     data = request.get_json()
-    username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
     is_login = data.get("is_login")
 
     current_user_id = session.get("user_id")
-    user = user_service.handle_user_auth(username, password, is_login, current_user_id)
+    user = user_service.handle_user_auth(email, password, is_login, current_user_id)
 
     if not user:
         return (
@@ -733,6 +733,11 @@ def forgot_password():
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     reset_link = f"{frontend_url}/reset_password/{token}"
 
+    print("\n" + "="*50)
+    print(f"🔑 JELSZÓ VISSZAÁLLÍTÁSI LINK ({email}):")
+    print(reset_link)
+    print("="*50 + "\n")
+
     msg = Message(
         "Password Reset", sender=app.config["MAIL_USERNAME"], recipients=[email]
     )
@@ -743,6 +748,7 @@ def forgot_password():
         mail.send(msg)
         return jsonify({"message": "Check your emails"}), 200
     except Exception as e:
+        print("HIBA TÖRTÉNT AZ E-MAIL KÜLDÉSEKOR:", e)
         return jsonify({"error": str(e)}), 500
 
 

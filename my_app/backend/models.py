@@ -18,7 +18,7 @@ class User(db.Model):
     is_guest = db.Column(db.Boolean, default=True, nullable=False)
     tokens = db.Column(db.Integer, default=INITIAL_TOKENS)
 
-    username = db.Column(db.String(150), unique=True, nullable=True)
+    email = db.Column(db.String(150), unique=True, nullable=True)
     password_hash = db.Column(db.String(255), nullable=True)
 
     current_game_state = db.Column(JSONB, nullable=True)
@@ -41,7 +41,7 @@ class User(db.Model):
 
     __table_args__ = (
         CheckConstraint(
-            "(username IS NULL AND password_hash IS NULL) OR (username IS NOT NULL AND password_hash IS NOT NULL)",
+            "(email IS NULL AND password_hash IS NULL) OR (email IS NOT NULL AND password_hash IS NOT NULL)",
             name="check_username_password_required",
         ),
     )

@@ -94,3 +94,39 @@
   font-size: 1.3rem;
   font-weight: 400;
 }
+
+/* A wrapper, ami relatív pozíciót ad az input köré */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 40px !important;
+}
+
+.password-input-wrapper .eye-toggle {
+  position: absolute;
+  right: 10px;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #f4f2f2;
+  box-shadow: none !important;
+}
+
+.password-input-wrapper .eye-toggle:hover,
+.password-input-wrapper .eye-toggle:focus,
+.password-input-wrapper .eye-toggle:active {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -10,6 +10,7 @@ import {
   initializeSessionAPI,
   setAuth,
   checkSessionAPI,
+  handleForgotPasswordAPI,
   setForgotPasswordSubmit,
   setBet,
   retakeBet,
@@ -152,12 +153,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleAuth = useCallback(
     async (
-      username: string,
+      email: string,
       password: string,
       isLogIn: boolean,
     ): Promise<{ status: string } | void> => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(username)) {
+      if (!emailRegex.test(email)) {
         throw new Error("Invalid email address");
       }
 
@@ -168,7 +169,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          setAuth(username, password, isLogIn),
+          setAuth(email, password, isLogIn),
         );
 
         const resData = data as { status?: string };
@@ -185,6 +186,40 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       return { status: resultStatus };
     },
     [executeAsyncAction, handleApiAction, transitionToState],
+  );
+
+  const handleForgotPassword = useCallback(
+    async (email: string): Promise<{ status: string } | void> => {
+      if (!email || email.trim() === "") {
+        toast("Missing email address", {
+          id: "forgot-pass-error",
+          duration: 2000,
+        });
+        return;
+      }
+
+      let resultStatus = "OK";
+
+      try {
+        await executeAsyncAction(async () => {
+          await handleApiAction(() => handleForgotPasswordAPI(email));
+        });
+      } catch (err: unknown) {
+        // Itt kapjuk el a továbbdobott hibát
+        const httpError = err as HttpError;
+
+        // Ha a szerver küldött üzenetet a válaszban (pl. {"error": "User does not exist"}),
+        // akkor kiolvashatjuk onnan, különben hagyjuk az error.message-et
+        const errorMessage =
+          httpError.message || "ERROR";
+
+        resultStatus = errorMessage;
+        throw err;
+      }
+
+      return { status: resultStatus };
+    },
+    [executeAsyncAction, handleApiAction],
   );
 
   const handleForgotPasswordSubmit = useCallback(
@@ -765,6 +800,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     roadmapMap,
     transitionToState,
     handleAuth,
+    handleForgotPassword,
     handleForgotPasswordSubmit,
     handleSkipAuth,
     handleStartGame,

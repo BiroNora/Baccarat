@@ -6,14 +6,14 @@ class UserService:
     def __init__(self, db_session):
         self.db = db_session
 
-    def handle_user_auth(self, username, password, is_login, current_user_id=None):
+    def handle_user_auth(self, email, password, is_login, current_user_id=None):
         """
         Kezeli a felhasználó bejelentkezését vagy regisztrációját.
         Visszaadja a User objektumot, vagy ValueError-t dob hiba esetén.
         """
         if is_login:
             # --- BEJELENTKEZÉS ---
-            user = self.db.query(User).filter_by(username=username).first()
+            user = self.db.query(User).filter_by(email=email).first()
 
             if not user or not check_password_hash(user.password_hash, password):
                 # INVALID_CREDENTIALS = IC
@@ -26,7 +26,7 @@ class UserService:
 
         else:
             # --- REGISZTRÁCIÓ ---
-            existing_user = self.db.query(User).filter_by(username=username).first()
+            existing_user = self.db.query(User).filter_by(email=email).first()
 
             if existing_user:
                 # USERNAME_ALREADY_EXISTS = UAE
@@ -38,12 +38,12 @@ class UserService:
 
             if user:
                 # HA VAN MÁR SESSION: Frissítjük a meglévő vendég fiókot (megtartva a tokeneket és a játékállapotot!)
-                user.username = username
+                user.email = email
                 user.password_hash = generate_password_hash(password)
                 user.is_guest = False
             else:
                 user = User(
-                    username=username,
+                    email=email,
                     password_hash=generate_password_hash(password),
                     is_guest=False
                 )

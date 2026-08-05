@@ -24,6 +24,7 @@ function App() {
     gameState,
     roadmapMap,
     handleAuth,
+    handleForgotPassword,
     handleSkipAuth,
     handlePlaceBet,
     handleRetakeBet,
@@ -55,6 +56,7 @@ function App() {
           <AuthModal
             onClose={() => setIsAuthOpen(false)}
             onAuthSubmit={handleAuth}
+            onHandleForgotPassword={handleForgotPassword}
           />
         )}
       </AnimatePresence>
