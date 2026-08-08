@@ -10,7 +10,8 @@ export type GameState =
   | "OUT_OF_TOKENS"
   | "RESTART_GAME"
   | "ERROR"
-  | "RELOADING";
+  | "RELOADING"
+  | "FORGOT_PASSWORD";
 
 export interface GameStateData {
   currentGameState: GameState;

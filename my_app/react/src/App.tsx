@@ -17,6 +17,7 @@ import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Toaster } from "react-hot-toast";
+import ForgotPasswordModal from "./components/ForgotPasswordModal";
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -175,6 +176,14 @@ function App() {
                   <PageWrapper>
                     <div className="cards-wrapper"></div>
                     <StandardGame gameState={gameState} />
+                  </PageWrapper>
+                </div>
+              );
+            case "FORGOT_PASSWORD":
+              return (
+                <div>
+                  <PageWrapper>
+                    <ForgotPasswordModal />
                   </PageWrapper>
                 </div>
               );

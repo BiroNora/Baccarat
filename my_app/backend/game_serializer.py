@@ -20,6 +20,8 @@ class GameSerializer:
             return GameSerializer.serialize_clear_game_state(game)
         if "handle_auth" in p:
             return GameSerializer.serialize_handle_auth(game)
+        if "forgot_password" in p:
+            return GameSerializer.serialize_forgot_password(game)
 
         if any(x in p for x in ["check_session", "bet", "retake_bet", "restart"]):
             return GameSerializer.serialize_for_client_bets(game)
@@ -53,7 +55,6 @@ class GameSerializer:
             "target_phase": PhaseState.BETTING.value,
             "pre_phase": calc_phase.value,
         }
-
 
     @staticmethod
     def serialize_clear_game_state(game) -> Dict[str, Any]:
@@ -147,4 +148,10 @@ class GameSerializer:
             "target_phase": game.get_target_phase().value,
             "final_phase": game.get_final_phase().value,
             "pre_phase": calc_phase.value,
+        }
+
+    @staticmethod
+    def serialize_forgot_password(game) -> Dict[str, Any]:
+        return {
+            "target_phase": PhaseState.FORGOT_PASSWORD.value,
         }

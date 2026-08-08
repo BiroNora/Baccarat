@@ -9,6 +9,7 @@ class PhaseState(str, Enum):
     RELOADING = "RELOADING"
     ERROR = "ERROR"
     OUT_OF_TOKENS = "OUT_OF_TOKENS"
+    FORGOT_PASSWORD = "FORGOT_PASSWORD"
 
     # Játék előkészítése
     SHUFFLING = "SHUFFLING"

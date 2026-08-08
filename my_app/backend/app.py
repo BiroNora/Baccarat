@@ -5,7 +5,8 @@ import logging
 from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, session
-from flask_mail import Mail, Message
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta, timezone
 from my_app.backend.bet_type import BetType
@@ -41,13 +42,16 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("VERCEL", "False") == "True"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-app.config["MAIL_SERVER"] = "smtp.googlemail.com"
-app.config["MAIL_PORT"] = 465
-app.config["MAIL_USE_SSL"] = True
-app.config["MAIL_USERNAME"] = "az.emaild@gmail.com"
-app.config["MAIL_PASSWORD"] = "az_alkalmazasjelszavam"
-
-mail = Mail(app)
+# Flask limiter inicializálás
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=[
+        "200 per day",
+        "50 per hour",
+    ],  # Alapértelmezett korlátok az egész appra
+    storage_uri="memory://",  # Memóriában tárolja a számlálót
+)
 
 # =========================================================================
 # DATABASE SETUP (NEON POSTGRES)
@@ -435,13 +439,13 @@ def handle_auth(user_service):
 
     if not user:
         return (
-                jsonify(
-                    {
-                        "status": "IC",
-                    }
-                ),
-                200,
-            )
+            jsonify(
+                {
+                    "status": "IC",
+                }
+            ),
+            200,
+        )
 
     session["user_id"] = user.id
 
@@ -716,40 +720,34 @@ def force_restart_by_client_id(user):
 
 # 8
 @app.route("/api/forgot_password", methods=["POST"])
+@limiter.limit("5 per minute")
+@api_error_handler
 def forgot_password():
     data = request.get_json()
     email = data.get("email")
-
-    if not email:
-        return jsonify({"error": "Missing Email address"}), 400
-
     user = User.query.filter_by(email=email).first()
 
-    if not user:
-        return jsonify({"error": "User does not exist"}), 404
-
-    serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-    token = serializer.dumps(email, salt="password-reset-salt")
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    reset_link = f"{frontend_url}/reset_password/{token}"
-
-    print("\n" + "="*50)
-    print(f"🔑 JELSZÓ VISSZAÁLLÍTÁSI LINK ({email}):")
-    print(reset_link)
-    print("="*50 + "\n")
-
-    msg = Message(
-        "Password Reset", sender=app.config["MAIL_USERNAME"], recipients=[email]
-    )
-
-    msg.body = f"Click the link below to reset your password: {reset_link}. The link is valid 5 mins."
+    if not email or not user:
+        return jsonify({"status": "IC"}), 200
 
     try:
-        mail.send(msg)
-        return jsonify({"message": "Check your emails"}), 200
-    except Exception as e:
-        print("HIBA TÖRTÉNT AZ E-MAIL KÜLDÉSEKOR:", e)
-        return jsonify({"error": str(e)}), 500
+        serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+        token = serializer.dumps(email, salt="password-reset-salt")
+    except:
+        return jsonify({"status": "IC"}), 200
+    game = getattr(user, "current_game_state")
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "current_tokens": 0,
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "token": token,
+            }
+        ),
+        200,
+    )
 
 
 # 9

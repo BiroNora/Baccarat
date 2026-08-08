@@ -198,28 +198,31 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         return;
       }
 
-      let resultStatus = "OK";
+      let resultStatus = "success";
 
-      try {
-        await executeAsyncAction(async () => {
-          await handleApiAction(() => handleForgotPasswordAPI(email));
-        });
-      } catch (err: unknown) {
-        // Itt kapjuk el a továbbdobott hibát
-        const httpError = err as HttpError;
+      await executeAsyncAction(async () => {
+        const data = await handleApiAction(() =>
+          handleForgotPasswordAPI(email),
+        );
 
-        // Ha a szerver küldött üzenetet a válaszban (pl. {"error": "User does not exist"}),
-        // akkor kiolvashatjuk onnan, különben hagyjuk az error.message-et
-        const errorMessage =
-          httpError.message || "ERROR";
+        const resData = data as { status?: string; token?: string };
+        if (resData && resData.status === "IC") {
+          resultStatus = "IC";
+          return;
+        }
 
-        resultStatus = errorMessage;
-        throw err;
-      }
+        // Token mentése sessionStorage-ba
+        if (resData?.token) {
+          sessionStorage.setItem("_rt_", resData.token);
+        }
 
+        const response = extractGameStateData(data);
+        if (!response) return;
+        transitionToState(response?.target_phase as GameState, response);
+      });
       return { status: resultStatus };
     },
-    [executeAsyncAction, handleApiAction],
+    [executeAsyncAction, handleApiAction, transitionToState],
   );
 
   const handleForgotPasswordSubmit = useCallback(
