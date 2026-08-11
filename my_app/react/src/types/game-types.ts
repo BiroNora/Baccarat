@@ -106,13 +106,14 @@ export type GameStateMachineHookResult = {
     password: string,
     isLogIn: boolean,
   ) => Promise<{ status: string } | void>;
+  handleCloseNewPassCase: () => void;
   handleForgotPassword: (
     email: string,
   ) => Promise<{ status: string } | void>;
   handleForgotPasswordSubmit: (
     token: string,
     password: string,
-  ) => Promise<void>;
+  ) => Promise<{ status: string } | void>;
   transitionToState: (
     newState: GameState,
     newData?: Partial<GameStateData>,

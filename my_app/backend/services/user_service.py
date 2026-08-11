@@ -71,3 +71,7 @@ class UserService:
         user = self.db.query(User).filter_by(id=user_id).first()
 
         return user
+
+    def update_password(self, user, password: str):
+        user.password = generate_password_hash(password)
+        self.db.commit()

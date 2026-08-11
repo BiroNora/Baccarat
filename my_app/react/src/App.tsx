@@ -16,16 +16,19 @@ import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Toaster } from "react-hot-toast";
-import ForgotPasswordModal from "./components/ForgotPasswordModal";
+import toast, { Toaster } from "react-hot-toast";
+import { ForgotPasswordModal } from "./components/ForgotPasswordModal";
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+
   const {
     gameState,
     roadmapMap,
     handleAuth,
+    handleCloseNewPassCase,
     handleForgotPassword,
+    handleForgotPasswordSubmit,
     handleSkipAuth,
     handlePlaceBet,
     handleRetakeBet,
@@ -48,6 +51,27 @@ function App() {
       </motion.div>
     );
   }
+
+  // Segédfg, megnyitja a login modalt a betting felületen sikeres
+  // jelszó módosítás után
+  const handlePasswordResetAndOpenLogin = async (
+    token: string,
+    password: string,
+  ) => {
+    const result = await handleForgotPasswordSubmit(token, password);
+    if (result?.status === "IC") {
+      handleCloseNewPassCase();
+      return result;
+    }
+    toast("Password successfully changed!", {
+      duration: 3000,
+      id: "password-changed-toast",
+    });
+
+    setTimeout(() => {
+      setIsAuthOpen(true);
+    }, 3000);
+  };
 
   return (
     <>
@@ -183,7 +207,10 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <ForgotPasswordModal />
+                    <ForgotPasswordModal
+                      onCloseForm={handleCloseNewPassCase}
+                      onResetSubmit={handlePasswordResetAndOpenLogin}
+                    />
                   </PageWrapper>
                 </div>
               );

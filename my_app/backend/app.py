@@ -261,7 +261,7 @@ def index():
 
 
 # =========================================================================
-# GAME API ENDPOINTS
+# GAME API ENDPOINTS  IC - invalid credentials
 # =========================================================================
 # 0/1
 @app.route("/api/initialize_session", methods=["POST"])
@@ -741,7 +741,7 @@ def forgot_password():
         jsonify(
             {
                 "status": "success",
-                "current_tokens": 0,
+                "current_tokens": user.tokens,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "token": token,
             }
@@ -752,7 +752,9 @@ def forgot_password():
 
 # 9
 @app.route("/api/reset_password/<token>", methods=["POST"])
-def reset_password(token):
+@api_error_handler
+@with_user_service
+def reset_password(token, user_service):
     serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
     try:
         # A token 5 percig (300 másodpercig) érvényes
@@ -764,16 +766,13 @@ def reset_password(token):
     new_password = data.get("password")
 
     if not new_password:
-        return jsonify({"error": "Missing new password"}), 400
+        return jsonify({"status": "IC"}), 200
 
     user = User.query.filter_by(email=email).first()
+
     if not user:
-        return jsonify({"error": "User does not exist"}), 404
+        return jsonify({"status": "IC"}), 200
 
-    # Itt állítsd be a jelszót (ha hash-eled, akkor add meg a hash-elt verziót, pl. werkzeug.security-vel)
-    user.password = (
-        new_password  # vagy user.set_password(new_password) a te rendszered szerint
-    )
-    db.session.commit()
+    user_service.update_password(user, new_password)
 
-    return jsonify({"message": "Password successfully updated!"}), 200
+    return jsonify({"status": "success"}), 200

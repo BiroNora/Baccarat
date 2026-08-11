@@ -188,6 +188,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     [executeAsyncAction, handleApiAction, transitionToState],
   );
 
+  const handleCloseNewPassCase = useCallback(() => {
+    sessionStorage.removeItem("_rf_");
+
+    transitionToState("BETTING" as GameState, { target_phase: "BETTING" });
+  }, [transitionToState]);
+
   const handleForgotPassword = useCallback(
     async (email: string): Promise<{ status: string } | void> => {
       if (!email || email.trim() === "") {
@@ -213,7 +219,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         // Token mentése sessionStorage-ba
         if (resData?.token) {
-          sessionStorage.setItem("_rt_", resData.token);
+          sessionStorage.setItem("_rf_", resData.token);
         }
 
         const response = extractGameStateData(data);
@@ -226,16 +232,29 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   );
 
   const handleForgotPasswordSubmit = useCallback(
-    async (token: string, password: string) => {
-      executeAsyncAction(async () => {
+    async (
+      token: string,
+      password: string,
+    ): Promise<{ status: string } | void> => {
+      let resultStatus = "success";
+
+      await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
           setForgotPasswordSubmit(token, password),
         );
+
+        const resData = data as { status?: string };
+        if (resData && resData.status === "IC") {
+          resultStatus = resData.status;
+          return;
+        }
 
         const response = extractGameStateData(data);
         if (!response) return;
         transitionToState(response?.target_phase as GameState, response);
       });
+
+      return { status: resultStatus };
     },
     [executeAsyncAction, handleApiAction, transitionToState],
   );
@@ -803,6 +822,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     roadmapMap,
     transitionToState,
     handleAuth,
+    handleCloseNewPassCase,
     handleForgotPassword,
     handleForgotPasswordSubmit,
     handleSkipAuth,
