@@ -778,3 +778,24 @@ def reset_password(token, user_service):
     user_service.update_password(user, new_password)
 
     return jsonify({"status": "success"}), 200
+
+
+# dedicated cron
+@app.route("/api/cron/cleanup-guests", methods=["GET"])
+@with_user_service
+def cron_cleanup_guests(user_service):
+    # Vercel Cron biztonsági ellenőrzés
+    auth_header = request.headers.get("Authorization")
+    cron_secret = os.environ.get("CRON_SECRET")
+
+    if not cron_secret or auth_header != f"Bearer {cron_secret}":
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        deleted_count = user_service.delete_old_guests()
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully deleted {deleted_count} old guest accounts."
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

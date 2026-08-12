@@ -6,6 +6,8 @@ from my_app.backend.app import User
 from my_app.backend.game import Game
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from datetime import datetime, timedelta, timezone
+
 class UserService:
     def __init__(self, db_session):
         self.db = db_session
@@ -25,7 +27,7 @@ class UserService:
             )
 
             if not user or not check_password_hash(user.password_hash, password):
-                raise ValueError("IC") # Invalid Credentials
+                raise ValueError("IC")  # Invalid Credentials
 
             user.is_guest = False
             self.db.commit()
@@ -35,7 +37,7 @@ class UserService:
         else:
             # --- REGISZTRÁCIÓ ---
             if not username or not re.match(r"^[a-zA-Z0-9_]{3,30}$", username):
-                raise ValueError("IU") # Invalid Username format
+                raise ValueError("IU")  # Invalid Username format
 
             existing_user = (
                 self.db.query(User)
@@ -44,7 +46,7 @@ class UserService:
             )
 
             if existing_user:
-                raise ValueError("UAE") # User Already Exists
+                raise ValueError("UAE")  # User Already Exists
 
             user = None
             if current_user_id:
@@ -59,7 +61,7 @@ class UserService:
             else:
                 user = User(
                     email=email,
-                    user_name = username,
+                    user_name=username,
                     password_hash=generate_password_hash(password),
                     is_guest=False,
                 )
@@ -89,3 +91,20 @@ class UserService:
     def update_password(self, user, password: str):
         user.password_hash = generate_password_hash(password)
         self.db.commit()
+
+    def delete_old_guests(self):
+        """
+        Törli azokat a vendég fiókokat, amelyek 2 napnál régebben voltak aktívak.
+        """
+        # Kiszámoljuk a 2 nappal ezelőtti időpontot (timezone-aware módon)
+        threshold = datetime.now(timezone.utc) - timedelta(days=2)
+
+        # Lekérdezzük és töröljük a felesleges vendégeket
+        deleted_count = (
+            self.db.query(User)
+            .filter(User.is_guest == True, User.last_activity < threshold)
+            .delete(synchronize_session=False)
+        )
+
+        self.db.commit()
+        return deleted_count

@@ -2,5 +2,12 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/run.py" },
     { "source": "/(.*)", "destination": "/my_app/react/dist/$1" }
+  ],
+
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-guests",
+      "schedule": "0 0 * * 0"
+    }
   ]
 }
