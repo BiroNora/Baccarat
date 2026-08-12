@@ -54,9 +54,9 @@ export async function setAuth(
   });
 }
 
-export async function handleForgotPasswordAPI(email: string) {
+export async function handleForgotPasswordAPI(identifier: string) {
   return await callApiEndpoint(`/api/forgot_password`, "POST", {
-    email: email,
+    identifier: identifier,
   });
 }
 

@@ -50,8 +50,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         err instanceof Error ? err.message : "Error sending email";
 
       // Ha a backend azt küldi, hogy "User does not exist", azt átírhatod emberibbre is ha akarod:
-      if (errorMessage === "User does not exist") {
-        errorMessage = "User does not exist";
+      if (errorMessage === "IC") {
+        errorMessage = "Invalid credentials";
       }
 
       toast(errorMessage, {
@@ -67,8 +67,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setLoading(true);
 
+    const emailArg = isLogin ? email : email;
+    const usernameArg = isLogin ? email : username;
+
     try {
-      const result = await onAuthSubmit(email, username, password, isLogin);
+      const result = await onAuthSubmit(emailArg, usernameArg, password, isLogin);
 
       if (result?.status === "IC") {
         throw new Error("IC");

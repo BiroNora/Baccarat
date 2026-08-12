@@ -109,7 +109,7 @@ export type GameStateMachineHookResult = {
   ) => Promise<{ status: string } | void>;
   handleCloseNewPassCase: () => void;
   handleForgotPassword: (
-    email: string,
+    identifier: string,
   ) => Promise<{ status: string } | void>;
   handleForgotPasswordSubmit: (
     token: string,

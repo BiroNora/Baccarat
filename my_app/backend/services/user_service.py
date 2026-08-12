@@ -92,6 +92,24 @@ class UserService:
         user.password_hash = generate_password_hash(password)
         self.db.commit()
 
+    def get_user_by_identifier(self, identifier: str):
+        if not identifier or not identifier.strip():
+            raise ValueError("IC")
+
+        identifier = identifier.strip()
+
+        print("101 identi: ", identifier)
+
+        if "@" in identifier:
+            user = self.db.query(User).filter_by(email=identifier).first()
+        else:
+            user = self.db.query(User).filter_by(user_name=identifier).first()
+
+        if not user:
+            raise ValueError("IC")
+
+        return user
+
     def delete_old_guests(self):
         """
         Törli azokat a vendég fiókokat, amelyek 2 napnál régebben voltak aktívak.

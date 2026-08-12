@@ -50,3 +50,6 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.id[:8]} (Client: {self.client_id[:8]})>"
+
+    def __repr__(self):
+        return f"<User id={self.id}, email={self.email}, username={self.user_name}>"

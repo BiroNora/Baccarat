@@ -723,17 +723,15 @@ def force_restart_by_client_id(user):
 @app.route("/api/forgot_password", methods=["POST"])
 @limiter.limit("5 per minute")
 @api_error_handler
-def forgot_password():
+@with_user_service
+def forgot_password(user_service):
     data = request.get_json()
-    email = data.get("email")
-    user = User.query.filter_by(email=email).first()
-
-    if not email or not user:
-        return jsonify({"status": "IC"}), 200
+    identifier = data.get("identifier")
+    user_service.get_user_by_identifier(identifier)
 
     try:
         serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
-        token = serializer.dumps(email, salt="password-reset-salt")
+        token = serializer.dumps(identifier, salt="password-reset-salt")
     except:
         return jsonify({"status": "IC"}), 200
 
@@ -760,7 +758,7 @@ def reset_password(token, user_service):
     serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
     try:
         # A token 5 percig (300 másodpercig) érvényes
-        email = serializer.loads(token, salt="password-reset-salt", max_age=300)
+        identifier = serializer.loads(token, salt="password-reset-salt", max_age=300)
     except Exception:
         return jsonify({"error": "The link is invalid or has expired."}), 400
 
@@ -770,7 +768,7 @@ def reset_password(token, user_service):
     if not new_password:
         return jsonify({"status": "IC"}), 200
 
-    user = User.query.filter_by(email=email).first()
+    user = user_service.get_user_by_identifier(identifier)
 
     if not user:
         return jsonify({"status": "IC"}), 200
