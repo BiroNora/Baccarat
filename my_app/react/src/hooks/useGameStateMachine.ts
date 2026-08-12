@@ -154,6 +154,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const handleAuth = useCallback(
     async (
       email: string,
+      username: string,
       password: string,
       isLogIn: boolean,
     ): Promise<{ status: string } | void> => {
@@ -169,7 +170,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          setAuth(email, password, isLogIn),
+          setAuth(email, username, password, isLogIn),
         );
 
         const resData = data as { status?: string };

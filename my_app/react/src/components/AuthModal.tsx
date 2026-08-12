@@ -8,6 +8,7 @@ interface AuthModalProps {
   onClose: () => void;
   onAuthSubmit: (
     email: string,
+    username: string,
     password: string,
     isLogin: boolean,
   ) => Promise<{ status: string } | void>;
@@ -20,7 +21,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onHandleForgotPassword,
 }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setUsername] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,10 +68,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
 
     try {
-      const result = await onAuthSubmit(email, password, isLogin);
+      const result = await onAuthSubmit(email, username, password, isLogin);
 
       if (result?.status === "IC") {
         throw new Error("IC");
+      }
+      if (result?.status === "UAE") {
+        throw new Error("UAE");
+      }
+      if (result?.status === "IU") {
+        throw new Error("IU");
       }
 
       onClose();
@@ -78,6 +86,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         err instanceof Error ? err.message : "Authentication failed";
       if (errorMessage === "IC") {
         errorMessage = "Invalid credentials";
+      }
+      if (errorMessage === "UAE") {
+        errorMessage = "Email or Username already exists";
+      }
+      if (errorMessage === "IU") {
+        errorMessage = "Invalid username format";
       }
 
       toast(errorMessage, {
@@ -110,19 +124,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <h2>{isLogin ? "Log In" : "Register"}</h2>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <div className="form-group form-height">
+            <label htmlFor="email">
+              {isLogin ? "Email or User Name" : "Email"}
+            </label>
             <input
               id="email"
-              type="email"
               value={email}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group form-height">
             <label htmlFor="password">Password</label>
 
             <div className="password-input-wrapper">
@@ -148,9 +163,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </small>
           </div>
 
-          <div className="forget-text" onClick={handleForgotPassword}>
-            {isLogin ? "Forgot password?" : " "}
-          </div>
+          {isLogin && (
+            <div
+              className="form-group form-height forgot-text"
+              onClick={handleForgotPassword}
+            >
+              Forgot password?
+            </div>
+          )}
+          {!isLogin && (
+            <div className="form-group form-height">
+              <label htmlFor="username">User Name</label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                placeholder="e.g. player_123"
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                minLength={3}
+                maxLength={30}
+                pattern="^[a-zA-Z0-9_]{3,30}$"
+                title="3-30 characters. Letters, numbers, and underscores only."
+                required
+              />
+              <small id="username-hint" className="helper-text">
+                Letters, numbers, and underscores only.
+              </small>
+            </div>
+          )}
 
           <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? "Please wait..." : isLogin ? "Log In" : "Register"}

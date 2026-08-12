@@ -42,11 +42,13 @@ export async function checkSessionAPI() {
 
 export async function setAuth(
   email: string,
+  username: string,
   password: string,
   isLogIn: boolean,
 ) {
   return await callApiEndpoint("/api/handle_auth", "POST", {
     email: email,
+    username: username,
     password: password,
     is_login: isLogIn,
   });

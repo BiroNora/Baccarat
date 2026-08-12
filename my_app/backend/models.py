@@ -19,6 +19,7 @@ class User(db.Model):
     tokens = db.Column(db.Integer, default=INITIAL_TOKENS)
 
     email = db.Column(db.String(150), unique=True, nullable=True)
+    user_name = db.Column(db.String(150), unique=True, nullable=True)
     password_hash = db.Column(db.String(255), nullable=True)
 
     current_game_state = db.Column(JSONB, nullable=True)
@@ -41,8 +42,9 @@ class User(db.Model):
 
     __table_args__ = (
         CheckConstraint(
-            "(email IS NULL AND password_hash IS NULL) OR (email IS NOT NULL AND password_hash IS NOT NULL)",
-            name="check_username_password_required",
+            "(email IS NULL AND user_name IS NULL AND password_hash IS NULL) OR "
+            "(email IS NOT NULL AND user_name IS NOT NULL AND password_hash IS NOT NULL)",
+            name="check_credentials_required",
         ),
     )
 

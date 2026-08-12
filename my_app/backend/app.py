@@ -261,7 +261,7 @@ def index():
 
 
 # =========================================================================
-# GAME API ENDPOINTS  IC - invalid credentials
+# GAME API ENDPOINTS
 # =========================================================================
 # 0/1
 @app.route("/api/initialize_session", methods=["POST"])
@@ -431,24 +431,25 @@ def check_session(user_service):
 def handle_auth(user_service):
     data = request.get_json()
     email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
     is_login = data.get("is_login")
 
-    current_user_id = session.get("user_id")
-    user = user_service.handle_user_auth(email, password, is_login, current_user_id)
+    current_user_id = None if is_login else session.get("user_id")
 
-    if not user:
+    try:
+        user = user_service.handle_user_auth(email, username, password, is_login, current_user_id)
+    except ValueError as e:
         return (
             jsonify(
                 {
-                    "status": "IC",
+                    "status": str(e),
                 }
             ),
             200,
         )
 
     session["user_id"] = user.id
-
     game = getattr(user, "current_game_state")
 
     return (
@@ -735,14 +736,15 @@ def forgot_password():
         token = serializer.dumps(email, salt="password-reset-salt")
     except:
         return jsonify({"status": "IC"}), 200
-    game = getattr(user, "current_game_state")
 
     return (
         jsonify(
             {
                 "status": "success",
-                "current_tokens": user.tokens,
-                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "current_tokens": INITIAL_TOKENS,
+                "game_state": {
+                    "target_phase": "FORGOT_PASSWORD"
+                },
                 "token": token,
             }
         ),

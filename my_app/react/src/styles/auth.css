@@ -36,9 +36,13 @@
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
+}
+
+.form-height {
+  min-height: 6.5rem;
 }
 
 .form-group label {
@@ -78,15 +82,15 @@
 }
 
 .helper-text {
-  padding-top: 0.5rem;
   font-size: 0.7rem;
+  margin-top: 0.5rem;
+  min-height: 1.5rem;
 }
 
-.forget-text {
-  min-height: 1.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.7rem;
+.forgot-text {
+  font-size: 1rem;
   font-weight: 400;
+  padding-top: 2rem;
 }
 
 .guest-text {
@@ -140,4 +144,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+input#username::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }

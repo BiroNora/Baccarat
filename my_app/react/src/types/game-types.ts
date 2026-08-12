@@ -103,6 +103,7 @@ export type GameStateMachineHookResult = {
   roadmapMap: Record<string, HistoryUnit[]>;
   handleAuth: (
     email: string,
+    username: string,
     password: string,
     isLogIn: boolean,
   ) => Promise<{ status: string } | void>;
