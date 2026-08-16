@@ -21,6 +21,7 @@ import { ForgotPasswordModal } from "./components/ForgotPasswordModal";
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isFirstIn, setIsFirstIn] = useState(false);
 
   const {
     gameState,
@@ -79,9 +80,13 @@ function App() {
       <AnimatePresence>
         {isAuthOpen && (
           <AuthModal
-            onClose={() => setIsAuthOpen(false)}
+            onClose={() => {
+              setIsAuthOpen(false);
+              setIsFirstIn(false);
+            }}
             onAuthSubmit={handleAuth}
             onHandleForgotPassword={handleForgotPassword}
+            isFirstIn={isFirstIn}
           />
         )}
       </AnimatePresence>
@@ -115,7 +120,10 @@ function App() {
                 <div>
                   <PageWrapper>
                     <Loading
-                      onOpenAuth={() => setIsAuthOpen(true)}
+                      onOpenAuth={() => {
+                        setIsFirstIn(true);
+                        setIsAuthOpen(true);
+                      }}
                       onSkipAuth={() => handleSkipAuth()}
                       isAuthOpen={isAuthOpen}
                       isWFSR={isWFSR}

@@ -157,15 +157,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       username: string,
       password: string,
       isLogIn: boolean,
+      isFirstIn: boolean = false,
     ): Promise<{ status: string } | void> => {
       if (!password || password.length < 6) {
         throw new Error("Password must be at least 6 characters long");
       }
       let resultStatus = "success";
-      
+
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          setAuth(email, username, password, isLogIn),
+          setAuth(email, username, password, isLogIn, isFirstIn),
         );
 
         const resData = data as { status?: string };
@@ -191,7 +192,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState]);
 
   const handleForgotPassword = useCallback(
-    async (identifier: string): Promise<{ status: string } | void> => {
+    async (identifier: string, isFirstIn: boolean = false,): Promise<{ status: string } | void> => {
       if (!identifier || identifier.trim() === "") {
         toast("Missing email address", {
           id: "forgot-pass-error",
@@ -204,7 +205,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          handleForgotPasswordAPI(identifier),
+          handleForgotPasswordAPI(identifier, isFirstIn),
         );
 
         const resData = data as { status?: string; token?: string };

@@ -428,12 +428,15 @@ def check_session(user_service):
 @app.route("/api/handle_auth", methods=["POST"])
 @api_error_handler
 @with_user_service
-def handle_auth(user_service):
+@with_game_service
+def handle_auth(user_service, service):
     data = request.get_json()
     email = data.get("email")
     username = data.get("username")
     password = data.get("password")
     is_login = data.get("is_login")
+    is_first_in = data.get("is_first_in")
+    print("439 is_first_in", is_first_in)
 
     current_user_id = None if is_login else session.get("user_id")
 
@@ -450,6 +453,19 @@ def handle_auth(user_service):
         )
 
     session["user_id"] = user.id
+
+    if is_first_in:
+        service.reset_game_data(user)
+        game = getattr(user, "current_game_state", None)
+        if game:
+            if isinstance(game, dict):
+                game = Game.deserialize(game)
+            game.clear_up()
+            game.deck = [None] * TOTAL_INITIAL_CARDS
+            user.current_game_state = game.serialize()
+
+        service.db.commit()
+
     game = getattr(user, "current_game_state")
 
     return (
@@ -724,10 +740,27 @@ def force_restart_by_client_id(user):
 @limiter.limit("5 per minute")
 @api_error_handler
 @with_user_service
-def forgot_password(user_service):
+@with_game_service
+def forgot_password(user_service, service):
     data = request.get_json()
     identifier = data.get("identifier")
-    user_service.get_user_by_identifier(identifier)
+    is_first_in = data.get("is_first_in")
+    print("746 is_first_in forgot_password", is_first_in)
+
+    user = user_service.get_user_by_identifier(identifier)
+
+    if is_first_in:
+        service.reset_game_data(user)
+        game = getattr(user, "current_game_state", None)
+        if game:
+            if isinstance(game, dict):
+                game = Game.deserialize(game)
+            game.clear_up()
+            game.deck = [None] * TOTAL_INITIAL_CARDS
+
+            user.current_game_state = game.serialize()
+
+        service.db.commit()
 
     try:
         serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
