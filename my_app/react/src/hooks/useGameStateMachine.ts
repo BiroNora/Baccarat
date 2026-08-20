@@ -460,6 +460,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           sessionData &&
           sessionData.status === "success"
         ) {
+          if (sessionData.history && typeof setStableHistory === "function") {
+            setStableHistory(sessionData.history);
+          }
+
           transitionToState(response.target_phase as GameState, response);
         } else {
           isProcessingRef.current = false;

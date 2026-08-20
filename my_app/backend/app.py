@@ -417,6 +417,7 @@ def check_session(user_service):
             {
                 "status": "success",
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "history": user.history,
                 "current_tokens": user.tokens,
             }
         ),
@@ -473,6 +474,7 @@ def handle_auth(user_service, service):
             {
                 "status": "success",
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "history": user.history,
                 "current_tokens": user.tokens,
             }
         ),
@@ -774,7 +776,8 @@ def forgot_password(user_service, service):
                 "status": "success",
                 "current_tokens": INITIAL_TOKENS,
                 "game_state": {
-                    "target_phase": "FORGOT_PASSWORD"
+                    "target_phase": "FORGOT_PASSWORD",
+                    "deck_len": game.get_deck_len(),
                 },
                 "token": token,
             }
