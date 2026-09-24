@@ -4,11 +4,23 @@ import "../styles/cards.css";
 interface CardsProps {
   gameState: GameStateData;
   initDeckLen: number | null;
-  onOpenAuth: () => void;
+  isGuest?: boolean;
+  username?: string;
+  onOpenAuth?: () => void;
+  onOpenProfile?: () => void;
 }
 
-const Cards: React.FC<CardsProps> = ({ gameState, onOpenAuth }) => {
+const Cards: React.FC<CardsProps> = ({
+  gameState,
+  isGuest,
+  username,
+  onOpenAuth,
+  onOpenProfile,
+}) => {
   const { deck_len } = gameState;
+  const truncateUsername = (name: string, maxLen = 12) => {
+    return name.length > maxLen ? name.substring(0, maxLen) + "..." : name;
+  };
 
   return (
     <div className="cards merriweather">
@@ -18,16 +30,29 @@ const Cards: React.FC<CardsProps> = ({ gameState, onOpenAuth }) => {
       </div>
 
       <div className="cards-right">
-        <a
-          href="#auth"
-          className="login-link"
-          onClick={(e) => {
-            e.preventDefault();
-            onOpenAuth();
-          }}
-        >
-          Log in / Sign up
-        </a>
+        {isGuest ? (
+          <a
+            href="#auth"
+            className="login-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onOpenAuth?.();
+            }}
+          >
+            Log in / Sign up
+          </a>
+        ) : (
+          <a
+            href="#profile"
+            className="login-link"
+            onClick={(e) => {
+              e.preventDefault();
+              onOpenProfile?.();
+            }}
+          >
+            {truncateUsername(username || "")}'s profile
+          </a>
+        )}
       </div>
     </div>
   );

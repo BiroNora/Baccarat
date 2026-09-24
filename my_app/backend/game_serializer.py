@@ -21,7 +21,7 @@ class GameSerializer:
         if "handle_auth" in p:
             return GameSerializer.serialize_handle_auth(game)
 
-        if any(x in p for x in ["check_session", "bet", "retake_bet", "restart"]):
+        if any(x in p for x in ["check_session", "bet", "retake_bet", "restart", "handle_conflict"]):
             return GameSerializer.serialize_for_client_bets(game)
 
         return GameSerializer.serialize_for_client_init(game)
@@ -46,11 +46,11 @@ class GameSerializer:
         is_betting = game.bets.get("TOTAL", 0) == 0
 
         calc_phase = PhaseState.BETTING if is_betting else PhaseState.SHUFFLING
-
+        print("49: ", game.get_target_phase().value,)
         return {
             "bets": game.bets,
             "deck_len": TOTAL_INITIAL_CARDS,
-            "target_phase": PhaseState.BETTING.value,
+            "target_phase": game.get_target_phase().value,
             "pre_phase": calc_phase.value,
         }
 

@@ -9,6 +9,8 @@ import {
 import {
   initializeSessionAPI,
   setAuth,
+  updateUsername,
+  handleConflictAPI,
   checkSessionAPI,
   handleForgotPasswordAPI,
   setForgotPasswordSubmit,
@@ -157,7 +159,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       username: string,
       password: string,
       isLogIn: boolean,
-      isFirstIn: boolean = false,
     ): Promise<{ status: string } | void> => {
       if (!password || password.length < 6) {
         throw new Error("Password must be at least 6 characters long");
@@ -166,20 +167,82 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          setAuth(email, username, password, isLogIn, isFirstIn),
+          setAuth(email, username, password, isLogIn),
         );
 
-        const resData = data as { status?: string };
-        if (resData && resData.status === "IC") {
+        const resData = data as {
+          status?: string;
+          is_guest?: boolean;
+          username?: string;
+        };
+        console.log("status: ", resData.status)
+        if (
+          resData &&
+          (resData.status === "IC" ||
+            resData.status === "UAE" ||
+            resData.status === "IU")
+        ) {
           resultStatus = resData.status;
+          return;
+        }
+
+        if (resData && resData.status === "CONFLICT") {
+          resultStatus = "CONFLICT";
+
+          const response = extractGameStateData(data);
+          console.log("response.target: ", response?.target_phase)
+          if (response) {
+            transitionToState(response?.target_phase as GameState, response);
+          }
           return;
         }
 
         const response = extractGameStateData(data);
         if (!response) return;
+
+        if (resData && typeof resData.is_guest === "boolean") {
+          dispatch({ type: "SET_IS_GUEST", payload: resData.is_guest });
+        }
+        if (response.username) {
+          dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
         transitionToState(response?.target_phase as GameState, response);
       });
 
+      return { status: resultStatus };
+    },
+    [executeAsyncAction, handleApiAction, transitionToState],
+  );
+
+  const handleUpdateUsername = useCallback(
+    async (username: string): Promise<{ status: string } | void> => {
+      if (!username || username.length < 3 || username.length > 25) {
+        throw new Error("Username incorrect long");
+      }
+      let resultStatus = "success";
+
+      await executeAsyncAction(async () => {
+        const data = await handleApiAction(() => updateUsername(username));
+
+        const resData = data as {
+          status?: string;
+          username?: string;
+        };
+        if (resData && resData.status === "IC") {
+          resultStatus = resData.status;
+          return;
+        }
+
+        const response = extractGameStateData(resData);
+        if (!response) return;
+
+        if (response.username) {
+          dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
+        transitionToState(response?.target_phase as GameState, response);
+      });
       return { status: resultStatus };
     },
     [executeAsyncAction, handleApiAction, transitionToState],
@@ -191,8 +254,36 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState("BETTING" as GameState, { target_phase: "BETTING" });
   }, [transitionToState]);
 
+  const handleConflict = useCallback(
+    async (version_new: boolean): Promise<{ status: string } | void> => {
+      let resultStatus = "success";
+
+      await executeAsyncAction(async () => {
+        const data = await handleApiAction(() =>
+          handleConflictAPI(version_new),
+        );
+
+        const resData = data as { status?: string; is_guest?: boolean };
+        if (resData && resData.status === "IC") {
+          resultStatus = resData.status;
+          return;
+        }
+
+        if (resData && typeof resData.is_guest === "boolean") {
+          dispatch({ type: "SET_IS_GUEST", payload: resData.is_guest });
+        }
+        const response = extractGameStateData(data);
+        if (!response) return;
+        transitionToState(response?.target_phase as GameState, response);
+      });
+
+      return { status: resultStatus };
+    },
+    [executeAsyncAction, handleApiAction, transitionToState],
+  );
+
   const handleForgotPassword = useCallback(
-    async (identifier: string, isFirstIn: boolean = false,): Promise<{ status: string } | void> => {
+    async (identifier: string): Promise<{ status: string } | void> => {
       if (!identifier || identifier.trim() === "") {
         toast("Missing email address", {
           id: "forgot-pass-error",
@@ -205,7 +296,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       await executeAsyncAction(async () => {
         const data = await handleApiAction(() =>
-          handleForgotPasswordAPI(identifier, isFirstIn),
+          handleForgotPasswordAPI(identifier),
         );
 
         const resData = data as { status?: string; token?: string };
@@ -333,6 +424,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         const response = extractGameStateData(data);
         if (!response) return;
+
+        if (response.username) {
+          dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
         transitionToState(response?.target_phase as GameState, response);
       });
     },
@@ -367,6 +463,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         const response = extractGameStateData(data);
         if (!response) return;
+
+        if (response.username) {
+          dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
         transitionToState(response?.target_phase as GameState, response);
       });
     },
@@ -453,6 +554,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           checkSessionAPI(),
         )) as ApiResponse;
         const response = extractGameStateData(sessionData);
+
+        const resData = sessionData as {
+          is_guest?: boolean;
+          username?: string;
+        };
+        if (resData && typeof resData.is_guest === "boolean") {
+          dispatch({ type: "SET_IS_GUEST", payload: resData.is_guest });
+        }
+        if (resData.username) {
+          dispatch({ type: "SET_USERNAME", payload: resData.username });
+        }
 
         if (
           isMountedRef.current &&
@@ -820,9 +932,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   return {
     gameState: state.gameState,
     currentGameState: state.gameState.currentGameState,
+    isGuest: state.isGuest,
     roadmapMap,
     transitionToState,
     handleAuth,
+    handleUpdateUsername,
+    handleConflict,
     handleCloseNewPassCase,
     handleForgotPassword,
     handleForgotPasswordSubmit,

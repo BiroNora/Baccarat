@@ -11,7 +11,8 @@ export type GameState =
   | "RESTART_GAME"
   | "ERROR"
   | "RELOADING"
-  | "FORGOT_PASSWORD";
+  | "FORGOT_PASSWORD"
+  | "CONFLICT";
 
 export interface GameStateData {
   currentGameState: GameState;
@@ -29,6 +30,8 @@ export interface GameStateData {
   first_card: [string, number] | null;
   round_result: RoundResultUnit;
   history?: HistoryUnit[];
+  conflict_data?: ConflictDetails;
+  username?: string;
 }
 
 export interface PlayerData {
@@ -47,9 +50,22 @@ export interface ApiResponse {
   status: string;
   message?: string;
   current_tokens: number;
+  is_guest: boolean;
   game_state: GameStateData; // Csak a játék adatai
   history?: HistoryUnit[]; // Teljesen külön, opcionális egység!
   game_state_hint: string;
+  conflict_data?: ConflictDetails;
+  username?: string;
+}
+
+export interface ConflictDetails {
+  existing_user: {
+    balance: number;
+    updated_at?: string;
+  };
+  current_session: {
+    balance: number;
+  };
 }
 
 export interface HistoryUnit {
@@ -106,12 +122,14 @@ export type GameStateMachineHookResult = {
     username: string,
     password: string,
     isLogIn: boolean,
-    isFirstIn: boolean,
   ) => Promise<{ status: string } | void>;
+  handleUpdateUsername: (
+    username: string,
+  ) => Promise<{ status: string } | void>;
+  handleConflict: (version_new: boolean) => Promise<{ status: string } | void>;
   handleCloseNewPassCase: () => void;
   handleForgotPassword: (
     identifier: string,
-    isFirstIn: boolean,
   ) => Promise<{ status: string } | void>;
   handleForgotPasswordSubmit: (
     token: string,
@@ -132,6 +150,7 @@ export type GameStateMachineHookResult = {
   handleStartGame: () => Promise<void>;
   initDeckLen: number | null;
   isWFSR: boolean;
+  isGuest: boolean;
 };
 
 export const states = [

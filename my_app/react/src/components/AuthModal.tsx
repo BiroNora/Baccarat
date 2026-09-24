@@ -11,17 +11,14 @@ interface AuthModalProps {
     username: string,
     password: string,
     isLogin: boolean,
-    isFirstIn: boolean,
   ) => Promise<{ status: string } | void>;
-  onHandleForgotPassword: (email: string, isFirstIn: boolean) => Promise<{ status: string } | void>;
-  isFirstIn: boolean;
+  onHandleForgotPassword: (email: string) => Promise<{ status: string } | void>;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onAuthSubmit,
   onHandleForgotPassword,
-  isFirstIn,
 }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
@@ -29,7 +26,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  console.log("AUTHMODAL islodaingFirst: ", isFirstIn)
   const handleForgotPassword = async () => {
     if (!email || email.trim() === "") {
       toast("Missing email address", {
@@ -42,7 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
 
     try {
-      const res = await onHandleForgotPassword(email, isFirstIn);
+      const res = await onHandleForgotPassword(email);
       if (res?.status === "IC") {
         throw new Error("IC");
       }
@@ -59,7 +55,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       toast(errorMessage, {
         id: "forgot-pass-error",
-        duration: 3000,
+        duration: 2000,
       });
     } finally {
       setLoading(false);
@@ -74,7 +70,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const usernameArg = isLogin ? email : username;
 
     try {
-      const result = await onAuthSubmit(emailArg, usernameArg, password, isLogin, isFirstIn);
+      const result = await onAuthSubmit(
+        emailArg,
+        usernameArg,
+        password,
+        isLogin,
+      );
 
       if (result?.status === "IC") {
         throw new Error("IC");
@@ -102,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       toast(errorMessage, {
         id: "auth-error-toast",
-        duration: 3000,
+        duration: 2000,
       });
     } finally {
       setLoading(false);

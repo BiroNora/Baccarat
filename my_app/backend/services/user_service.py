@@ -5,8 +5,10 @@ from sqlalchemy import or_
 from my_app.backend.app import User
 from my_app.backend.game import Game
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm.attributes import flag_modified
 
 from datetime import datetime, timedelta, timezone
+
 
 class UserService:
     def __init__(self, db_session):
@@ -20,19 +22,42 @@ class UserService:
         """
         if is_login:
             # --- BEJELENTKEZÉS ---
-            user = (
+            target_user = (
                 self.db.query(User)
                 .filter(or_(User.email == email, User.user_name == username))
                 .first()
             )
 
-            if not user or not check_password_hash(user.password_hash, password):
+            if not target_user or not check_password_hash(
+                target_user.password_hash, password
+            ):
                 raise ValueError("IC")  # Invalid Credentials
 
-            user.is_guest = False
+            # Megvizsgáljuk, hogy van-e aktív vendég session (current_user_id),
+            # és az eltér-e a célfióktól
+            if current_user_id and current_user_id != target_user.id:
+                session_user = self.db.query(User).get(current_user_id)
+
+                if session_user and session_user.is_guest:
+                    db_raw = target_user.current_game_state
+                    session_raw = session_user.current_game_state
+
+                    has_db_game = db_raw is not None and db_raw != {}
+                    has_session_game = session_raw is not None and session_raw != {}
+
+                    if has_db_game and has_session_game:
+                        raise ValueError("CONFLICT")
+
+                    # Ha a session-ben van játék, de a célfiókban NINCS,
+                    # akkor simán átköltöztethetjük a session játékát a célfiókba, vagy összevonhatjuk
+                    elif has_session_game and not has_db_game:
+                        target_user.current_game_state = session_raw
+                        flag_modified(target_user, "current_game_state")
+
+            target_user.is_guest = False
             self.db.commit()
 
-            return user
+            return target_user
 
         else:
             # --- REGISZTRÁCIÓ ---
@@ -59,18 +84,15 @@ class UserService:
                 user.password_hash = generate_password_hash(password)
                 user.is_guest = False
             else:
+                initial_game = Game()
                 user = User(
                     email=email,
                     user_name=username,
                     password_hash=generate_password_hash(password),
                     is_guest=False,
+                    current_game_state=initial_game.serialize(),
                 )
-
-                initial_game = Game()
-                user.current_game_state = initial_game
-
                 self.db.add(user)
-                self.db.add(initial_game)
 
             self.db.commit()
 
@@ -98,8 +120,6 @@ class UserService:
 
         identifier = identifier.strip()
 
-        print("101 identi: ", identifier)
-
         if "@" in identifier:
             user = self.db.query(User).filter_by(email=identifier).first()
         else:
@@ -126,3 +146,56 @@ class UserService:
 
         self.db.commit()
         return deleted_count
+
+    def handle_conflict(self, current_user_id, target_user_id, version_new):
+        """
+        Kezeli a konfliktust a sessionben tárolt azonosítók alapján.
+        :param version_new: True -> Az új (vendég session) játéka nyer, felülírja a célszámlát.
+                            False -> A régi (célszámla) játéka marad, a vendég törlődik.
+        """
+        # régi mentett
+        target_user = self.db.query(User).get(target_user_id)
+
+        # jelenlegi
+        session_user = (
+            self.db.query(User).get(current_user_id) if current_user_id else None
+        )
+
+        if not target_user:
+            raise ValueError("IC")
+
+        if session_user and session_user.is_guest:
+            if version_new:
+                # 1. eset: Az új (vendég sessionben lévő) állapot nyer
+                if session_user.current_game_state:
+                    target_user.current_game_state = session_user.current_game_state
+                    if hasattr(session_user, "tokens"):
+                        target_user.tokens = session_user.tokens
+                    flag_modified(target_user, "current_game_state")
+            else:
+                pass
+
+        # Bármelyiket is választotta, a felesleges ideiglenes vendég fiókot mindkét esetben töröljük!
+        self.db.delete(session_user)
+
+        target_user.is_guest = False
+        self.db.commit()
+
+        return target_user
+
+    def update_username(self, user, new_username):
+        if (
+            not new_username
+            or not re.match(r"^[a-zA-Z0-9_]{3,25}$", new_username)
+            or not user
+        ):
+            return None
+
+        existing = self.db.query(User).filter(User.user_name == new_username).first()
+        if existing and existing.id != user.id:
+            return None
+
+        user.user_name = new_username
+        self.db.commit()
+
+        return user

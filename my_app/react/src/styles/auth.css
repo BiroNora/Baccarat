@@ -21,6 +21,7 @@
   max-width: 28rem;
   color: #f4ecd3;
   position: relative;
+  width: 100vw;
 }
 
 .close-btn {

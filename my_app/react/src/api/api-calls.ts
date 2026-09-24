@@ -45,21 +45,30 @@ export async function setAuth(
   username: string,
   password: string,
   isLogIn: boolean,
-  isFirstIn: boolean,
 ) {
   return await callApiEndpoint("/api/handle_auth", "POST", {
     email: email,
     username: username,
     password: password,
     is_login: isLogIn,
-    is_first_in: isFirstIn,
   });
 }
 
-export async function handleForgotPasswordAPI(identifier: string, isFirstIn: boolean,) {
+export async function updateUsername(username: string) {
+  return await callApiEndpoint(`/api/update_username`, "POST", {
+    username: username,
+  });
+}
+
+export async function handleConflictAPI(version_new: boolean) {
+  return await callApiEndpoint(`/api/handle_conflict`, "POST", {
+    version_new: version_new,
+  });
+}
+
+export async function handleForgotPasswordAPI(identifier: string) {
   return await callApiEndpoint(`/api/forgot_password`, "POST", {
     identifier: identifier,
-    is_first_in: isFirstIn,
   });
 }
 

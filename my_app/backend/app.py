@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 import os
 import traceback
 import uuid
@@ -14,6 +15,7 @@ from my_app.backend.models import db, User
 from my_app.backend.services.game_service import GameService
 from my_app.backend.services.user_service import UserService
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.attributes import flag_modified
 
 from my_app.backend.game import TOTAL_INITIAL_CARDS, Game
 from my_app.backend.game_serializer import GameSerializer
@@ -419,6 +421,8 @@ def check_session(user_service):
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "history": user.history,
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
+                "username": user.user_name,
             }
         ),
         200,
@@ -436,38 +440,117 @@ def handle_auth(user_service, service):
     username = data.get("username")
     password = data.get("password")
     is_login = data.get("is_login")
-    is_first_in = data.get("is_first_in")
-    print("439 is_first_in", is_first_in)
 
-    current_user_id = None if is_login else session.get("user_id")
+    current_user_id = session.get("user_id")
+
+    guest_user = (
+        user_service.db.query(User).get(current_user_id) if current_user_id else None
+    )
 
     try:
-        user = user_service.handle_user_auth(email, username, password, is_login, current_user_id)
-    except ValueError as e:
-        return (
-            jsonify(
-                {
-                    "status": str(e),
-                }
-            ),
-            200,
+        user = user_service.handle_user_auth(
+            email, username, password, is_login, current_user_id
         )
+    except ValueError as e:
+        error_code = str(e)
+        print("456 error_code: ", error_code)
+        if error_code == "CONFLICT":
+            target_user = (
+                user_service.db.query(User)
+                .filter(or_(User.email == email, User.user_name == username))
+                .first()
+            )
+
+            # --- Mentett adatok (tokenek + tétek) ---
+            target_tokens = 0
+            if target_user:  # régi adat
+                session["pending_target_user_id"] = target_user.id
+                t_base = target_user.tokens or 0
+                t_bets = 0
+                if target_user.current_game_state:
+                    raw_t_game = target_user.current_game_state
+                    t_game = (
+                        Game.deserialize(raw_t_game)
+                        if isinstance(raw_t_game, (dict, str))
+                        else raw_t_game
+                    )
+                    if hasattr(t_game, "bets") and t_game.bets:
+                        t_bets = (
+                            t_game.bets.get("TOTAL", 0)
+                            if isinstance(t_game.bets, dict)
+                            else getattr(t_game.bets, "TOTAL", 0)
+                        )
+                target_tokens = t_base + t_bets
+
+            # --- Vendég felhasználó teljes tokenjeinek számítása (tokenek + tétek) ---
+            serialized_game = None
+            guest_tokens = 0
+            if guest_user:
+                g_base = guest_user.tokens or 0
+                g_bets = 0
+                if guest_user.current_game_state:
+                    raw_game = guest_user.current_game_state
+                    game = (
+                        Game.deserialize(raw_game)
+                        if isinstance(raw_game, (dict, str))
+                        else raw_game
+                    )
+
+                    if hasattr(game, "bets") and game.bets:
+                        g_bets = (
+                            game.bets.get("TOTAL", 0)
+                            if isinstance(game.bets, dict)
+                            else getattr(game.bets, "TOTAL", 0)
+                        )
+
+                guest_tokens = g_base + g_bets
+                # Fázisok beállítása a konfliktushoz és a későbbi visszatéréshez
+                game.target_phase = PhaseState.CONFLICT
+
+                guest_user.current_game_state = game.serialize()
+                user_service.db.commit()
+
+                serialized_game = GameSerializer.serialize_by_context(
+                    game, request.path
+                )
+
+            return (
+                jsonify(
+                    {
+                        "status": error_code,
+                        "game_state": serialized_game,
+                        "conflict_data": {
+                            "existing_user": {
+                                "balance": target_tokens,
+                            },
+                            "current_session": {
+                                "balance": guest_tokens,
+                            },
+                        },
+                    }
+                ),
+                200,
+            )
+
+        return jsonify({"status": error_code}), 200
 
     session["user_id"] = user.id
 
-    if is_first_in:
-        service.reset_game_data(user)
-        game = getattr(user, "current_game_state", None)
-        if game:
-            if isinstance(game, dict):
-                game = Game.deserialize(game)
-            game.clear_up()
-            game.deck = [None] * TOTAL_INITIAL_CARDS
-            user.current_game_state = game.serialize()
+    raw_game = getattr(user, "current_game_state", None)
+    if raw_game:
+        game = (
+            Game.deserialize(raw_game)
+            if isinstance(raw_game, (dict, str))
+            else raw_game
+        )
+    else:
+        # Biztonsági fallback, ha valamiért üres lenne
+        game = Game()
+        user.current_game_state = game.serialize()
 
-        service.db.commit()
-
-    game = getattr(user, "current_game_state")
+    game.target_phase = PhaseState.BETTING
+    user.current_game_state = game.serialize()
+    user_service.db.commit()
 
     return (
         jsonify(
@@ -476,6 +559,8 @@ def handle_auth(user_service, service):
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "history": user.history,
                 "current_tokens": user.tokens,
+                "is_guest": guest_user.is_guest if guest_user else True,
+                "username": user.user_name,
             }
         ),
         200,
@@ -540,6 +625,8 @@ def bet(user, game):
             {
                 "status": "success",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest if user else True,
+                "username": user.user_name,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "history": user.history,
                 "game_state_hint": hint,
@@ -579,6 +666,8 @@ def retake_bet(user, game):
             {
                 "status": "success",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest if user else True,
+                "username": user.user_name,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "history": user.history,
                 "game_state_hint": hint,
@@ -604,6 +693,7 @@ def create_deck(user, game):
             {
                 "status": "success",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "game_state_hint": "DECK_CREATED",
             }
@@ -678,6 +768,7 @@ def start_game(user, game, service):
                 "status": "success",
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
                 "game_state": game_data,
                 "history": user.history,
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
@@ -702,6 +793,7 @@ def set_restart(user, game):
             {
                 "status": "success",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "game_state_hint": "HIT_RESTART",
             }
@@ -728,6 +820,7 @@ def force_restart_by_client_id(user):
             {
                 "status": "success",
                 "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
                 "game_state": GameSerializer.serialize_by_context(game, request.path),
                 "history": user.history,
                 "game_state_hint": "FORCE_RESTART_SUCCESSFUL",
@@ -746,35 +839,36 @@ def force_restart_by_client_id(user):
 def forgot_password(user_service, service):
     data = request.get_json()
     identifier = data.get("identifier")
-    is_first_in = data.get("is_first_in")
-    print("746 is_first_in forgot_password", is_first_in)
 
     user = user_service.get_user_by_identifier(identifier)
 
-    if is_first_in:
-        service.reset_game_data(user)
-        game = getattr(user, "current_game_state", None)
-        if game:
-            if isinstance(game, dict):
-                game = Game.deserialize(game)
-            game.clear_up()
-            game.deck = [None] * TOTAL_INITIAL_CARDS
+    raw_game = getattr(user, "current_game_state", None)
 
-            user.current_game_state = game.serialize()
+    has_game_state = raw_game is not None and raw_game != {}
+    if isinstance(raw_game, dict):
+        game = Game.deserialize(raw_game)
+    else:
+        game = Game()
 
-        service.db.commit()
+    if not has_game_state:
+        game.clear_up()
+        game.deck = [None] * TOTAL_INITIAL_CARDS
+        user.current_game_state = game.serialize()
+        flag_modified(user, "current_game_state")
+
+    db.session.commit()
 
     try:
         serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
         token = serializer.dumps(identifier, salt="password-reset-salt")
     except:
         return jsonify({"status": "IC"}), 200
-
     return (
         jsonify(
             {
                 "status": "success",
                 "current_tokens": INITIAL_TOKENS,
+                "is_guest": user.is_guest,
                 "game_state": {
                     "target_phase": "FORGOT_PASSWORD",
                     "deck_len": game.get_deck_len(),
@@ -814,7 +908,57 @@ def reset_password(token, user_service):
     return jsonify({"status": "success"}), 200
 
 
-# dedicated cron
+# 10
+@app.route("/api/handle_conflict", methods=["POST"])
+@api_error_handler
+@with_user_service
+def handle_conflict(user_service):
+    data = request.get_json()
+    version_new = data.get("version_new")
+
+    current_user_id = session.get("user_id")
+    target_user_id = session.pop("pending_target_user_id", None)  # régi adat
+
+    if not target_user_id:
+        return jsonify({"status": "EXPIRED"}), 200
+
+    try:
+        user = user_service.handle_conflict(
+            current_user_id, target_user_id, version_new
+        )
+    except ValueError as e:
+        return jsonify({"status": str(e)}), 200
+
+    # Frissítjük a sessiont a végleges célfiók ID-jára
+    session["user_id"] = user.id
+
+    raw_game = getattr(user, "current_game_state", None)
+    if raw_game:
+        game = (
+            Game.deserialize(raw_game)
+            if isinstance(raw_game, (dict, str))
+            else raw_game
+        )
+    else:
+        game = Game()
+        user.current_game_state = game.serialize()
+        user_service.db.commit()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
+                "username": user.user_name,
+            }
+        ),
+        200,
+    )
+
+
+# 11 dedicated cron
 @app.route("/api/cron/cleanup-guests", methods=["GET"])
 @with_user_service
 def cron_cleanup_guests(user_service):
@@ -827,9 +971,60 @@ def cron_cleanup_guests(user_service):
 
     try:
         deleted_count = user_service.delete_old_guests()
-        return jsonify({
-            "status": "success",
-            "message": f"Successfully deleted {deleted_count} old guest accounts."
-        }), 200
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "message": f"Successfully deleted {deleted_count} old guest accounts.",
+                }
+            ),
+            200,
+        )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# 12
+@app.route("/api/update_username", methods=["POST"])
+@api_error_handler
+@with_user_service
+def update_username(user_service):
+    data = request.get_json()
+    new_username = data.get("username")
+    current_user_id = session.get("user_id")
+
+    if not current_user_id:
+        return jsonify({"status": "IC"}), 200
+
+    user = user_service.db.query(User).get(current_user_id)
+    if not user:
+        return jsonify({"status": "IC"}), 200
+
+    updated_user = user_service.update_username(user, new_username)
+    if not updated_user:
+        return jsonify({"status": "IC"}), 200
+
+    raw_game = getattr(user, "current_game_state", None)
+    if raw_game:
+        game = (
+            Game.deserialize(raw_game)
+            if isinstance(raw_game, (dict, str))
+            else raw_game
+        )
+    else:
+        game = Game()
+        user.current_game_state = game.serialize()
+        user_service.db.commit()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "game_state": GameSerializer.serialize_by_context(game, request.path),
+                "current_tokens": user.tokens,
+                "is_guest": user.is_guest,
+                "username": user.user_name,
+            }
+        ),
+        200,
+    )

@@ -18,15 +18,19 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import toast, { Toaster } from "react-hot-toast";
 import { ForgotPasswordModal } from "./components/ForgotPasswordModal";
+import { ProfileModal } from "./components/ProfileModal";
+import { defaultToastOptions } from "./utilities/toast-config";
+import { ConflictModal } from "./components/ConflictModal";
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isFirstIn, setIsFirstIn] = useState(false);
-
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const {
     gameState,
     roadmapMap,
     handleAuth,
+    handleUpdateUsername,
+    handleConflict,
     handleCloseNewPassCase,
     handleForgotPassword,
     handleForgotPasswordSubmit,
@@ -38,6 +42,7 @@ function App() {
     handleStartGame,
     initDeckLen,
     isWFSR,
+    isGuest,
   } = useGameStateMachine();
 
   function PageWrapper({ children }: React.PropsWithChildren<object>) {
@@ -82,11 +87,18 @@ function App() {
           <AuthModal
             onClose={() => {
               setIsAuthOpen(false);
-              setIsFirstIn(false);
             }}
             onAuthSubmit={handleAuth}
             onHandleForgotPassword={handleForgotPassword}
-            isFirstIn={isFirstIn}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isProfileOpen && (
+          <ProfileModal
+            onClose={() => setIsProfileOpen(false)}
+            username={gameState.username || ""}
+            handleSave={handleUpdateUsername}
           />
         )}
       </AnimatePresence>
@@ -95,20 +107,7 @@ function App() {
         containerStyle={{
           top: "40%",
         }}
-        toastOptions={{
-          duration: 2000,
-          style: {
-            background:
-              "radial-gradient(circle, #f91e43 0%, #e01f3f 40%, #a31e34 100%)",
-            color: "#fef3c7",
-            borderRadius: "10px",
-            border: "1px solid #ca8a04",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-            padding: "0.5rem",
-            fontStyle: "italic",
-            minWidth: "250px",
-          },
-        }}
+        toastOptions={defaultToastOptions}
       />
       <AnimatePresence mode="wait">
         {(() => {
@@ -120,10 +119,7 @@ function App() {
                 <div>
                   <PageWrapper>
                     <Loading
-                      onOpenAuth={() => {
-                        setIsFirstIn(true);
-                        setIsAuthOpen(true);
-                      }}
+                      onOpenAuth={() => setIsAuthOpen(true)}
                       onSkipAuth={() => handleSkipAuth()}
                       isAuthOpen={isAuthOpen}
                       isWFSR={isWFSR}
@@ -186,7 +182,10 @@ function App() {
                       <Cards
                         gameState={gameState}
                         initDeckLen={initDeckLen}
+                        isGuest={isGuest}
+                        username={gameState.username || ""}
                         onOpenAuth={() => setIsAuthOpen(true)}
+                        onOpenProfile={() => setIsProfileOpen(true)}
                       />
                     </div>
 
@@ -218,6 +217,17 @@ function App() {
                     <ForgotPasswordModal
                       onCloseForm={handleCloseNewPassCase}
                       onResetSubmit={handlePasswordResetAndOpenLogin}
+                    />
+                  </PageWrapper>
+                </div>
+              );
+            case "CONFLICT":
+              return (
+                <div>
+                  <PageWrapper>
+                    <ConflictModal
+                      onResolve={handleConflict}
+                      conflictData={gameState.conflict_data}
                     />
                   </PageWrapper>
                 </div>

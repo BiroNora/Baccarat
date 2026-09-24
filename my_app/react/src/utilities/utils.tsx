@@ -1,5 +1,5 @@
 import type {
-  ApiResponse,
+  ConflictDetails,
   GameStateData,
   HistoryUnit,
 } from "../types/game-types";
@@ -11,15 +11,15 @@ import {
 } from "../components/CardIcons";
 import { useEffect, useState, type JSX } from "react";
 
-export function extractGameStateData(
-  apiResponse: unknown,
-): Partial<GameStateData> | undefined {
+export function extractGameStateData(apiResponse: unknown):
+  | (Partial<GameStateData> & {
+      conflict_data?: ConflictDetails;
+      username?: string;
+    })
+  | undefined {
   if (
     typeof apiResponse !== "object" ||
     apiResponse === null ||
-    !("current_tokens" in apiResponse) ||
-    typeof (apiResponse as { current_tokens: unknown }).current_tokens !==
-      "number" ||
     !("game_state" in apiResponse) ||
     typeof (apiResponse as { game_state: unknown }).game_state !== "object" ||
     (apiResponse as { game_state: unknown }).game_state === null
@@ -28,16 +28,22 @@ export function extractGameStateData(
   }
 
   //const token: number = apiResponse.current_tokens as number;
-  const typedResponse = apiResponse as ApiResponse;
-  const rawGameState = (apiResponse as { game_state: GameStateData })
-    .game_state;
+  const res = apiResponse as {
+    current_tokens?: number;
+    game_state: Partial<GameStateData>;
+    conflict_data?: ConflictDetails;
+    username?: string;
+  };
 
-  const historyData: HistoryUnit[] = typedResponse.history || [];
+  const rawGameState = res.game_state as Partial<GameStateData>;
+
+  const historyData: HistoryUnit[] = res.game_state.history || [];
 
   try {
     const processedData: Partial<GameStateData> = {
       ...rawGameState,
-      tokens: typedResponse.current_tokens,
+      tokens:
+        res.current_tokens ?? res.conflict_data?.current_session?.balance ?? 0,
       history: historyData,
       bets: rawGameState.bets
         ? { ...rawGameState.bets }
@@ -51,6 +57,8 @@ export function extractGameStateData(
             B_PAIR: 0,
             TOTAL: 0,
           },
+      ...(typeof res.username === "string" ? { username: res.username } : {}),
+      ...(res.conflict_data ? { conflict_data: res.conflict_data } : {}),
     };
 
     return processedData;
@@ -137,42 +145,41 @@ type TimingConfig = {
 
 export const BACCARAT_TIMINGS: Record<string, TimingConfig> = {
   // 'B-P' formátumban kulcsolva
-  '2-2': {
+  "2-2": {
     card_3_b: 0,
     card_3_p: 0,
     score_3_b: 0,
     score_3_p: 0,
-    winner: 4.5
+    winner: 4.5,
   },
-  '3-2': {
+  "3-2": {
     card_3_b: 4.5,
     card_3_p: 0,
     score_3_b: 5.5,
     score_3_p: 0,
-    winner: 6.5
+    winner: 6.5,
   },
-  '2-3': {
+  "2-3": {
     card_3_b: 0,
     card_3_p: 4.5,
     score_3_b: 0,
     score_3_p: 5.5,
-    winner: 6.5
+    winner: 6.5,
   },
-  '3-3': {
+  "3-3": {
     card_3_b: 6.5,
     card_3_p: 4.5,
     score_3_b: 7.5,
     score_3_p: 5.5,
-    winner: 9
+    winner: 9,
   },
 };
 
 export const getTiming = (playerLen: number, bankerLen: number) => {
   const key = `${bankerLen}-${playerLen}`;
   // Visszaadjuk a teljes configot, vagy egy defaultot, ha a kulcs nem létezne
-  return BACCARAT_TIMINGS[key] || BACCARAT_TIMINGS['2-2'];
+  return BACCARAT_TIMINGS[key] || BACCARAT_TIMINGS["2-2"];
 };
-
 
 export const useDelayedSum = (
   sum2: number,
@@ -190,7 +197,13 @@ export const useDelayedSum = (
     }, time2 * 1000);
 
     let timer3: ReturnType<typeof setTimeout> | undefined;
-    if (time3 !== null && time3 !== undefined && time3 > time2 && sum3 !== null && sum3 !== undefined) {
+    if (
+      time3 !== null &&
+      time3 !== undefined &&
+      time3 > time2 &&
+      sum3 !== null &&
+      sum3 !== undefined
+    ) {
       timer3 = setTimeout(() => {
         setDisplayedSum(sum3);
       }, time3 * 1000);

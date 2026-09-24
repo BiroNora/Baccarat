@@ -6,6 +6,8 @@ export interface GameDataState {
   initDeckLen: number | null; // Animációhoz
   totalInitialCards: number | null;
   selectedBetType: number;
+  isGuest: boolean;
+  username?: string;
 }
 
 export interface BetMap {
@@ -16,14 +18,17 @@ export interface BetMap {
 // Definiáljuk az akciókat, ha még nincsenek a types-ban
 export type GameAction =
   | { type: "SYNC_SERVER_DATA"; payload: GameStateData }
+  | { type: "SET_CONFIG"; payload: { totalInitialCards: number } }
   | { type: "SET_DECK_LEN"; payload: number | null }
+  | { type: "SET_IS_GUEST"; payload: boolean }
+  | { type: "SET_USERNAME"; payload: string }
   | { type: "RESET_TURN_VARIABLES" };
 
 export const initialGameDataState: GameDataState = {
   gameState: {
     currentGameState: "LOADING",
     player: { hand: [], sum_2: 0, sum_3: 0 },
-    banker: { hand: [], sum_2: 0, sum_3: 0},
+    banker: { hand: [], sum_2: 0, sum_3: 0 },
     winner: 0,
     is_player_third_card: false,
     is_banker_third_card: false,
@@ -58,6 +63,8 @@ export const initialGameDataState: GameDataState = {
   initDeckLen: null,
   totalInitialCards: null,
   selectedBetType: 0,
+  isGuest: true,
+  username: "",
 };
 
 export function gameReducer(
@@ -101,8 +108,24 @@ export function gameReducer(
         history: history ? [...history] : state.history,
       };
     }
+    case "SET_CONFIG":
+      return {
+        ...state,
+        totalInitialCards: action.payload.totalInitialCards,
+        initDeckLen:
+          state.initDeckLen === null || state.initDeckLen === 0
+            ? action.payload.totalInitialCards
+            : state.initDeckLen,
+        gameState: {
+          ...state.gameState,
+        },
+      };
     case "SET_DECK_LEN":
       return { ...state, initDeckLen: action.payload };
+    case "SET_IS_GUEST":
+      return { ...state, isGuest: action.payload };
+    case "SET_USERNAME":
+      return { ...state, username: action.payload };
     case "RESET_TURN_VARIABLES":
       return {
         ...state,
