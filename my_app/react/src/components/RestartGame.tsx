@@ -8,7 +8,7 @@ export function Restart() {
       <div>
         <div className="loading-container-centered">
           <div>
-            <h1>W E L L C O M E</h1>
+            <h1>W E L C O M E</h1>
           </div>
           <div>
             <h1>B A C K</h1>
