@@ -439,7 +439,7 @@ def check_session(user_service):
 @with_user_service
 @with_game_service
 def handle_auth(user_service, service):
-    data = request.get_json()
+    data = request.get_json() or {}
     email = data.get("email")
     username = data.get("username")
     password = data.get("password")
@@ -841,10 +841,15 @@ def force_restart_by_client_id(user):
 @with_user_service
 @with_game_service
 def forgot_password(user_service, service):
-    data = request.get_json()
+    data = request.get_json() or {}
     identifier = data.get("identifier")
 
-    user = user_service.get_user_by_identifier(identifier)
+    try:
+        user = user_service.get_user_by_identifier(identifier)
+    except ValueError as e:
+        if str(e) == "IC":
+            return jsonify({"status": "IC"}), 200
+        raise e
 
     raw_game = getattr(user, "current_game_state", None)
 
@@ -894,18 +899,20 @@ def reset_password(token, user_service):
         # A token 5 percig (300 másodpercig) érvényes
         identifier = serializer.loads(token, salt="password-reset-salt", max_age=300)
     except Exception:
-        return jsonify({"error": "The link is invalid or has expired."}), 400
+        return jsonify({"status": "IC"}), 200
 
-    data = request.get_json()
+    data = request.get_json() or {}
     new_password = data.get("password")
 
     if not new_password:
         return jsonify({"status": "IC"}), 200
 
-    user = user_service.get_user_by_identifier(identifier)
-
-    if not user:
-        return jsonify({"status": "IC"}), 200
+    try:
+        user = user_service.get_user_by_identifier(identifier)
+    except ValueError as e:
+        if str(e) == "IC":
+            return jsonify({"status": "IC"}), 200
+        raise e
 
     user_service.update_password(user, new_password)
 
@@ -917,7 +924,7 @@ def reset_password(token, user_service):
 @api_error_handler
 @with_user_service
 def handle_conflict(user_service):
-    data = request.get_json()
+    data = request.get_json() or {}
     version_new = data.get("version_new")
 
     current_user_id = session.get("user_id")
@@ -993,7 +1000,7 @@ def cron_cleanup_guests(user_service):
 @api_error_handler
 @with_user_service
 def update_username(user_service):
-    data = request.get_json()
+    data = request.get_json() or {}
     new_username = data.get("username")
     current_user_id = session.get("user_id")
 
