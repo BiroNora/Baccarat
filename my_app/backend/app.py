@@ -30,9 +30,13 @@ INITIAL_TOKENS = 1000
 # FLASK APPLICATION BASICS
 # =========================================================================
 base_dir = os.path.dirname(os.path.abspath(__file__))
-static_path = os.path.join(base_dir, "my_app", "react", "dist")
+project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
+static_path = os.path.join(project_root, "my_app", "react", "dist")
 
-app = Flask(__name__, static_folder=static_path, template_folder=static_path)
+if os.path.exists(static_path):
+    app = Flask(__name__, static_folder=static_path, template_folder=static_path)
+else:
+    app = Flask(__name__)  # Helyi fejlesztéshez, ha nincs még buildelve a React
 app.config["SECRET_KEY"] = os.environ.get(
     "FLASK_SECRET_KEY", "default-dev-secret-key-NEVER-USE-IN-PROD"
 )
