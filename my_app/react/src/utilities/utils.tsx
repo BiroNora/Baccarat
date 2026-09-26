@@ -31,13 +31,14 @@ export function extractGameStateData(apiResponse: unknown):
   const res = apiResponse as {
     current_tokens?: number;
     game_state: Partial<GameStateData>;
+    history?: HistoryUnit[];
     conflict_data?: ConflictDetails;
     username?: string;
   };
 
   const rawGameState = res.game_state as Partial<GameStateData>;
 
-  const historyData: HistoryUnit[] = res.game_state.history || [];
+  const historyData: HistoryUnit[] = res.history || rawGameState.history || [];
 
   try {
     const processedData: Partial<GameStateData> = {

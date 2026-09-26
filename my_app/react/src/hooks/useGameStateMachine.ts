@@ -175,7 +175,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           is_guest?: boolean;
           username?: string;
         };
-        console.log("status: ", resData.status)
+
         if (
           resData &&
           (resData.status === "IC" ||
@@ -190,7 +190,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           resultStatus = "CONFLICT";
 
           const response = extractGameStateData(data);
-          console.log("response.target: ", response?.target_phase)
           if (response) {
             transitionToState(response?.target_phase as GameState, response);
           }
@@ -418,15 +417,19 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
 
       executeAsyncAction(async () => {
-        const data = await handleApiAction(() =>
+        const data = (await handleApiAction(() =>
           setBet(amount, selectedBetType),
-        );
+        )) as ApiResponse;
 
         const response = extractGameStateData(data);
         if (!response) return;
 
         if (response.username) {
           dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
+        if (data && data.history && typeof setStableHistory === "function") {
+          setStableHistory(data.history);
         }
 
         transitionToState(response?.target_phase as GameState, response);
@@ -459,13 +462,19 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
 
       executeAsyncAction(async () => {
-        const data = await handleApiAction(() => retakeBet(selectedBetType));
+        const data = (await handleApiAction(() =>
+          retakeBet(selectedBetType),
+        )) as ApiResponse;
 
         const response = extractGameStateData(data);
         if (!response) return;
 
         if (response.username) {
           dispatch({ type: "SET_USERNAME", payload: response.username });
+        }
+
+        if (data && data.history && typeof setStableHistory === "function") {
+          setStableHistory(data.history);
         }
 
         transitionToState(response?.target_phase as GameState, response);
@@ -736,14 +745,36 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const currentDeckLen = state.gameState.deck_len;
         dispatch({ type: "SET_DECK_LEN", payload: currentDeckLen });
 
-        const data = await handleApiAction(() => startGame());
-        const response = extractGameStateData(data);
+        const sessionData = (await handleApiAction(() =>
+          startGame(),
+        )) as ApiResponse;
+        const response = extractGameStateData(sessionData);
 
-        if (!response || !isMountedRef.current) {
-          isProcessingRef.current = false;
-          return;
+        const resData = sessionData as {
+          is_guest?: boolean;
+          username?: string;
+        };
+        if (resData && typeof resData.is_guest === "boolean") {
+          dispatch({ type: "SET_IS_GUEST", payload: resData.is_guest });
         }
-        transitionToState(response?.target_phase as GameState, response);
+        if (resData.username) {
+          dispatch({ type: "SET_USERNAME", payload: resData.username });
+        }
+
+        if (
+          isMountedRef.current &&
+          response &&
+          sessionData &&
+          sessionData.status === "success"
+        ) {
+          if (sessionData.history && typeof setStableHistory === "function") {
+            setStableHistory(sessionData.history);
+          }
+
+          transitionToState(response.target_phase as GameState, response);
+        } else {
+          isProcessingRef.current = false;
+        }
       } catch (error) {
         console.error("Init Game hiba:", error);
         isProcessingRef.current = false;

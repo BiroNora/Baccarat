@@ -772,6 +772,7 @@ def start_game(user, game, service):
                 "status": "success",
                 "message": "New round initialized.",
                 "current_tokens": user.tokens,
+                "username": user.user_name,
                 "is_guest": user.is_guest,
                 "game_state": game_data,
                 "history": user.history,
