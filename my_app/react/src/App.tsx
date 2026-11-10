@@ -5,11 +5,11 @@ import CutSlider from "./components/CutSlider";
 import HeaderTitles from "./components/HeaderTitles";
 import Loading from "./components/Loading";
 import StandardGame from "./components/StandardGame";
+import Restart from "./components/RestartGame";
 import { AuthModal } from "./components/AuthModal";
 import { ErrorPage } from "./components/ErrorPage";
 import { OutOfTokens } from "./components/OutOfTokens";
 import { Reloading } from "./components/Reloading";
-import { Restart } from "./components/RestartGame";
 import { RoadMap } from "./components/RoadMap";
 import { Shifting } from "./components/Shifting";
 import { Shuffling } from "./components/Shuffling";
@@ -43,6 +43,7 @@ function App() {
     initDeckLen,
     isWFSR,
     isGuest,
+    tokens,
   } = useGameStateMachine();
 
   function PageWrapper({ children }: React.PropsWithChildren<object>) {
@@ -244,7 +245,7 @@ function App() {
               return (
                 <div>
                   <PageWrapper>
-                    <Restart />
+                    <Restart currTokens={tokens}/>
                   </PageWrapper>
                 </div>
               );

@@ -855,8 +855,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             if (response) {
               timeoutIdRef.current = window.setTimeout(() => {
                 if (isMountedRef.current) {
-                  resetGameVariables();
                   transitionToState("RESTART_GAME", response);
+                  resetGameVariables();
                 }
               }, 5000);
             }
@@ -980,5 +980,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleShiftingFirstPhaseEnd,
     initDeckLen: state.initDeckLen,
     isWFSR,
+    tokens: state.tokens,
   };
 }

@@ -1,8 +1,13 @@
 import "../styles/loading.css";
+import { formatNumber } from "../utilities/utils";
 import DragonIcon from "./DragonIcon";
 import PandaIcon from "./PandaIcon";
 
-export function Restart() {
+interface RestartProps {
+  currTokens: number;
+}
+
+const Restart: React.FC<RestartProps> = ({currTokens}) => {
   return (
     <div>
       <div>
@@ -15,7 +20,7 @@ export function Restart() {
           </div>
         </div>
 
-        <div className="bank3 merriweather">Your New Tokens: 1,000</div>
+        <div className="bank3 merriweather">Your New Tokens: {formatNumber(currTokens)}</div>
 
         <div className="betting-screen-container">
           <div className="merriweather tops">
@@ -39,4 +44,6 @@ export function Restart() {
       </div>
     </div>
   );
-}
+};
+
+export default Restart;

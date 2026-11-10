@@ -8,6 +8,7 @@ export interface GameDataState {
   selectedBetType: number;
   isGuest: boolean;
   username?: string;
+  tokens: number,
 }
 
 export interface BetMap {
@@ -65,6 +66,7 @@ export const initialGameDataState: GameDataState = {
   selectedBetType: 0,
   isGuest: true,
   username: "",
+  tokens: 0,
 };
 
 export function gameReducer(
@@ -129,6 +131,7 @@ export function gameReducer(
     case "RESET_TURN_VARIABLES":
       return {
         ...state,
+        tokens: state.gameState.tokens,
         initDeckLen: state.gameState.deck_len,
       };
     default:
